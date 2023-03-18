@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Jackal.ViewModels
+{
+    public class MainMenuViewModel : ViewModelBase
+    {
+        public void CommandCreateServer(object param)
+        {
+
+        }
+    }
+}
