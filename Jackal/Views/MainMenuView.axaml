@@ -12,6 +12,7 @@
 		</StackPanel.Styles>
 		<Button Content="Подключиться к серверу" HorizontalAlignment="Stretch"/>
 		<Button Content="Создать сервер" 
-				HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+				HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+				Command="{Binding $parent[Window].DataContext.CreateServer}"/>
 	</StackPanel>
 </UserControl>

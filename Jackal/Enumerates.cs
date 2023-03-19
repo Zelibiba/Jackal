@@ -4,9 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jackal.ViewModels
+namespace Jacal
 {
-    public class MainMenuViewModel : ViewModelBase
+    public enum Team
     {
+        None = 0,
+        White = 1,
+        Yellow = 2,
+        Red = 4,
+        Black = 8
     }
 }
