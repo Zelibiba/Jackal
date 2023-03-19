@@ -7,7 +7,7 @@ namespace Jackal.Views
         public MainWindow()
         {
             InitializeComponent();
-            DataContext=new ViewModels.MainWindowViewModel();
+            DataContext = new ViewModels.MainWindowViewModel();
         }
     }
 }
