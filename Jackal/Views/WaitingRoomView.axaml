@@ -21,10 +21,12 @@
 			</ItemsControl>
 		</Border>
 		<Button Grid.Column="1" Margin="10" Padding="10,5"
-				VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="25">
+				VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="25"
+				Command="{Binding StartServerCommand}">
 				Начать игру</Button>
 		<Button Grid.Column="1" Margin="10,100,0,0" Height="40" Width="170"
-				VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="25">
+				VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="25"
+				Command="{Binding AddPlayer}">
 				Добавить</Button>
 		<Button Grid.Column="1" Margin="10,270,0,0" Padding="10,5"
 				VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="25"

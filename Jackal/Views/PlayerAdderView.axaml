@@ -11,7 +11,8 @@
 	</UserControl.Resources>
 	<Border BorderBrush="Black" BorderThickness="1" Background="Lavender">
 		<Grid ColumnDefinitions="Auto,*,Auto" Margin="15,5">
-			<Button Grid.Column="0" Height="40" Width="40" Command="{Binding ChangeTeam}">
+			<Button Grid.Column="0" Height="40" Width="40"
+					Command="{Binding ChangeTeam}"  IsEnabled="{Binding !IsReady}">
 				<Button.Template>
 					<ControlTemplate TargetType="Button">
 						<Rectangle Stroke="Black" StrokeThickness="2"
@@ -20,13 +21,13 @@
 				</Button.Template>
 			</Button>
 			<TextBox Grid.Column="1" Margin="10" FontSize="20"
-					 Text="{Binding Name}" MaxLength="40"/>
+					 Text="{Binding Name}" MaxLength="40" IsEnabled="{Binding !IsReady}"/>
 			<ToggleButton Grid.Column="2" Height="30" Width="30" VerticalContentAlignment="Center"
-							Command="{Binding GetReady}">
+							Command="{Binding SetReady}">
 				<ToggleButton.Template>
 					<ControlTemplate TargetType="ToggleButton">
 						<Border BorderBrush="Black" BorderThickness="2"
-									Background="{Binding IsReady, Converter={StaticResource IsReadyConverter}}">
+								Background="{Binding IsReady, Converter={StaticResource IsReadyConverter}}">
 							<TextBlock Text="OK" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 						</Border>
 					</ControlTemplate>
