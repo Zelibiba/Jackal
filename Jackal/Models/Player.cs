@@ -16,9 +16,6 @@ namespace Jackal.Models
         {
             Name = name;
             Team = team;
-
-            //IObservable<bool> can = this.WhenAnyValue(vm => vm.IsReady);
-            //Command = ReactiveCommand.Create(() => { }, can);
         }
 
         [Reactive] public string Name { get; set; }

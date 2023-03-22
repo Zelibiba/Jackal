@@ -1,12 +1,17 @@
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using ReactiveUI;
 
 namespace Jackal.Views
 {
-    public partial class WaitingRoomView : UserControl
+    public partial class WaitingRoomView : ReactiveUserControl<Views.WaitingRoomView>
     {
         public WaitingRoomView()
         {
-            InitializeComponent();
+            //InitializeComponent();
+            this.WhenActivated(disposables => { });
+            AvaloniaXamlLoader.Load(this);
         }
     }
 }
