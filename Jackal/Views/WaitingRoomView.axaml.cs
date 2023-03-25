@@ -5,13 +5,11 @@ using ReactiveUI;
 
 namespace Jackal.Views
 {
-    public partial class WaitingRoomView : ReactiveUserControl<Views.WaitingRoomView>
+    public partial class WaitingRoomView : UserControl
     {
         public WaitingRoomView()
         {
-            //InitializeComponent();
-            this.WhenActivated(disposables => { });
-            AvaloniaXamlLoader.Load(this);
+            InitializeComponent();
         }
     }
 }

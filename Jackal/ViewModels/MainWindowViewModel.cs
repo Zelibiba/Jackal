@@ -11,6 +11,10 @@ namespace Jackal.ViewModels
         }
         [Reactive] public ViewModelBase Content { get; set; }
 
+        public void ConnectToServer(object param)
+        {
+            Content = new WaitingRoomViewModel();
+        }
         public void CreateServer(object param)
         {
             Content = new WaitingRoomViewModel();

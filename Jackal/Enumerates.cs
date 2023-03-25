@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jacal
+namespace Jackal
 {
     public enum Team
     {
@@ -13,5 +13,11 @@ namespace Jacal
         Yellow = 2,
         Red = 4,
         Black = 8
+    }
+
+    public enum NetMode
+    {
+        None = 0,
+
     }
 }

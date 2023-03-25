@@ -16,41 +16,22 @@ using System.Reactive.Disposables;
 
 namespace Jackal.ViewModels
 {
-    public class WaitingRoomViewModel : ViewModelBase, IActivatableViewModel
+    public class WaitingRoomViewModel : ViewModelBase
     {
         public WaitingRoomViewModel()
         {
-            _players = new ObservableCollectionExtended<Player>();
-            players = new ReadOnlyObservableCollection<Player>(_players);
-            IObservable<bool> canStartServer;
-
-            Activator = new ViewModelActivator();
-            this.WhenActivated(disposables =>
-            {
-                _players.ToObservableChangeSet()
-                        .Bind(out players)
-                        .Subscribe()
-                        .DisposeWith(disposables);
-            });
-            canStartServer = _players.ToObservableChangeSet()
-                                     .AutoRefresh(player => player.IsReady)
-                                     .ToCollection()
-                                     .Select(p => CheckPlayers(p));
+            Players = new ObservableCollection<Player>();
+            IObservable<bool> canStartServer = Players.ToObservableChangeSet()
+                                                      .AutoRefresh(player => player.IsReady)
+                                                      .ToCollection()
+                                                      .Select(p => CheckPlayers(p));
 
             StartServerCommand = ReactiveCommand.Create(() => Views.MessageBox.Show("Сервер запущен"), canStartServer);
         }
-        public ViewModelActivator Activator { get; }
-
-        private ObservableCollectionExtended<Player> _players;
-        
-        public ReadOnlyObservableCollection<Player> Players => players;
-        private ReadOnlyObservableCollection<Player> players;
+        public ObservableCollection<Player> Players { get; }
 
         public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
-        public void AddPlayer()
-        {
-            _players.Add(new Player("Джон Псина", Team.White));
-        }
+        public void AddPlayer() => Players.Add(new Player("Джон Псина", Team.White));
         private bool CheckPlayers(IEnumerable<Player> players)
         {
             if (players.Count() < 2)
