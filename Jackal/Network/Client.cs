@@ -17,6 +17,7 @@ namespace Jackal.Network
     {
         static int _index;
         static TcpClient? _client;
+        static NetworkStream _stream;
         static BinaryReader _reader;
         static BinaryWriter _writer;
         static WaitingRoomViewModel _viewModel;
@@ -28,9 +29,9 @@ namespace Jackal.Network
                 _viewModel = viewModel;
                 _client = new TcpClient();
                 _client.Connect(ip, 10001);
-                NetworkStream stream = _client.GetStream();
-                _reader = new BinaryReader(stream);
-                _writer = new BinaryWriter(stream);
+                _stream = _client.GetStream();
+                _reader = new BinaryReader(_stream);
+                _writer = new BinaryWriter(_stream);
 
                 Task.Run(ReceiveMessages);
             }
@@ -45,24 +46,36 @@ namespace Jackal.Network
         {
             try
             {
-                _viewModel.AddPlayer(new Player(_reader));
+                _viewModel.AddPlayer(_reader.ReadPlayer());
 
                 int playerCount = _reader.ReadInt32();
                 for (int i = 0; i < playerCount; i++)
+                    _viewModel.AddPlayer(_reader.ReadPlayer());
+
+                bool isActive = true;
+                while (isActive)
                 {
-                    _viewModel.AddPlayer(new Player(_reader));
+                    _ = await _stream.ReadAsync(new byte[1], 0, 1);
+                    switch (_reader.ReadNetMode())
+                    {
+                        case NetMode.ServerClose:
+                            Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Сервер разорвал соединение"));
+                            isActive = false;
+                            break;
+                    }
                 }
-                
+
             }
-            catch (Exception ex) { Views.MessageBox.Show("Client.Receive: " + ex.Message); }
+            catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Receive: " + ex.Message)); }
             finally { Stop(); }
         }
 
         public static void Stop()
         {
             //Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client Close"));
-            _writer?.Close();
             _reader?.Close();
+            _writer?.Close();
+            _stream?.Close();
             _client?.Close();
         }
     }

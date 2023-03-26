@@ -5,7 +5,7 @@
              xmlns:converters="clr-namespace:Jacal.Converters;assembly=Jackal"
 			 mc:Ignorable="d" 
              x:Class="Jackal.Views.PlayerAdderView"
-			 >
+			 IsEnabled="{Binding IsControllable}">
 	<UserControl.Resources>
 		<converters:TeamConverter x:Key="TeamConverter"/>
 		<converters:IsReadyConverter x:Key="IsReadyConverter"/>

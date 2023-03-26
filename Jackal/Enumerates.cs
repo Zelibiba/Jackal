@@ -18,6 +18,7 @@ namespace Jackal
     public enum NetMode
     {
         None = 0,
-
+        ServerClose,
+        NewPlayer
     }
 }

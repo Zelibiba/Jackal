@@ -39,7 +39,8 @@ namespace Jackal.ViewModels
         public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
         public void AddPlayer(Player player)
         {
-            Players.Add(new PlayerAdderViewModel(player));
+            bool isControllable = Players.Count == 0;
+            Players.Add(new PlayerAdderViewModel(player, isControllable));
         }
         private bool CheckPlayers(IEnumerable<Player> players)
         {

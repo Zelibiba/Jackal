@@ -16,36 +16,42 @@ namespace Jackal.Network
         readonly int _index;
         internal readonly Player _player;
         readonly TcpClient _client;
+        readonly NetworkStream _stream;
         readonly BinaryReader _reader;
         readonly BinaryWriter _writer;
 
         internal ClientListener(TcpClient tcpClient, int index)
         {
-            Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Новый клиент"));
             _index = index;
             _client = tcpClient;
             _player = new Player(
                         _index,
                         ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString(),
                         Team.White);
-            NetworkStream stream = _client.GetStream();
-            _reader = new BinaryReader(stream);
-            _writer = new BinaryWriter(stream);
+            _stream = _client.GetStream();
+            _reader = new BinaryReader(_stream);
+            _writer = new BinaryWriter(_stream);
 
             Task.Run(ReceiveMessages);
         }
 
-        private async void ReceiveMessages()
+        async void ReceiveMessages()
         {
             try
             {
-                _player.NetWrite(_writer);
+                _writer.Write(_player);
                 _writer.Write(Server.Clients.Count - 1);
-                foreach(ClientListener client in OtherClients())
+                foreach (ClientListener client in OtherClients())
                 {
-                    client._player.NetWrite(_writer);
+                    _writer.Write(client._player);
                 }
                 _writer.Flush();
+
+                //bool isActive = true;
+                //while(isActive)
+                //{
+
+                //}
             }
             catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("ClientListener.Receive: " + ex.Message)); }
             finally { Server.RemoveConnection(this); }
@@ -54,8 +60,16 @@ namespace Jackal.Network
         internal void Close()
         {
             //Dispatcher.UIThread.Post(() => Views.MessageBox.Show("ClientListener Close"));
+            if (_client.Connected)
+            {
+                _stream.WriteByte(10);
+                _writer.Write(NetMode.ServerClose);
+                _writer.Flush();
+            }
+
             _reader?.Close();
             _writer?.Close();
+            _stream?.Close();
             _client?.Close();
         }
 

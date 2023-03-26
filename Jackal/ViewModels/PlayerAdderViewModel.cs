@@ -13,13 +13,14 @@ namespace Jackal.ViewModels
 {
     public class PlayerAdderViewModel : ViewModelBase
     {
-        public PlayerAdderViewModel(Player player)
+        public PlayerAdderViewModel(Player player, bool isControllable)
         {
             Player = player;
+            IsControllable = isControllable;
         }
 
         public Player Player { get; }
-        [Reactive] public bool IsControllable { get; set; }
+        public bool IsControllable { get; }
 
         public void ChangeTeam()
         {
