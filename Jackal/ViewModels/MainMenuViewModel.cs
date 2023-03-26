@@ -8,5 +8,8 @@ namespace Jackal.ViewModels
 {
     public class MainMenuViewModel : ViewModelBase
     {
+        public MainMenuViewModel()
+        {
+        }
     }
 }

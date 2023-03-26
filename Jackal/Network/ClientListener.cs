@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using Jackal.Models;
+using Avalonia.Threading;
 
 namespace Jackal.Network
 {
@@ -20,9 +21,11 @@ namespace Jackal.Network
 
         internal ClientListener(TcpClient tcpClient, int index)
         {
+            Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Новый клиент"));
             _index = index;
             _client = tcpClient;
             _player = new Player(
+                        _index,
                         ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString(),
                         Team.White);
             NetworkStream stream = _client.GetStream();
@@ -44,12 +47,13 @@ namespace Jackal.Network
                 }
                 _writer.Flush();
             }
-            catch (Exception ex) { Views.MessageBox.Show("ClientListener.Receive: " + ex.Message); }
+            catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("ClientListener.Receive: " + ex.Message)); }
             finally { Server.RemoveConnection(this); }
         }
 
         internal void Close()
         {
+            //Dispatcher.UIThread.Post(() => Views.MessageBox.Show("ClientListener Close"));
             _reader?.Close();
             _writer?.Close();
             _client?.Close();
@@ -57,7 +61,7 @@ namespace Jackal.Network
 
         ClientListener[] OtherClients()
         {
-            if (Server.Clients.Count == 1)
+            if (Server.Clients.Count <= 1)
                 return Array.Empty<ClientListener>();
 
             ClientListener[] clients = new ClientListener[Server.Clients.Count - 1];

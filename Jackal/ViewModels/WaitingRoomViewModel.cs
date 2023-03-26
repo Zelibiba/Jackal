@@ -13,25 +13,34 @@ using System.Threading.Tasks;
 using Jackal.Models;
 using DynamicData.Binding;
 using System.Reactive.Disposables;
+using Jackal.Network;
 
 namespace Jackal.ViewModels
 {
     public class WaitingRoomViewModel : ViewModelBase
     {
-        public WaitingRoomViewModel()
+        public WaitingRoomViewModel(bool isServerHolder)
         {
-            Players = new ObservableCollection<Player>();
+            Players = new ObservableCollection<PlayerAdderViewModel>();
             IObservable<bool> canStartServer = Players.ToObservableChangeSet()
-                                                      .AutoRefresh(player => player.IsReady)
+                                                      .AutoRefresh(playerVM => playerVM.Player.IsReady)
+                                                      .Transform(playersVM => playersVM.Player)
                                                       .ToCollection()
-                                                      .Select(p => CheckPlayers(p));
+                                                      .Select(player => CheckPlayers(player));
 
             StartServerCommand = ReactiveCommand.Create(() => Views.MessageBox.Show("Сервер запущен"), canStartServer);
+
+            if (isServerHolder)
+                Server.Start();
+            Client.Start(Server.IP, this);
         }
-        public ObservableCollection<Player> Players { get; }
+        public ObservableCollection<PlayerAdderViewModel> Players { get; }
 
         public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
-        public void AddPlayer() => Players.Add(new Player("Джон Псина", Team.White));
+        public void AddPlayer(Player player)
+        {
+            Players.Add(new PlayerAdderViewModel(player));
+        }
         private bool CheckPlayers(IEnumerable<Player> players)
         {
             if (players.Count() < 2)

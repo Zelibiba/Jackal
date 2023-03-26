@@ -5,6 +5,18 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+	<CFBundleName>Jackal</CFBundleName> <!-- Also defines .app file name -->
+	  <CFBundleDisplayName>Jackal</CFBundleDisplayName>
+	  <CFBundleIdentifier>com.laiger.ios</CFBundleIdentifier>
+	  <CFBundleVersion>1.0.0</CFBundleVersion>
+	  <CFBundlePackageType>AAPL</CFBundlePackageType>
+	  <CFBundleSignature>????</CFBundleSignature>
+	  <CFBundleExecutable>Jackal</CFBundleExecutable>
+	  <CFBundleIconFile>Jackal.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
+	  <CFBundleShortVersionString>1.0</CFBundleShortVersionString>
+	  <NSPrincipalClass>NSApplication</NSPrincipalClass>
+	  <NSHighResolutionCapable>true</NSHighResolutionCapable>
+	  <Platforms>AnyCPU;ARM32;ARM64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,5 +36,6 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
     <PackageReference Include="ReactiveUI.Fody" Version="18.4.26" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
+	<PackageReference Include="Dotnet.Bundle" Version="*" />
   </ItemGroup>
 </Project>

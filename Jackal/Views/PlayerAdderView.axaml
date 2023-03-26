@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:Jacal.Converters;assembly=Jackal"
 			 mc:Ignorable="d" 
-             x:Class="Jackal.Views.PlayerAdderView">
+             x:Class="Jackal.Views.PlayerAdderView"
+			 >
 	<UserControl.Resources>
 		<converters:TeamConverter x:Key="TeamConverter"/>
 		<converters:IsReadyConverter x:Key="IsReadyConverter"/>
@@ -12,22 +13,22 @@
 	<Border BorderBrush="Black" BorderThickness="1" Background="Lavender">
 		<Grid ColumnDefinitions="Auto,*,Auto" Margin="15,5">
 			<Button Grid.Column="0" Height="40" Width="40"
-					Command="{Binding ChangeTeam}"  IsEnabled="{Binding !IsReady}">
+					Command="{Binding ChangeTeam}"  IsEnabled="{Binding !Player.IsReady}">
 				<Button.Template>
 					<ControlTemplate TargetType="Button">
 						<Rectangle Stroke="Black" StrokeThickness="2"
-								   Fill="{Binding Team, Converter={StaticResource TeamConverter}}"/>
+								   Fill="{Binding Player.Team, Converter={StaticResource TeamConverter}}"/>
 					</ControlTemplate>
 				</Button.Template>
 			</Button>
 			<TextBox Grid.Column="1" Margin="10" FontSize="20"
-					 Text="{Binding Name}" MaxLength="40" IsEnabled="{Binding !IsReady}"/>
+					 Text="{Binding Player.Name}" MaxLength="40" IsEnabled="{Binding !Player.IsReady}"/>
 			<ToggleButton Grid.Column="2" Height="30" Width="30" VerticalContentAlignment="Center"
 							Command="{Binding SetReady}">
 				<ToggleButton.Template>
 					<ControlTemplate TargetType="ToggleButton">
 						<Border BorderBrush="Black" BorderThickness="2"
-								Background="{Binding IsReady, Converter={StaticResource IsReadyConverter}}">
+								Background="{Binding Player.IsReady, Converter={StaticResource IsReadyConverter}}">
 							<TextBlock Text="OK" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 						</Border>
 					</ControlTemplate>

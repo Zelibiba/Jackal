@@ -13,11 +13,11 @@ namespace Jackal.ViewModels
 
         public void ConnectToServer(object param)
         {
-            Content = new WaitingRoomViewModel();
+            Content = new WaitingRoomViewModel(false);
         }
         public void CreateServer(object param)
         {
-            Content = new WaitingRoomViewModel();
+            Content = new WaitingRoomViewModel(true);
         }
         public void Cansel()
         {

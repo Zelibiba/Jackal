@@ -8,6 +8,8 @@ using System.Net.Sockets;
 using System.IO;
 using Tmds.DBus;
 using Jackal.Models;
+using Avalonia.Threading;
+using Jackal.ViewModels;
 
 namespace Jackal.Network
 {
@@ -15,13 +17,15 @@ namespace Jackal.Network
     {
         static int _index;
         static TcpClient? _client;
-        static BinaryReader? _reader;
-        static BinaryWriter? _writer;
+        static BinaryReader _reader;
+        static BinaryWriter _writer;
+        static WaitingRoomViewModel _viewModel;
 
-        public static void Start(string ip)
+        public static void Start(string ip, WaitingRoomViewModel viewModel)
         {
             try
             {
+                _viewModel = viewModel;
                 _client = new TcpClient();
                 _client.Connect(ip, 10001);
                 NetworkStream stream = _client.GetStream();
@@ -41,13 +45,14 @@ namespace Jackal.Network
         {
             try
             {
-                Player player = Player.NetRead(_reader);
+                _viewModel.AddPlayer(new Player(_reader));
+
                 int playerCount = _reader.ReadInt32();
-                for(int i=0; i < playerCount; i++)
+                for (int i = 0; i < playerCount; i++)
                 {
-                    Player p = Player.NetRead(_reader);
+                    _viewModel.AddPlayer(new Player(_reader));
                 }
-                Views.MessageBox.Show($"{player.Name}, {player.Team}");
+                
             }
             catch (Exception ex) { Views.MessageBox.Show("Client.Receive: " + ex.Message); }
             finally { Stop(); }
@@ -55,6 +60,7 @@ namespace Jackal.Network
 
         public static void Stop()
         {
+            //Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client Close"));
             _writer?.Close();
             _reader?.Close();
             _client?.Close();

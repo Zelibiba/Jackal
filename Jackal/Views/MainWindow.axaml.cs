@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Jackal.Network;
+using System;
 
 namespace Jackal.Views
 {
@@ -8,6 +10,14 @@ namespace Jackal.Views
         {
             InitializeComponent();
             DataContext = new ViewModels.MainWindowViewModel();
+
+            Closing += ServerStop;
+        }
+
+        void ServerStop(object? sender, EventArgs e)
+        {
+            Server.Stop();
+            Closed -= ServerStop;
         }
     }
 }
