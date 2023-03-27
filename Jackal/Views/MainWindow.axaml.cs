@@ -16,7 +16,10 @@ namespace Jackal.Views
 
         void ServerStop(object? sender, EventArgs e)
         {
-            Server.Stop();
+            if (Server.IsServerHolder)
+                Server.Stop();
+            else
+                Client.Stop();
             Closed -= ServerStop;
         }
     }

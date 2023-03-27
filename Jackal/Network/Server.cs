@@ -17,6 +17,8 @@ namespace Jackal.Network
         static TcpListener _server;
         static IPAddress ip => Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Last();
         public static string IP => ip.ToString();
+        static Task _listening;
+        public static bool IsServerHolder;
 
         internal static List<ClientListener> Clients;
         static int _playerIndex;
@@ -30,11 +32,13 @@ namespace Jackal.Network
             Clients = new List<ClientListener>();
             _server = new TcpListener(ip, 10001);
             _canselListening = false;
+            IsServerHolder = true;
 
-            Task.Run(ListenAsync);
+
+            _listening = Task.Run(ListenAsync);
         }
 
-        static async void ListenAsync()
+        static async Task ListenAsync()
         {
             try
             {
@@ -52,24 +56,21 @@ namespace Jackal.Network
             finally { Close(); }
         }
 
-        internal static void RemoveConnection(ClientListener client)
-        {
-            Clients.Remove(client);
-            client.Close();
-        }
-
         static void Close()
         {
             foreach (ClientListener client in Clients)
             {
-                client.Close();
+                client.Stop();
             }
             Clients.Clear();
             _server?.Stop();
         }
         public static void Stop()
         {
+            if (_server == null)
+                return;
             _server?.Stop();
+            _listening.Wait();
         }
     }
 }

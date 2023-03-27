@@ -45,6 +45,7 @@ namespace Jackal
         }
         public static void Write(this BinaryWriter writer, NetMode mode)
         {
+            writer.Write((byte)10);
             writer.Write((int)mode);
         }
     }

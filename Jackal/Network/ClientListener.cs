@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.IO;
 using Jackal.Models;
 using Avalonia.Threading;
+using System.Threading;
 
 namespace Jackal.Network
 {
@@ -19,6 +20,9 @@ namespace Jackal.Network
         readonly NetworkStream _stream;
         readonly BinaryReader _reader;
         readonly BinaryWriter _writer;
+        readonly CancellationTokenSource _cancellationTokenSource;
+        Task _listening;
+        NetMode _lastMode;
 
         internal ClientListener(TcpClient tcpClient, int index)
         {
@@ -31,63 +35,82 @@ namespace Jackal.Network
             _stream = _client.GetStream();
             _reader = new BinaryReader(_stream);
             _writer = new BinaryWriter(_stream);
+            _cancellationTokenSource = new CancellationTokenSource();
 
-            Task.Run(ReceiveMessages);
+            _listening = Task.Run(ReceiveMessages);
         }
 
-        async void ReceiveMessages()
+        async Task ReceiveMessages()
         {
             try
             {
                 _writer.Write(_player);
                 _writer.Write(Server.Clients.Count - 1);
-                foreach (ClientListener client in OtherClients())
+                foreach (ClientListener client in Server.Clients)
                 {
+                    if (client == this)
+                        continue;
                     _writer.Write(client._player);
                 }
                 _writer.Flush();
 
-                //bool isActive = true;
-                //while(isActive)
-                //{
+                SendToOther(writer =>
+                {
+                    writer.Write(NetMode.NewPlayer);
+                    writer.Write(_player);
+                });
 
-                //}
+                bool continueListening = true;
+                byte[] buffer = new byte[1];
+                while (continueListening)
+                {
+                    _ = await _stream.ReadAsync(buffer, 0, 1, _cancellationTokenSource.Token);
+                    _lastMode = _reader.ReadNetMode();
+                    switch (_lastMode)
+                    {
+                        case NetMode.Disconnect:
+                            await Task.Delay(500);
+                            Server.Clients.Remove(this);
+                            continueListening = false;
+                            break;
+                    }
+                }
             }
-            catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("ClientListener.Receive: " + ex.Message)); }
-            finally { Server.RemoveConnection(this); }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) { await Dispatcher.UIThread.InvokeAsync(() => Views.MessageBox.Show("ClientListener.Receive: " + ex.Message)); }
+            finally { Close(); }
         }
 
-        internal void Close()
+        void Close()
         {
-            //Dispatcher.UIThread.Post(() => Views.MessageBox.Show("ClientListener Close"));
-            if (_client.Connected)
-            {
-                _stream.WriteByte(10);
-                _writer.Write(NetMode.ServerClose);
-                _writer.Flush();
-            }
-
             _reader?.Close();
             _writer?.Close();
             _stream?.Close();
             _client?.Close();
+            _cancellationTokenSource?.Dispose();
+        }
+        internal void Stop()
+        {
+            if (_client.Connected && _lastMode != NetMode.Disconnect)
+            {
+                _writer.Write(NetMode.Disconnect);
+                _writer.Flush();
+                _cancellationTokenSource.Cancel();
+            }
+
+            _listening.Wait();
         }
 
-        ClientListener[] OtherClients()
+        void SendToOther(Action<BinaryWriter> messageFunc)
         {
-            if (Server.Clients.Count <= 1)
-                return Array.Empty<ClientListener>();
-
-            ClientListener[] clients = new ClientListener[Server.Clients.Count - 1];
-            int i = 0;
-            foreach (ClientListener client in Server.Clients)
+            foreach(ClientListener client in Server.Clients)
             {
-                if (client == this) 
+                if (client == this)
                     continue;
-                clients[i] = client;
-                i++;
+
+                messageFunc(client._writer);
+                client._writer.Flush();
             }
-            return clients;
         }
     }
 }
