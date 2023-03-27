@@ -1,10 +1,13 @@
-﻿using Jackal.Models;
+﻿using Avalonia.Threading;
+using Jackal.Models;
+using Jackal.Network;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +20,12 @@ namespace Jackal.ViewModels
         {
             Player = player;
             IsControllable = isControllable;
+            if (IsControllable)
+            {
+                this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.IsReady)
+                    .Skip(1)
+                    .Subscribe(x => Client.UpdatePlayer(Player));
+            }
         }
 
         public Player Player { get; }

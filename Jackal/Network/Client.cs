@@ -16,7 +16,6 @@ namespace Jackal.Network
 {
     public static class Client
     {
-        static int _index;
         static TcpClient _client;
         static NetworkStream _stream;
         static BinaryReader _reader;
@@ -46,13 +45,11 @@ namespace Jackal.Network
                 Close();
             }
         }
-
         static async Task ReceiveMessages()
         {
             try
             {
-                _viewModel.AddPlayer(_reader.ReadPlayer());
-
+                RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
                 int playerCount = _reader.ReadInt32();
                 for (int i = 0; i < playerCount; i++)
                     _viewModel.AddPlayer(_reader.ReadPlayer());
@@ -71,7 +68,11 @@ namespace Jackal.Network
                             continueListening = false;
                             break;
                         case NetMode.NewPlayer:
-                            _viewModel.AddPlayer(_reader.ReadPlayer());
+                            Player player = _reader.ReadPlayer();
+                            Dispatcher.UIThread.InvokeAsync(()=>_viewModel.AddPlayer(player)).Wait();
+                            break;
+                        case NetMode.UpdatePlayer:
+                            _viewModel.UpdatePlayer(_reader.ReadPlayer());
                             break;
                     }
                 }
@@ -80,6 +81,17 @@ namespace Jackal.Network
             catch (OperationCanceledException) { }
             catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Receive: " + ex.Message)); }
             finally { Close(); }
+        }
+
+        static void RunInUIThread(Action function)
+        {
+            Dispatcher.UIThread.InvokeAsync(function).Wait();
+        }
+        public static void UpdatePlayer(Player player)
+        {
+            _writer.Write(NetMode.UpdatePlayer);
+            _writer.Write(player);
+            _writer.Flush();
         }
 
         static void Close()

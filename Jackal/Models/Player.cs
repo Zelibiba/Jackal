@@ -24,5 +24,12 @@ namespace Jackal.Models
         [Reactive] public string Name { get; set; }
         [Reactive] public Team Team { get; set; }
         [Reactive] public bool IsReady { get; set; }
+
+        public void Copy(Player player)
+        {
+            Name = player.Name;
+            Team = player.Team;
+            IsReady = player.IsReady;
+        }
     }
 }

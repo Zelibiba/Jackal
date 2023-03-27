@@ -14,6 +14,8 @@ using Jackal.Models;
 using DynamicData.Binding;
 using System.Reactive.Disposables;
 using Jackal.Network;
+using Avalonia.Threading;
+using System.Numerics;
 
 namespace Jackal.ViewModels
 {
@@ -26,7 +28,7 @@ namespace Jackal.ViewModels
                                                       .AutoRefresh(playerVM => playerVM.Player.IsReady)
                                                       .Transform(playersVM => playersVM.Player)
                                                       .ToCollection()
-                                                      .Select(player => CheckPlayers(player));
+                                                      .Select(players => CheckPlayers(players));
 
             StartServerCommand = ReactiveCommand.Create(() => Views.MessageBox.Show("Сервер запущен"), canStartServer);
 
@@ -37,10 +39,22 @@ namespace Jackal.ViewModels
         public ObservableCollection<PlayerAdderViewModel> Players { get; }
 
         public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
+
         public void AddPlayer(Player player)
         {
             bool isControllable = Players.Count == 0;
             Players.Add(new PlayerAdderViewModel(player, isControllable));
+        }
+        public void UpdatePlayer(Player player)
+        {
+            foreach (PlayerAdderViewModel playerVM in Players)
+            {
+                if (playerVM.Player.Index == player.Index)
+                {
+                    Dispatcher.UIThread.Post(() => playerVM.Player.Copy(player));
+                    break;
+                }
+            }
         }
         private bool CheckPlayers(IEnumerable<Player> players)
         {

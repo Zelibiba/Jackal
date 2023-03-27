@@ -19,6 +19,7 @@ namespace Jackal
     {
         None = 0,
         Disconnect,
-        NewPlayer
+        NewPlayer,
+        UpdatePlayer
     }
 }

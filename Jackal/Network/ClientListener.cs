@@ -73,6 +73,14 @@ namespace Jackal.Network
                             Server.Clients.Remove(this);
                             continueListening = false;
                             break;
+                        case NetMode.UpdatePlayer:
+                            _player.Copy(_reader.ReadPlayer());
+                            SendToOther(writer =>
+                            {
+                                writer.Write(NetMode.UpdatePlayer);
+                                writer.Write(_player);
+                            });
+                            break;
                     }
                 }
             }
