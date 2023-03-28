@@ -32,30 +32,17 @@ namespace Jackal.ViewModels
 
             StartServerCommand = ReactiveCommand.Create(() => Views.MessageBox.Show("Сервер запущен"), canStartServer);
 
-            if (isServerHolder)
+            IsServerHolder = isServerHolder;
+            if (IsServerHolder)
                 Server.Start();
             Client.Start(Server.IP, this);
         }
         public ObservableCollection<PlayerAdderViewModel> Players { get; }
+        public bool IsServerHolder { get; }
 
         public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
 
-        public void AddPlayer(Player player)
-        {
-            bool isControllable = Players.Count == 0;
-            Players.Add(new PlayerAdderViewModel(player, isControllable));
-        }
-        public void UpdatePlayer(Player player)
-        {
-            foreach (PlayerAdderViewModel playerVM in Players)
-            {
-                if (playerVM.Player.Index == player.Index)
-                {
-                    Dispatcher.UIThread.Post(() => playerVM.Player.Copy(player));
-                    break;
-                }
-            }
-        }
+
         private bool CheckPlayers(IEnumerable<Player> players)
         {
             if (players.Count() < 2)
@@ -69,6 +56,31 @@ namespace Jackal.ViewModels
                 usedTeams |= player.Team;
             }
             return true;
+        }
+        public void AddPlayer(Player player)
+        {
+            bool isControllable = Players.Count == 0;
+            Players.Add(new PlayerAdderViewModel(player, isControllable));
+        }
+        public void UpdatePlayer(Player player)
+        {
+            foreach (PlayerAdderViewModel playerVM in Players)
+            {
+                if (playerVM.Player.Index == player.Index)
+                {
+                    playerVM.Player.Copy(player);
+                    break;
+                }
+            }
+        }
+        public void DeletePlasyer(int index)
+        {
+            foreach (PlayerAdderViewModel playerVM in Players)
+                if (playerVM.Player.Index == index)
+                {
+                    Players.Remove(playerVM);
+                    break;
+                }
         }
     }
 }

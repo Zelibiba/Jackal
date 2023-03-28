@@ -52,7 +52,7 @@ namespace Jackal.Network
                 RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
                 int playerCount = _reader.ReadInt32();
                 for (int i = 0; i < playerCount; i++)
-                    _viewModel.AddPlayer(_reader.ReadPlayer());
+                    RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
 
                 bool continueListening = true;
                 byte[] buffer = new byte[1];
@@ -68,11 +68,13 @@ namespace Jackal.Network
                             continueListening = false;
                             break;
                         case NetMode.NewPlayer:
-                            Player player = _reader.ReadPlayer();
-                            Dispatcher.UIThread.InvokeAsync(()=>_viewModel.AddPlayer(player)).Wait();
+                            RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.UpdatePlayer:
-                            _viewModel.UpdatePlayer(_reader.ReadPlayer());
+                            RunInUIThread(() => _viewModel.UpdatePlayer(_reader.ReadPlayer()));
+                            break;
+                        case NetMode.DeletePlayer:
+                            RunInUIThread(() => _viewModel.DeletePlasyer(_reader.ReadInt32()));
                             break;
                     }
                 }

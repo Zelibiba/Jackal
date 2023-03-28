@@ -20,6 +20,7 @@ namespace Jackal
         None = 0,
         Disconnect,
         NewPlayer,
-        UpdatePlayer
+        UpdatePlayer,
+        DeletePlayer
     }
 }

@@ -14,7 +14,6 @@ namespace Jackal.Network
 {
     internal class ClientListener
     {
-        readonly int _index;
         internal readonly Player _player;
         readonly TcpClient _client;
         readonly NetworkStream _stream;
@@ -26,10 +25,9 @@ namespace Jackal.Network
 
         internal ClientListener(TcpClient tcpClient, int index)
         {
-            _index = index;
             _client = tcpClient;
             _player = new Player(
-                        _index,
+                        index,
                         ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString(),
                         Team.White);
             _stream = _client.GetStream();
@@ -72,6 +70,11 @@ namespace Jackal.Network
                             await Task.Delay(500);
                             Server.Clients.Remove(this);
                             continueListening = false;
+                            SendToOther(writer =>
+                            {
+                                writer.Write(NetMode.DeletePlayer);
+                                writer.Write(_player.Index);
+                            });
                             break;
                         case NetMode.UpdatePlayer:
                             _player.Copy(_reader.ReadPlayer());
