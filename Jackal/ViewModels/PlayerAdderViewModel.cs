@@ -22,7 +22,7 @@ namespace Jackal.ViewModels
             IsControllable = isControllable;
             if (IsControllable)
             {
-                this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.IsReady)
+                this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.IntAlliance, vm => vm.Player.IsReady)
                     .Skip(1)
                     .Subscribe(x => Client.UpdatePlayer(Player));
             }
@@ -31,6 +31,13 @@ namespace Jackal.ViewModels
         public Player Player { get; }
         public bool IsControllable { get; }
 
+        public void ChangeAlliance()
+        {
+            if (Player.IntAlliance == 4)
+                Player.IntAlliance = 1;
+            else
+                Player.IntAlliance++;
+        }
         public void ChangeTeam()
         {
             if (Player.Team == Team.Black)

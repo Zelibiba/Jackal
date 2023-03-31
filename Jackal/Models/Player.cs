@@ -17,17 +17,20 @@ namespace Jackal.Models
         {
             Index = index;
             Name = name;
+            IntAlliance = index;
             Team = team;
         }
 
         public readonly int Index;
         [Reactive] public string Name { get; set; }
+        [Reactive] public int IntAlliance { get; set; }
         [Reactive] public Team Team { get; set; }
         [Reactive] public bool IsReady { get; set; }
 
         public void Copy(Player player)
         {
             Name = player.Name;
+            IntAlliance = player.IntAlliance;
             Team = player.Team;
             IsReady = player.IsReady;
         }

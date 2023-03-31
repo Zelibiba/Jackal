@@ -27,6 +27,7 @@ namespace Jackal
                               name: reader.ReadString(),
                               team: reader.ReadTeam())
             {
+                IntAlliance = reader.ReadInt32(),
                 IsReady = reader.ReadBoolean()
             };
         }
@@ -35,6 +36,7 @@ namespace Jackal
             writer.Write(player.Index);
             writer.Write(player.Name);
             writer.Write(player.Team);
+            writer.Write(player.IntAlliance);
             writer.Write(player.IsReady);
         }
 

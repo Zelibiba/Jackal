@@ -21,7 +21,7 @@ namespace Jackal.ViewModels
 {
     public class WaitingRoomViewModel : ViewModelBase
     {
-        public WaitingRoomViewModel(bool isServerHolder)
+        public WaitingRoomViewModel(bool isServerHolder, string ip)
         {
             Players = new ObservableCollection<PlayerAdderViewModel>();
             IObservable<bool> canStartServer = Players.ToObservableChangeSet()
@@ -34,8 +34,11 @@ namespace Jackal.ViewModels
 
             IsServerHolder = isServerHolder;
             if (IsServerHolder)
+            {
                 Server.Start();
-            Client.Start(Server.IP, this);
+                ip = Server.IP;
+            }
+            Client.Start(ip, this);
         }
         public ObservableCollection<PlayerAdderViewModel> Players { get; }
         public bool IsServerHolder { get; }
@@ -65,13 +68,11 @@ namespace Jackal.ViewModels
         public void UpdatePlayer(Player player)
         {
             foreach (PlayerAdderViewModel playerVM in Players)
-            {
                 if (playerVM.Player.Index == player.Index)
                 {
                     playerVM.Player.Copy(player);
                     break;
                 }
-            }
         }
         public void DeletePlasyer(int index)
         {
