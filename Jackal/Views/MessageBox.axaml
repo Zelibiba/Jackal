@@ -8,7 +8,7 @@
 		Width="250"
 		Height="200">
 	<Grid RowDefinitions="*,Auto" Margin="10">
-		<TextBlock Name="Text" Grid.Row="0"
+		<TextBlock Name="Text" Grid.Row="0" TextWrapping="Wrap"
 				   HorizontalAlignment="Center" VerticalAlignment="Center"/>
 		<Button Name="Button" Grid.Row="1" Content="OK"
 				HorizontalAlignment="Right" VerticalAlignment="Bottom"/>

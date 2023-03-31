@@ -106,7 +106,7 @@ namespace Jackal.Network
         }
         public static void Stop()
         {
-            if (_client == null)
+            if (_client == null || !_client.Connected)
                 return;
 
             if (_client.Connected && _lastMode != NetMode.Disconnect)

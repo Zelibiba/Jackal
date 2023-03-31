@@ -7,7 +7,7 @@
              x:Class="Jackal.Views.WaitingRoomView">
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="0.6*" MinWidth="300"/>
+			<ColumnDefinition Width="*" MinWidth="300" MaxWidth="600"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Border Grid.Column="0" Margin="10" Height="300" VerticalAlignment="Top"

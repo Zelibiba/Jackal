@@ -1,5 +1,7 @@
-﻿using Jackal.Views;
+﻿using Avalonia.Controls;
+using Jackal.Views;
 using ReactiveUI.Fody.Helpers;
+using System.Threading.Tasks;
 
 namespace Jackal.ViewModels
 {
@@ -7,17 +9,22 @@ namespace Jackal.ViewModels
     {
         public MainWindowViewModel()
         {
-            Content = new MainMenuViewModel();
+            //Content = new MainMenuViewModel();
+            Content = new GameViewModel();
         }
         [Reactive] public ViewModelBase Content { get; set; }
 
-        public void ConnectToServer(object param)
+        public async Task ConnectToServer(object param)
         {
-            Content = new WaitingRoomViewModel(false);
+            //IPWindow dialog = new IPWindow();
+            //string ip = await dialog.ShowDialog<string>(param as Window);
+            //if (!string.IsNullOrEmpty(ip))
+            //    Content = new WaitingRoomViewModel(false, ip);
+            Content = new WaitingRoomViewModel(false, Network.Server.IP);
         }
         public void CreateServer(object param)
         {
-            Content = new WaitingRoomViewModel(true);
+            Content = new WaitingRoomViewModel(true, string.Empty);
         }
         public void Cansel()
         {

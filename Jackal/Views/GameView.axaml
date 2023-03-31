@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Jackal.ViewModels"
+			 xmlns:v="using:Jackal.Models.Cells"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Jackal.Views.GameView">
+	<Design.DataContext>
+		<vm:GameViewModel/>
+	</Design.DataContext>
+	<UserControl.Styles>
+		<StyleInclude Source="/Views/Styles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Viewbox>
+			<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<UniformGrid Rows="13" Columns="13"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Button Classes="Cell"/>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</Viewbox>
+	</Grid>
+</UserControl>

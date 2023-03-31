@@ -11,7 +11,8 @@
 			</Style>
 		</StackPanel.Styles>
 		<Button Content="Подключиться к серверу" HorizontalAlignment="Stretch"
-				Command="{Binding $parent[Window].DataContext.ConnectToServer}"/>
+				Command="{Binding $parent[Window].DataContext.ConnectToServer}"
+				CommandParameter="{Binding $parent[Window]}"/>
 		<Button Content="Создать сервер" 
 				HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
 				Command="{Binding $parent[Window].DataContext.CreateServer}"/>

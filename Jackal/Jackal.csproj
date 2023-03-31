@@ -21,6 +21,10 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaXaml Remove="Models\Новая папка\**" />
+    <Compile Remove="Models\Новая папка\**" />
+    <EmbeddedResource Remove="Models\Новая папка\**" />
+    <None Remove="Models\Новая папка\**" />
     <None Remove=".gitignore" />
   </ItemGroup>
 
@@ -37,5 +41,9 @@
     <PackageReference Include="ReactiveUI.Fody" Version="18.4.26" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
 	<PackageReference Include="Dotnet.Bundle" Version="*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\Images\" />
   </ItemGroup>
 </Project>

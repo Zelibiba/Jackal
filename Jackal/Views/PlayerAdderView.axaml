@@ -11,8 +11,8 @@
 		<converters:IsReadyConverter x:Key="IsReadyConverter"/>
 	</UserControl.Resources>
 	<Border BorderBrush="Black" BorderThickness="1" Background="Lavender">
-		<Grid ColumnDefinitions="Auto,*,Auto" Margin="15,5">
-			<Button Grid.Column="0" Height="40" Width="40"
+		<Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,5">
+			<Button Grid.Column="0" Height="40" Width="40" Margin="5,0"
 					Command="{Binding ChangeTeam}"  IsEnabled="{Binding !Player.IsReady}">
 				<Button.Template>
 					<ControlTemplate TargetType="Button">
@@ -21,10 +21,16 @@
 					</ControlTemplate>
 				</Button.Template>
 			</Button>
-			<TextBox Grid.Column="1" Margin="10" FontSize="20"
+			<Grid Grid.Column="1" RowDefinitions="Auto,*" Height="40" Width="40">
+				<TextBlock Grid.Row="0" HorizontalAlignment="Stretch"
+						   Text="Альянс" FontSize="10"/>
+				<Button Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center"
+						Content="{Binding Player.IntAlliance}" Command="{Binding ChangeAlliance}"/>
+			</Grid>
+			<TextBox Grid.Column="2" FontSize="20" Margin="5,0"
 					 Text="{Binding Player.Name}" MaxLength="40" IsEnabled="{Binding !Player.IsReady}"/>
-			<ToggleButton Grid.Column="2" Height="30" Width="30" VerticalContentAlignment="Center"
-							Command="{Binding SetReady}">
+			<ToggleButton Grid.Column="3" Height="30" Width="30" VerticalContentAlignment="Center" Margin="5,0"
+						  Command="{Binding SetReady}">
 				<ToggleButton.Template>
 					<ControlTemplate TargetType="ToggleButton">
 						<Border BorderBrush="Black" BorderThickness="2"
