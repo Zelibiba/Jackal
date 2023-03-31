@@ -10,15 +10,15 @@ namespace Jackal.ViewModels
 {
     public class GameViewModel : ViewModelBase
     {
-        int N = 13 * 13;
+        int N = 13;
         Cell[] _cells;
 
         public GameViewModel()
         {
-            _cells = new Cell[N];
-            for(int i=0;i<N;i++)
+            _cells = new Cell[N * N];
+            for (int i = 0; i < _cells.Length; i++)
             {
-                _cells[i] = new Cell();
+                _cells[i] = new Cell(i/N, i%N, "Field");
             }
         }
 
@@ -27,6 +27,14 @@ namespace Jackal.ViewModels
         public void func(object param)
         {
             MessageBox.Show("!");
+        }
+        public bool Canfunc(object param)
+        {
+            return true;
+        }
+        public void funcP(object param)
+        {
+            MessageBox.Show("?");
         }
     }
 }
