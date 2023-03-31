@@ -1,14 +1,89 @@
-<Button xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="50" d:DesignHeight="50"
-             x:Class="Jackal.Views.CellView">
-		<Button.Template>
-			<ControlTemplate TargetType="Button">
-				<Border BorderBrush="Red" BorderThickness="1">
-					<Rectangle Fill="AliceBlue"/>
-				</Border>
-			</ControlTemplate>
-		</Button.Template>
-</Button>
+			 xmlns:converters="clr-namespace:Jacal.Converters"
+			 x:Class="Jackal.Views.CellView"
+			 mc:Ignorable="d" d:DesignWidth="50" d:DesignHeight="50"
+			 HorizontalAlignment="Stretch"
+			 VerticalAlignment="Stretch">
+	<UserControl.Resources>
+		<converters:TeamConverter x:Key="TeamConverter"/>
+		<converters:ImageConverter x:Key="ImageConverter"/>
+	</UserControl.Resources>
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
+
+		<!-- Классы для отображения выбора ячейки. -->
+		<Style Selector="Border.Cell.Usual">
+			<Setter Property="BorderBrush" Value="Black"/>
+			<Setter Property="BorderThickness" Value="1"/>
+		</Style>
+		<Style Selector="Border.CanBeSelected">
+			<Setter Property="BorderBrush" Value="#FF28F91E"/>
+			<Setter Property="BorderThickness" Value="4"/>
+		</Style>
+		<Style Selector="Border.IsSelected">
+			<Setter Property="BorderBrush" Value="Red"/>
+			<Setter Property="BorderThickness" Value="4"/>
+		</Style>
+		<Style Selector="Border.IsShip">
+			<Setter Property="BorderBrush" Value="{Binding ShipTeam, Converter={StaticResource TeamConverter}}"/>
+			<Setter Property="BorderThickness" Value="6"/>
+		</Style>
+
+		<!-- Классы для отображения золота. -->
+		<Style Selector="Border.Gold.Usual">
+			<Setter Property="IsVisible" Value="False"/>
+		</Style>
+		<Style Selector="Border.Treasure">
+			<Setter Property="IsVisible" Value="True"/>
+		</Style>
+	</UserControl.Styles>
+	<UserControl.Template>
+		<ControlTemplate>
+			<Border Classes="Cell Usual"
+					Classes.CanBeSelected="{Binding CanBeSelected}"
+					Classes.IsSelected="{Binding IsSelected}"
+					Classes.Ship="{Binding IsShip}">
+				<Panel>
+					<!--<Image Source="/Assets/Images/Field.png"/>-->
+					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}"/>				
+					<Button ZIndex="9" Command="{Binding $parent[UserControl;1].DataContext.func}"
+							HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+						<Button.Template>
+							<ControlTemplate TargetType="Button">
+								<Grid Background="Transparent"/>
+							</ControlTemplate>
+						</Button.Template>
+					</Button>
+					<Border Classes="Gold Usual" BorderBrush="Gold" BorderThickness="3"
+							Classes.Treasure="{Binding Treasure}">
+						<WrapPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="2,0">
+							<TextBlock Text="Г" FontWeight="Bold" FontSize="20"
+									   IsVisible="{Binding Galeon}"/>
+							<TextBlock Text="5" FontWeight="Bold" FontSize="20"
+									   IsVisible="{Binding ContainsGold}"/>
+						</WrapPanel>
+					</Border>
+					<ItemsControl ZIndex="10" Margin="2" Items="{Binding Pirates}">
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<UniformGrid Rows="2" Columns="3"/>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button Classes="Pirate"/>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+					<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+						<TextBlock Text="{Binding Row}" Margin="5,0"/>
+						<TextBlock Text="{Binding Column}" Margin="5,0"/>
+					</WrapPanel>
+				</Panel>
+			</Border>
+		</ControlTemplate>
+	</UserControl.Template>
+</UserControl>

@@ -3,15 +3,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Jackal.ViewModels"
-			 xmlns:v="using:Jackal.Models.Cells"
+			 xmlns:v="using:Jackal.Views"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jackal.Views.GameView">
 	<Design.DataContext>
 		<vm:GameViewModel/>
 	</Design.DataContext>
-	<UserControl.Styles>
-		<StyleInclude Source="/Views/Styles.axaml"/>
-	</UserControl.Styles>
 	<Grid>
 		<Viewbox>
 			<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
@@ -22,7 +19,7 @@
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
-						<Button Classes="Cell"/>
+						<v:CellView/>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
