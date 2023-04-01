@@ -1,32 +1,46 @@
-﻿using Jackal.Models.Cells;
+﻿using Avalonia.Controls.Mixins;
+using DynamicData;
+using DynamicData.Binding;
+using Jackal.Models;
+using Jackal.Models.Cells;
 using Jackal.Views;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Jackal.ViewModels
 {
-    public class GameViewModel : ViewModelBase
+    public class GameViewModel : ViewModelBase, IActivatableViewModel
     {
-        int N = 13;
-        Cell[] _cells;
+        public ViewModelActivator Activator { get; }
+        IDisposable _disCells;
 
         public GameViewModel()
         {
-            _cells = new Cell[N * N];
-            for (int i = 0; i < _cells.Length; i++)
+            Activator = new ViewModelActivator();
+            this.WhenActivated(disposable =>
             {
-                _cells[i] = new Cell(i/N, i%N, "Field");
-            }
+                _disCells.DisposeWith(disposable);
+            });
+
+            Game.CreateMap();
+            _disCells = Game.Map.ToObservableChangeSet()
+                                  .Bind(out _cells)
+                                  .Subscribe();
         }
 
-        public Cell[] Cells => _cells;
+        public ReadOnlyObservableCollection<Cell> Cells => _cells;
+        public ReadOnlyObservableCollection<Cell> _cells;
 
         public void func(object param)
         {
-            MessageBox.Show("!");
+            Cell cell = Game.Map[5,5];
+            Game.Map[5,5] = Game.Map[0,0];
+            Game.Map[0,0] = cell;
         }
         public bool Canfunc(object param)
         {

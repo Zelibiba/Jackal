@@ -6,9 +6,6 @@
 			 xmlns:v="using:Jackal.Views"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jackal.Views.GameView">
-	<Design.DataContext>
-		<vm:GameViewModel/>
-	</Design.DataContext>
 	<Grid>
 		<Viewbox>
 			<ItemsControl Height="832" Width="832" Items="{Binding Cells}">

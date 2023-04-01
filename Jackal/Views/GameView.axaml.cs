@@ -1,13 +1,17 @@
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using Jackal.ViewModels;
+using ReactiveUI;
 
 namespace Jackal.Views
 {
-    public partial class GameView : UserControl
+    public partial class GameView : ReactiveUserControl<GameViewModel>
     {
         public GameView()
         {
             InitializeComponent();
-            DataContext = new ViewModels.GameViewModel();
+            this.WhenActivated(disposables => { });
         }
     }
 }

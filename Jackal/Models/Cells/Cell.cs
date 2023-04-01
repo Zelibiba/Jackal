@@ -13,9 +13,6 @@ namespace Jackal.Models.Cells
 {
     public class Cell : ReactiveObject
     {
-        protected int row;
-        protected int column;
-
         public Cell(int row, int column, string image)
         {
             this.row = row;
@@ -24,9 +21,12 @@ namespace Jackal.Models.Cells
 
             Pirates = new ObservableCollection<Pirate>
             {
-                new Pirate()
+                //new Pirate()
             };
         }
+
+        protected int row;
+        protected int column;
         public int Row => row;
         public int Column => column;
 

@@ -78,7 +78,7 @@
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>
-					<WrapPanel ZIndex="11" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 						<TextBlock Text="{Binding Row}" Margin="5,0"/>
 						<TextBlock Text="{Binding Column}" Margin="5,0"/>
 					</WrapPanel>
