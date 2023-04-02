@@ -21,10 +21,10 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
-    <AvaloniaXaml Remove="Models\Новая папка\**" />
-    <Compile Remove="Models\Новая папка\**" />
-    <EmbeddedResource Remove="Models\Новая папка\**" />
-    <None Remove="Models\Новая папка\**" />
+    <AvaloniaXaml Remove="Styles\**" />
+    <Compile Remove="Styles\**" />
+    <EmbeddedResource Remove="Styles\**" />
+    <None Remove="Styles\**" />
     <None Remove=".gitignore" />
   </ItemGroup>
 

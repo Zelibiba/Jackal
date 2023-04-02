@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DynamicData.Binding;
 using Jackal.Models.Cells;
+using Jackal.Models.Pirates;
 
 namespace Jackal.Models
 {
@@ -36,30 +37,43 @@ namespace Jackal.Models
                     Map[i, j] = new Cell(i, j, "Field");
                 }
             }
+            Map[0, 6] = new ShipCell(0, 6, Team.White);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
-            Map[0, 6] = new ShipCell(0, 6, Team.White);
-            Map[0, 7] = new ShipCell(0, 7, Team.Red);
-            Map[0, 8] = new ShipCell(0, 8, Team.Black);
-            Map[0, 9] = new ShipCell(0, 9, Team.Yellow);
-            Map[1, 6].AddPirate(new Pirate(Team.White));
+
+            Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[0, 6].AddPirate(new Pirate(Team.White));
         }
         
         public static void SelectPirate(Pirate pirate)
         {
+            Deselect();
             SelectedPirate = pirate;
 
             foreach (Cell cell in Map)
                 cell.CanBeSelected = false;
             foreach (int[] coords in pirate.Cell.SelectableCoords)
-                Map[coords[0], coords[1]].CanBeSelected = true;
+                Map[coords].CanBeSelected = true;
+        }
+        public static void Deselect(bool deselectPirate = true)
+        {
+            if (SelectedPirate == null)
+                return;
+
+            foreach (int[] coords in SelectedPirate.Cell.SelectableCoords)
+                Map[coords].CanBeSelected = false;
+
+            if (deselectPirate)
+                SelectedPirate = null;
         }
         public static void MovePirate(Cell newCell)
         {
+            Deselect(false);
             SelectedPirate.RemoveFromCell();
             newCell.AddPirate(SelectedPirate);
-            foreach (Cell cell in Map)
-                cell.CanBeSelected = false;
 
             //foreach (Cell cell in Map)
             //    cell.CanBeSelected = false;

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
+using Jackal.Models.Pirates;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -29,7 +30,7 @@ namespace Jackal.Models.Cells
                               .Select(gold => gold > 0)
                               .ToProperty(this, c => c.ContainsGold);
             _treasure = this.WhenAnyValue(c => c.Gold, c => c.Galeon)
-                            .Select(t => t.Item1 > 0 && t.Item2)
+                            .Select(t => t.Item1 > 0 || t.Item2)
                             .ToProperty(this, c => c.Treasure);
             IsOpened = true;
         }
@@ -59,8 +60,13 @@ namespace Jackal.Models.Cells
         public virtual bool IsShip => false;
         public virtual Team ShipTeam => Team.None;
 
+
+
         public void AddPirate(Pirate pirate)
         {
+            if(!IsOpened)
+                IsOpened = true;
+
             Pirates.Add(pirate);
             pirate.Cell = this;
         }

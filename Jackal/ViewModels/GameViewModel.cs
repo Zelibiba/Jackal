@@ -3,6 +3,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models;
 using Jackal.Models.Cells;
+using Jackal.Models.Pirates;
 using Jackal.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -33,10 +34,9 @@ namespace Jackal.ViewModels
             this.WhenAnyValue(vm => vm.SelectedCell)
                 .Skip(1)
                 .Subscribe(cell => SelectCell(cell));
-
-            PirateSelection = ReactiveCommand.Create<Pirate>(pirate => Game.SelectPirate(pirate));
-            //CellSelection = ReactiveCommand.Create(() => Views.MessageBox.Show((SelectedCell==null).ToString()));
-
+            this.WhenAnyValue(vm => vm.SelectedPirate)
+                .Where(pirate => pirate != null)
+                .Subscribe(pirate => SelectPirate(pirate));
 
             Game.CreateMap();
             _disCells = Game.Map.ToObservableChangeSet()
@@ -44,12 +44,12 @@ namespace Jackal.ViewModels
                                   .Subscribe();
         }
 
+
         public ReadOnlyObservableCollection<Cell> Cells => _cells;
         public ReadOnlyObservableCollection<Cell> _cells;
         [Reactive] public Cell SelectedCell { get; set; }
+        [Reactive] public Pirate SelectedPirate { get; set; }
 
-        public ReactiveCommand<Pirate, Unit> PirateSelection { get; }
-        //public ReactiveCommand<Unit, Unit> CellSelection { get; }
 
         void SelectCell(Cell cell)
         {
@@ -58,5 +58,10 @@ namespace Jackal.ViewModels
             if (Game.IsPirateSelected)
                 Game.MovePirate(cell);
         }
+        void SelectPirate(Pirate pirate)
+        {
+            Game.SelectPirate(pirate);
+        }
+        public void Deselect() => Game.Deselect();
     }
 }

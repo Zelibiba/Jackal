@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using Jackal.Models.Cells;
 
-namespace Jackal.Models
+namespace Jackal.Models.Pirates
 {
     public class Pirate : ReactiveObject
     {
@@ -17,7 +17,7 @@ namespace Jackal.Models
 
         public Cell Cell { get; set; }
 
-        public Team Team {get;set;}
+        public Team Team { get; set; }
         public bool IsBlocked => false;
         public int MazeNodeNumber => 0;
         public bool IsInMaze => false;

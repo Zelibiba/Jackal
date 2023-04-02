@@ -1,3 +1,4 @@
+
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,8 +7,8 @@
 			 xmlns:v="using:Jackal.Views"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jackal.Views.GameView">
-	<Grid>
-		<Viewbox>
+	<Grid ColumnDefinitions="auto,*">
+		<Viewbox Grid.Column="0">
 			<ListBox Height="832" Width="832" Items="{Binding Cells}" SelectedItem="{Binding SelectedCell}">
 				<ListBox.ItemsPanel>
 					<ItemsPanelTemplate>
@@ -27,5 +28,14 @@
 				</ListBox.Styles>
 			</ListBox>
 		</Viewbox>
+		<Border Grid.Column="1" Background="AliceBlue">
+			<Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"
+					BorderBrush="Black" BorderThickness="2" Padding="5">
+				<WrapPanel Orientation="Vertical">
+					<ToggleButton Content="g"/>
+					<ToggleButton Content="G" Margin="0,5,0,0"/>
+				</WrapPanel>
+			</Border>
+		</Border>
 	</Grid>
 </UserControl>

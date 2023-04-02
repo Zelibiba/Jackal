@@ -39,11 +39,26 @@ namespace Jackal.Models
                 this[row * MapSize + column] = value;
             }
         }
+        public Cell this[int[] coords]
+        {
+            get
+            {
+                if (coords.Length != 2)
+                    throw new ArgumentException();
+                return this[coords[0], coords[1]];
+            }
+            set
+            {
+                if (coords.Length != 2)
+                    throw new ArgumentException();
+                this[coords[0], coords[1]] = value;
+            }
+        }
 
         void CheckIndexes(int row, int column)
         {
             if (row < 0 || column < 0 || row >= MapSize || column >= MapSize)
-                throw new ArgumentOutOfRangeException("Map");
+                throw new ArgumentOutOfRangeException();
         }
     }
 }
