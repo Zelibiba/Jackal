@@ -48,15 +48,13 @@
 					Classes.Ship="{Binding IsShip}">
 				<Panel>
 					<!--<Image Source="/Assets/Images/Field.png"/>-->
-					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}"/>				
-					<Button ZIndex="9" Command="{Binding $parent[UserControl;1].DataContext.func}"
-							HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-						<Button.Template>
-							<ControlTemplate TargetType="Button">
-								<Grid Background="Transparent"/>
-							</ControlTemplate>
-						</Button.Template>
-					</Button>
+					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsOpened}">
+						<Image.RenderTransform>
+							<TransformGroup>
+								<RotateTransform Angle="{Binding Angle}"/>
+							</TransformGroup>
+						</Image.RenderTransform>
+					</Image>
 					<Border Classes="Gold Usual" BorderBrush="Gold" BorderThickness="3"
 							Classes.Treasure="{Binding Treasure}">
 						<WrapPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="2,0">

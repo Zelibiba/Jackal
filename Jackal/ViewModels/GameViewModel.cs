@@ -5,10 +5,13 @@ using Jackal.Models;
 using Jackal.Models.Cells;
 using Jackal.Views;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,6 +30,14 @@ namespace Jackal.ViewModels
                 _disCells.DisposeWith(disposable);
             });
 
+            this.WhenAnyValue(vm => vm.SelectedCell)
+                .Skip(1)
+                .Subscribe(cell => SelectCell(cell));
+
+            PirateSelection = ReactiveCommand.Create<Pirate>(pirate => Game.SelectPirate(pirate));
+            //CellSelection = ReactiveCommand.Create(() => Views.MessageBox.Show((SelectedCell==null).ToString()));
+
+
             Game.CreateMap();
             _disCells = Game.Map.ToObservableChangeSet()
                                   .Bind(out _cells)
@@ -35,20 +46,17 @@ namespace Jackal.ViewModels
 
         public ReadOnlyObservableCollection<Cell> Cells => _cells;
         public ReadOnlyObservableCollection<Cell> _cells;
+        [Reactive] public Cell SelectedCell { get; set; }
 
-        public void func(object param)
+        public ReactiveCommand<Pirate, Unit> PirateSelection { get; }
+        //public ReactiveCommand<Unit, Unit> CellSelection { get; }
+
+        void SelectCell(Cell cell)
         {
-            Cell cell = Game.Map[5,5];
-            Game.Map[5,5] = Game.Map[0,0];
-            Game.Map[0,0] = cell;
-        }
-        public bool Canfunc(object param)
-        {
-            return true;
-        }
-        public void funcP(object param)
-        {
-            MessageBox.Show("?");
+            if (!cell.CanBeSelected)
+                return;
+            if (Game.IsPirateSelected)
+                Game.MovePirate(cell);
         }
     }
 }

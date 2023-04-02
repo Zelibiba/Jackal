@@ -8,31 +8,41 @@ using System.Threading.Tasks;
 
 namespace Jackal.Models
 {
+    /// <summary>
+    /// Клас карты.
+    /// </summary>
+    /// <remarks>
+    /// Наследуется от ObservableCollection&lt;<see cref="Cell"/>&gt;.
+    /// </remarks>
     public class ObservableMap : ObservableCollection<Cell>
     {
+        /// <summary>
+        /// <inheritdoc cref="ObservableMap" path="/summary"/>
+        /// </summary>
+        /// <param name="mapSize">Размер квадратного массива.</param>
         public ObservableMap(int mapSize)
         {
-            _mapSize = mapSize;
+            MapSize = mapSize;
         }
 
-        readonly int _mapSize;
+        public readonly int MapSize;
         public Cell this[int row, int column]
         {
             get
             {
                 CheckIndexes(row, column);
-                return this[row * _mapSize + column];
+                return this[row * MapSize + column];
             }
             set
             {
                 CheckIndexes(row, column);
-                this[row * _mapSize + column] = value;
+                this[row * MapSize + column] = value;
             }
         }
 
         void CheckIndexes(int row, int column)
         {
-            if (row < 0 || column < 0 || row >= _mapSize || column >= _mapSize)
+            if (row < 0 || column < 0 || row >= MapSize || column >= MapSize)
                 throw new ArgumentOutOfRangeException("Map");
         }
     }

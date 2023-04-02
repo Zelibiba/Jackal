@@ -6,11 +6,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Jackal.Models.Cells
 {
+    /// <summary>
+    /// Базовый класс ячейки.
+    /// </summary>
     public class Cell : ReactiveObject
     {
         public Cell(int row, int column, string image)
@@ -18,27 +22,61 @@ namespace Jackal.Models.Cells
             this.row = row;
             this.column = column;
             Image = image;
+            Pirates = new ObservableCollection<Pirate>();
+            SelectableCoords = new List<int[]>();
 
-            Pirates = new ObservableCollection<Pirate>
-            {
-                //new Pirate()
-            };
+            _containsGold = this.WhenAnyValue(c => c.Gold)
+                              .Select(gold => gold > 0)
+                              .ToProperty(this, c => c.ContainsGold);
+            _treasure = this.WhenAnyValue(c => c.Gold, c => c.Galeon)
+                            .Select(t => t.Item1 > 0 && t.Item2)
+                            .ToProperty(this, c => c.Treasure);
+            IsOpened = true;
         }
 
         protected int row;
         protected int column;
+
         public int Row => row;
         public int Column => column;
-
         [Reactive] public string Image { get; private set; }
+        public virtual int Angle => 0;
+
+        [Reactive] public bool IsOpened { get; set; }
+        [Reactive] public bool CanBeSelected { get; set; }
+        
         [Reactive] public int Gold { get; protected set; }
         [Reactive] public bool Galeon { get; protected set; }
+        public bool ContainsGold => _containsGold.Value;
+        readonly ObservableAsPropertyHelper<bool> _containsGold;
+        public bool Treasure => _treasure.Value;
+        readonly ObservableAsPropertyHelper<bool> _treasure;
+
         public ObservableCollection<Pirate> Pirates { get; protected set; }
-        public bool CanBeSelected => false;
+        public List<int[]> SelectableCoords { get; }
+
         public bool IsSelected => false;
-        public bool Ship => false;
-        public Team ShipTeam => Team.Yellow;
-        public bool Treasure => false;
-        public bool ContainsGold => false;
+        public virtual bool IsShip => false;
+        public virtual Team ShipTeam => Team.None;
+
+        public void AddPirate(Pirate pirate)
+        {
+            Pirates.Add(pirate);
+            pirate.Cell = this;
+        }
+
+        public virtual void SetSelectableCoords(ObservableMap map)
+        {
+            SelectableCoords.Clear();
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    if ((i == 0 && j == 0) || map[row + i, column + j] is SeaCell)
+                        continue;
+                    SelectableCoords.Add(new int[2] { row + i, column + j });
+                }
+            }
+        }
     }
 }

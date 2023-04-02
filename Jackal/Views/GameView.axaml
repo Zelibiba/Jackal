@@ -8,18 +8,24 @@
              x:Class="Jackal.Views.GameView">
 	<Grid>
 		<Viewbox>
-			<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
-				<ItemsControl.ItemsPanel>
+			<ListBox Height="832" Width="832" Items="{Binding Cells}" SelectedItem="{Binding SelectedCell}">
+				<ListBox.ItemsPanel>
 					<ItemsPanelTemplate>
 						<UniformGrid Rows="13" Columns="13"/>
 					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<v:CellView/>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+				</ListBox.ItemsPanel>
+				<ListBox.Styles>
+					<Style Selector="ListBoxItem">
+						<Setter Property="Template">
+							<Setter.Value>
+								<ControlTemplate TargetType="ListBoxItem">
+									<v:CellView/>
+								</ControlTemplate>
+							</Setter.Value>
+						</Setter>
+					</Style>
+				</ListBox.Styles>
+			</ListBox>
 		</Viewbox>
 	</Grid>
 </UserControl>

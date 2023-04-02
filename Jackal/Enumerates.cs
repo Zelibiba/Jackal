@@ -23,4 +23,16 @@ namespace Jackal
         UpdatePlayer,
         DeletePlayer
     }
+    public enum Orientation
+    {
+        None = 0,
+        Up = 1,
+        Right = 2,
+        Down = 4,
+        Left = 8,
+        UpRight = Up | Right,       // 3
+        RightDown = Right | Down,   // 6
+        LeftUp = Left | Up,         // 9
+        LeftDown = Down | Left      // 12
+    }
 }

@@ -24,7 +24,8 @@
 		<Style.Resources>
 			<converters:TeamConverter x:Key="TeamConverter"/>
 		</Style.Resources>
-		<Setter Property="Command" Value="{Binding $parent[UserControl;1].DataContext.funcP}"/>
+		<Setter Property="Command" Value="{Binding $parent[UserControl;1].DataContext.PirateSelection}"/>
+		<Setter Property="CommandParameter" Value="{Binding .}"/>
 		<Setter Property="HorizontalAlignment" Value="Center"/>
 		<Setter Property="VerticalAlignment" Value="Center"/>
 		<Setter Property="Template">
