@@ -32,16 +32,17 @@ namespace Jackal.ViewModels
             });
 
             this.WhenAnyValue(vm => vm.SelectedCell)
-                .Where(cell=> cell != null && cell.CanBeSelected)
+                .Where(cell => cell != null && (cell.CanBeSelected || cell is ShipCell))
                 .Subscribe(cell => SelectCell(cell));
             this.WhenAnyValue(vm => vm.SelectedPirate)
                 .Where(pirate => pirate != null)
                 .Subscribe(pirate => SelectPirate(pirate));
 
-            Game.CreateMap();
+            if (!Game.CreateMap())
+                return;
             _disCells = Game.Map.ToObservableChangeSet()
-                                  .Bind(out _cells)
-                                  .Subscribe();
+                                .Bind(out _cells)
+                                .Subscribe();
         }
 
 
@@ -53,17 +54,19 @@ namespace Jackal.ViewModels
 
         void SelectCell(Cell cell)
         {
-            if (Game.IsPirateSelected)
-                Game.MovePirate(cell);
+            Game.SelectCell(cell);
+            //SelectedCell = null;
         }
         void SelectPirate(Pirate pirate)
         {
             Game.SelectPirate(pirate);
+            //SelectedPirate = null;
         }
         public void Deselect()
         {
             Game.Deselect();
             SelectedPirate = null;
+            SelectedCell = null;
         }
     }
 }

@@ -86,6 +86,11 @@ namespace Jackal.Models.Cells
                 Galeon = false;
         }
 
+        public void SetCoordinates(int row,int column)
+        {
+            this.row = row;
+            this.column = column;
+        }
         public virtual void SetSelectableCoords(ObservableMap map)
         {
             SelectableCoords.Clear();

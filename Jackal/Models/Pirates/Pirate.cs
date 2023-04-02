@@ -16,6 +16,8 @@ namespace Jackal.Models.Pirates
             Team = team;
         }
 
+        public virtual bool CanDriveShip => true;
+
         public Cell Cell { get; set; }
 
         [Reactive] public Team Team { get; set; }
