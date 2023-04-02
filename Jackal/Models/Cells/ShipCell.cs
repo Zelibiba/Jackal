@@ -8,19 +8,62 @@ namespace Jackal.Models.Cells
 {
     public class ShipCell : Cell
     {
-        public ShipCell(int row, int column, Team team) : base(row, column, "Ship")
+        public ShipCell(int row, int column, Team team, (Orientation, int[][]) shipRegion) : base(row, column, "Ship")
         {
             IsOpened = true;
             ShipTeam = team;
+            Orientation = shipRegion.Item1;
+            _shipRegion = shipRegion.Item2;
+            MovableCoords = new List<int[]>();
+
+            if (!(Orientation.Up | Orientation.Right | Orientation.Down | Orientation.Left).HasFlag(Orientation))
+                throw new ArgumentException();
         }
+
+        public readonly Orientation Orientation;
+        readonly int[][] _shipRegion;
+        public List<int[]> MovableCoords;
 
         public override bool IsShip => true;
         public override Team ShipTeam { get; }
 
+
         public override void SetSelectableCoords(ObservableMap map)
         {
             SelectableCoords.Clear();
-            SelectableCoords.Add(new int[] { row + 1, column });
+
+            int r = row;
+            int c = column;
+            switch (Orientation)
+            {
+                case Orientation.Up:
+                    r--; break;
+                case Orientation.Down:
+                    r++; break;
+                case Orientation.Left:
+                    c++; break;
+                case Orientation.Right:
+                    c--; break;
+            }
+            SelectableCoords.Add(new int[] { r, c });
+
+            int coord = -1;
+            int[] shipCoord = new int[2] { row, column };
+            switch (Orientation)
+            {
+                case Orientation.Up:
+                case Orientation.Down:
+                    coord = 1; break;
+                case Orientation.Right:
+                case Orientation.Left:
+                    coord = 0; break;
+            }
+            MovableCoords.Clear();
+            foreach (int[] coords in _shipRegion)
+            {
+                if (Math.Abs(coords[coord] - shipCoord[coord]) == 1)
+                    MovableCoords.Add(coords);
+            }
         }
     }
 }
