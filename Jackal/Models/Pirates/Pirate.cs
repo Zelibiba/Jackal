@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Jackal.Models.Cells;
 
 namespace Jackal.Models.Pirates
@@ -17,14 +18,18 @@ namespace Jackal.Models.Pirates
 
         public Cell Cell { get; set; }
 
-        public Team Team { get; set; }
+        [Reactive] public Team Team { get; set; }
+
+        [Reactive] public bool Gold { get; set; }
+        [Reactive] public bool Galeon { get; set; }
+        public bool Treasure => Gold || Galeon;
+
+
+
         public bool IsBlocked => false;
         public int MazeNodeNumber => 0;
         public bool IsInMaze => false;
 
-        public void RemoveFromCell()
-        {
-            Cell.Pirates.Remove(this);
-        }
+        public void RemoveFromCell() => Cell.RemovePirate(this);
     }
 }

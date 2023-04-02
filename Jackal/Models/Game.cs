@@ -42,10 +42,7 @@ namespace Jackal.Models
                 cell.SetSelectableCoords(Map);
 
             Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[1, 6].SetGold(2);
         }
         
         public static void SelectPirate(Pirate pirate)

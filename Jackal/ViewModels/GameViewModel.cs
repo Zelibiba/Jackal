@@ -32,7 +32,7 @@ namespace Jackal.ViewModels
             });
 
             this.WhenAnyValue(vm => vm.SelectedCell)
-                .Skip(1)
+                .Where(cell=> cell != null && cell.CanBeSelected)
                 .Subscribe(cell => SelectCell(cell));
             this.WhenAnyValue(vm => vm.SelectedPirate)
                 .Where(pirate => pirate != null)
@@ -53,8 +53,6 @@ namespace Jackal.ViewModels
 
         void SelectCell(Cell cell)
         {
-            if (!cell.CanBeSelected)
-                return;
             if (Game.IsPirateSelected)
                 Game.MovePirate(cell);
         }
@@ -62,6 +60,10 @@ namespace Jackal.ViewModels
         {
             Game.SelectPirate(pirate);
         }
-        public void Deselect() => Game.Deselect();
+        public void Deselect()
+        {
+            Game.Deselect();
+            SelectedPirate = null;
+        }
     }
 }

@@ -45,7 +45,8 @@ namespace Jackal.Models.Cells
 
         [Reactive] public bool IsOpened { get; set; }
         [Reactive] public bool CanBeSelected { get; set; }
-        
+
+        public void SetGold(int g) => Gold = g;
         [Reactive] public int Gold { get; protected set; }
         [Reactive] public bool Galeon { get; protected set; }
         public bool ContainsGold => _containsGold.Value;
@@ -69,6 +70,20 @@ namespace Jackal.Models.Cells
 
             Pirates.Add(pirate);
             pirate.Cell = this;
+
+            if (pirate.Gold)
+                Gold++;
+            else if (pirate.Galeon)
+                Galeon = true;
+        }
+        public void RemovePirate(Pirate pirate)
+        {
+            Pirates.Remove(pirate);
+
+            if (pirate.Gold)
+                Gold--;
+            else if (pirate.Galeon)
+                Galeon = false;
         }
 
         public virtual void SetSelectableCoords(ObservableMap map)
