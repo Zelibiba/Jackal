@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DynamicData.Binding;
 using Jackal.Models.Cells;
 using Jackal.Models.Pirates;
+using ReactiveUI;
 
 namespace Jackal.Models
 {
@@ -18,6 +19,9 @@ namespace Jackal.Models
         static bool _falshStart = true;
         public static readonly int MapSize = 13;
         public static ObservableMap Map { get; private set; }
+
+        static IObservable<Pirate> s { get; set; }
+
         public static Pirate? SelectedPirate { get; private set; }
         public static bool IsPirateSelected => SelectedPirate != null;
         public static ShipCell? SelectedShip { get;private set; }
@@ -69,30 +73,42 @@ namespace Jackal.Models
 
             return true;
         }
-        
-        public static void SelectCell(Cell cell)
+
+        public static void PreSelectCell(Cell cell)
+        {
+            if (cell.CanBeSelected ||
+               cell is ShipCell ship && ship.CanMove)
+                SelectCell(cell);
+        }
+        static void SelectCell(Cell cell)
         {
             if (IsPirateSelected)
                 MovePirate(cell);
             else if (IsShipSelected)
                 MoveShip(cell);
-            else if (cell is ShipCell ship && ship.CanMove)
-                SelectShip(ship);
+            else if (cell is ShipCell)
+                SelectShip(cell);
         }
-        public static void SelectPirate(Pirate pirate)
+        static void SelectShip(Cell cell)
+        {
+            Deselect();
+            SelectedShip = cell as ShipCell;
+            foreach (int[] coords in SelectedShip.MovableCoords)
+                Map[coords].CanBeSelected = true;
+        }
+
+        public static void PreSelectPirate(Pirate pirate)
+        {
+            SelectPirate(pirate);
+        }
+        static void SelectPirate(Pirate pirate)
         {
             Deselect();
             SelectedPirate = pirate;
             foreach (int[] coords in pirate.Cell.SelectableCoords)
                 Map[coords].CanBeSelected = true;
         }
-        static void SelectShip(ShipCell ship)
-        {
-            Deselect();
-            SelectedShip = ship;
-            foreach (int[] coords in ship.MovableCoords)
-                Map[coords].CanBeSelected = true;
-        }
+
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
@@ -112,6 +128,7 @@ namespace Jackal.Models
                     SelectedShip = null;
             }
         }
+
         static void MovePirate(Cell newCell)
         {
             Deselect(false);

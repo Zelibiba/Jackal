@@ -31,12 +31,6 @@ namespace Jackal.ViewModels
                 _disCells.DisposeWith(disposable);
             });
 
-            this.WhenAnyValue(vm => vm.SelectedCell)
-                .Where(cell => cell != null && (cell.CanBeSelected || cell is ShipCell))
-                .Subscribe(cell => SelectCell(cell));
-            this.WhenAnyValue(vm => vm.SelectedPirate)
-                .Where(pirate => pirate != null)
-                .Subscribe(pirate => SelectPirate(pirate));
 
             if (!Game.CreateMap())
                 return;
@@ -47,26 +41,12 @@ namespace Jackal.ViewModels
 
 
         public ReadOnlyObservableCollection<Cell> Cells => _cells;
-        public ReadOnlyObservableCollection<Cell> _cells;
-        [Reactive] public Cell SelectedCell { get; set; }
+        ReadOnlyObservableCollection<Cell> _cells;
+
         [Reactive] public Pirate SelectedPirate { get; set; }
 
-
-        void SelectCell(Cell cell)
-        {
-            Game.SelectCell(cell);
-            //SelectedCell = null;
-        }
-        void SelectPirate(Pirate pirate)
-        {
-            Game.SelectPirate(pirate);
-            //SelectedPirate = null;
-        }
-        public void Deselect()
-        {
-            Game.Deselect();
-            SelectedPirate = null;
-            SelectedCell = null;
-        }
+        public void SelectCell(Cell cell) => Game.PreSelectCell(cell);
+        public void SelectPirate(Pirate pirate) => Game.PreSelectPirate(pirate);
+        public void Deselect() => Game.Deselect();
     }
 }

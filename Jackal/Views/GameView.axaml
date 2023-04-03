@@ -5,28 +5,23 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Jackal.ViewModels"
 			 xmlns:v="using:Jackal.Views"
+			 x:Class="Jackal.Views.GameView"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Jackal.Views.GameView">
+             Name="Game">
 	<Grid ColumnDefinitions="auto,*">
 		<Viewbox Grid.Column="0">
-			<ListBox Height="832" Width="832" Items="{Binding Cells}" SelectedItem="{Binding SelectedCell}">
-				<ListBox.ItemsPanel>
+			<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
+				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<UniformGrid Rows="13" Columns="13"/>
 					</ItemsPanelTemplate>
-				</ListBox.ItemsPanel>
-				<ListBox.Styles>
-					<Style Selector="ListBoxItem">
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="ListBoxItem">
-									<v:CellView/>
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-					</Style>
-				</ListBox.Styles>
-			</ListBox>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<v:CellView/>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
 		</Viewbox>
 		<Border Grid.Column="1" Background="AliceBlue">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"

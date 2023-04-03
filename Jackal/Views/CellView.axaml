@@ -13,6 +13,7 @@
 		<converters:ImageConverter x:Key="ImageConverter"/>
 	</UserControl.Resources>
 	<UserControl.Styles>
+		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
 		
 		<!-- Классы для отображения выбора ячейки. -->
 		<Style Selector="Border.Cell.Usual">
@@ -57,6 +58,14 @@
 							</TransformGroup>
 						</Image.RenderTransform>
 					</Image>
+					<Button ZIndex="9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+							Command="{Binding $parent[UserControl;1].DataContext.SelectCell}" CommandParameter="{Binding .}">
+						<Button.Template>
+							<ControlTemplate TargetType="Button">
+								<Grid Background="Transparent"/>
+							</ControlTemplate>
+						</Button.Template>
+					</Button>
 					<Border Classes="Gold Usual"
 							Classes.Treasure="{Binding Treasure}"
 							Classes.IsShip="{Binding IsShip}">
@@ -67,25 +76,18 @@
 									   IsVisible="{Binding ContainsGold}"/>
 						</WrapPanel>
 					</Border>
-					<ListBox ZIndex="10" Margin="2" Background="Transparent"
-							 Items="{Binding Pirates}" SelectedItem="{Binding $parent[UserControl;1].DataContext.SelectedPirate}">
-						<ListBox.ItemsPanel>
+					<ItemsControl ZIndex="10" Margin="2" Items="{Binding Pirates}">
+						<ItemsControl.ItemsPanel>
 							<ItemsPanelTemplate>
 								<UniformGrid Rows="2" Columns="3"/>
 							</ItemsPanelTemplate>
-						</ListBox.ItemsPanel>
-						<ListBox.Styles>
-							<Style Selector="ListBoxItem">
-								<Setter Property="Template">
-									<Setter.Value>
-										<ControlTemplate TargetType="ListBoxItem">
-											<v:PirateView/>
-										</ControlTemplate>
-									</Setter.Value>
-								</Setter>
-							</Style>
-						</ListBox.Styles>
-					</ListBox>
+						</ItemsControl.ItemsPanel>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button Classes="Pirate"/>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
 					<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 						<TextBlock Text="{Binding Row}" Margin="5,0"/>
 						<TextBlock Text="{Binding Column}" Margin="5,0"/>

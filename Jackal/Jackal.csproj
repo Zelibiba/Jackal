@@ -21,10 +21,6 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
-    <AvaloniaXaml Remove="Styles\**" />
-    <Compile Remove="Styles\**" />
-    <EmbeddedResource Remove="Styles\**" />
-    <None Remove="Styles\**" />
     <None Remove=".gitignore" />
   </ItemGroup>
 
