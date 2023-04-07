@@ -11,30 +11,46 @@ using ReactiveUI;
 
 namespace Jackal.Models
 {
+    public class CellArgs:EventArgs
+    {
+        public CellArgs(Cell cell) => Cell = cell;
+        public readonly Cell Cell;
+    }
+
     /// <summary>
     /// Класс игровой модели.
     /// </summary>
     public static class Game
     {
-        static bool _falshStart = true;
         public static readonly int MapSize = 13;
         public static ObservableMap Map { get; private set; }
 
         static IObservable<Pirate> s { get; set; }
 
-        public static Pirate? SelectedPirate { get; private set; }
+        static Pirate? _selectedPirate;
+        public static Pirate? SelectedPirate
+        {
+            get => _selectedPirate;
+            set
+            {
+                _selectedPirate = value;
+                if (_selectedPirate == null)
+                    DeselectInVM?.Invoke();
+            }
+        }
         public static bool IsPirateSelected => SelectedPirate != null;
+
+        public static event EventHandler<CellArgs>? StartPirateAnimation;
+        static void OnStartPirateAnimation(Cell cell)
+        {
+            StartPirateAnimation?.Invoke(null, new CellArgs(cell));
+        }
+
         public static ShipCell? SelectedShip { get;private set; }
         public static bool IsShipSelected => SelectedShip != null;
 
-        public static bool CreateMap()
+        public static void CreateMap()
         {
-            if(_falshStart)
-            {
-                _falshStart = false;
-                return false;
-            }
-
             Map = new ObservableMap(MapSize);
             for(int i = 0; i < MapSize; i++)
             {
@@ -69,9 +85,11 @@ namespace Jackal.Models
                 cell.SetSelectableCoords(Map);
 
             Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[0, 6].AddPirate(new Pirate(Team.White));
+            Map[0, 6].AddPirate(new Pirate(Team.White));
             Map[1, 6].SetGold(2);
 
-            return true;
+            Map[6, 6].AddPirate(new Pirate(Team.Red));
         }
 
         public static void PreSelectCell(Cell cell)
@@ -82,8 +100,11 @@ namespace Jackal.Models
         }
         static void SelectCell(Cell cell)
         {
-            if (IsPirateSelected)
-                MovePirate(cell);
+            if (IsPirateSelected && cell.CanBeSelected)
+            {
+                Deselect(false);
+                OnStartPirateAnimation(cell);
+            }
             else if (IsShipSelected)
                 MoveShip(cell);
             else if (cell is ShipCell)
@@ -97,9 +118,10 @@ namespace Jackal.Models
                 Map[coords].CanBeSelected = true;
         }
 
-        public static void PreSelectPirate(Pirate pirate)
+        public static bool PreSelectPirate(Pirate pirate)
         {
             SelectPirate(pirate);
+            return true;
         }
         static void SelectPirate(Pirate pirate)
         {
@@ -109,6 +131,8 @@ namespace Jackal.Models
                 Map[coords].CanBeSelected = true;
         }
 
+        public delegate void DeselectInViewModel();
+        public static DeselectInViewModel? DeselectInVM;
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
@@ -129,9 +153,8 @@ namespace Jackal.Models
             }
         }
 
-        static void MovePirate(Cell newCell)
+        public static void MovePirate(Cell newCell)
         {
-            Deselect(false);
             SelectedPirate.RemoveFromCell();
             newCell.AddPirate(SelectedPirate);
             SelectedPirate = null;

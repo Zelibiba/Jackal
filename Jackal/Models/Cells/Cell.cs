@@ -18,10 +18,10 @@ namespace Jackal.Models.Cells
     /// </summary>
     public class Cell : ReactiveObject
     {
-        public Cell(int row, int column, string image)
+        public Cell(int row, int column, string image, bool isStandable = true)
         {
-            this.row = row;
-            this.column = column;
+            Row = row;
+            Column= column;
             Image = image;
             Pirates = new ObservableCollection<Pirate>();
             SelectableCoords = new List<int[]>();
@@ -32,14 +32,16 @@ namespace Jackal.Models.Cells
             _treasure = this.WhenAnyValue(c => c.Gold, c => c.Galeon)
                             .Select(t => t.Item1 > 0 || t.Item2)
                             .ToProperty(this, c => c.Treasure);
+
+            this.isStandable = isStandable;
+
             IsOpened = true;
         }
 
-        protected int row;
-        protected int column;
+        protected readonly bool isStandable;
 
-        public int Row => row;
-        public int Column => column;
+        public int Row { get; protected set; }
+        public int Column { get; protected set; }
         [Reactive] public string Image { get; private set; }
         public virtual int Angle => 0;
 
@@ -88,8 +90,8 @@ namespace Jackal.Models.Cells
 
         public void SetCoordinates(int row,int column)
         {
-            this.row = row;
-            this.column = column;
+            Row = row;
+            Column = column;
         }
         public virtual void SetSelectableCoords(ObservableMap map)
         {
@@ -98,9 +100,9 @@ namespace Jackal.Models.Cells
             {
                 for (int j = -1; j < 2; j++)
                 {
-                    if ((i == 0 && j == 0) || map[row + i, column + j] is SeaCell)
+                    if ((i == 0 && j == 0) || map[Row + i, Column + j] is SeaCell)
                         continue;
-                    SelectableCoords.Add(new int[2] { row + i, column + j });
+                    SelectableCoords.Add(new int[2] { Row + i, Column + j });
                 }
             }
         }

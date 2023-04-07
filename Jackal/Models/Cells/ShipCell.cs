@@ -36,8 +36,8 @@ namespace Jackal.Models.Cells
         {
             SelectableCoords.Clear();
 
-            int r = row;
-            int c = column;
+            int r = Row;
+            int c = Column;
             switch (Orientation)
             {
                 case Orientation.Up:
@@ -52,7 +52,7 @@ namespace Jackal.Models.Cells
             SelectableCoords.Add(new int[] { r, c });
 
             int coord = -1;
-            int[] shipCoord = new int[2] { row, column };
+            int[] shipCoord = new int[2] { Row, Column };
             switch (Orientation)
             {
                 case Orientation.Up:

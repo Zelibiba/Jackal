@@ -6,31 +6,41 @@
              xmlns:vm="using:Jackal.ViewModels"
 			 xmlns:v="using:Jackal.Views"
 			 x:Class="Jackal.Views.GameView"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             Name="Game">
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
+	</UserControl.Styles>
 	<Grid ColumnDefinitions="auto,*">
 		<Viewbox Grid.Column="0">
-			<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<UniformGrid Rows="13" Columns="13"/>
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<v:CellView/>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+			<Panel Name="MapControl">
+				<Button Name="PirateAnimator" Classes="Pirate" DataContext="{Binding SelectedPirate}"
+						HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="20" ZIndex="11"
+						IsEnabled="False" IsVisible="False"/>
+				<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<UniformGrid Rows="13" Columns="13"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<v:CellView/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</Panel>
 		</Viewbox>
 		<Border Grid.Column="1" Background="AliceBlue">
-			<Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"
-					BorderBrush="Black" BorderThickness="2" Padding="5">
-				<WrapPanel Orientation="Vertical" IsEnabled="True">
-					<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold}"/>
-					<ToggleButton Content="G" Margin="0,5,0,0" IsChecked="{Binding SelectedPirate.Galeon}"/>
-				</WrapPanel>
-			</Border>
+			<WrapPanel Orientation="Vertical">
+				<Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"
+						BorderBrush="Black" BorderThickness="2" Padding="5">
+					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
+						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold}" IsEnabled="{Binding SelectedPirate.Cell.ContainsGold}"/>
+						<ToggleButton Content="G" IsChecked="{Binding SelectedPirate.Galeon}" IsEnabled="{Binding SelectedPirate.Cell.Galeon}" Margin="0,5,0,0"/>
+					</WrapPanel>
+				</Border>
+				<Button Name="Butt" Content="EER" Height="30" Width="50"/>
+			</WrapPanel>
 		</Border>
 	</Grid>
 </UserControl>
