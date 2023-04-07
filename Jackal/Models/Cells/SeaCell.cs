@@ -23,8 +23,8 @@ namespace Jackal.Models.Cells
                     if (i == 0 && j == 0)
                         continue;
 
-                    int newI = row + i;
-                    int newJ = column + j;
+                    int newI = Row + i;
+                    int newJ = Column + j;
                     if (newI < 0 || newJ < 0 || newI >= map.MapSize || newJ >= map.MapSize)
                         continue;
                     if (map[newI, newJ] is not SeaCell && map[newI, newJ] is not ShipCell)

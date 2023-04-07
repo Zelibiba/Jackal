@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls.Mixins;
+﻿using Avalonia.Animation;
+using Avalonia.Controls.Mixins;
 using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models;
@@ -22,6 +23,8 @@ namespace Jackal.ViewModels
     {
         public ViewModelActivator Activator { get; }
         IDisposable _disCells;
+        static bool _falshStart = true;
+
 
         public GameViewModel()
         {
@@ -31,22 +34,37 @@ namespace Jackal.ViewModels
                 _disCells.DisposeWith(disposable);
             });
 
-
-            if (!Game.CreateMap())
+            if (_falshStart)
+            {
+                _falshStart = false;
                 return;
+            }
+
+            Game.CreateMap();
+            Game.DeselectInVM = () => SelectedPirate = null;
+
             _disCells = Game.Map.ToObservableChangeSet()
                                 .Bind(out _cells)
                                 .Subscribe();
+            _isPirateSelected = this.WhenAnyValue(vm => vm.SelectedPirate)
+                                    .Select(pirate => pirate != null)
+                                    .ToProperty(this, vm => vm.IsPirateSelected);
         }
 
 
         public ReadOnlyObservableCollection<Cell> Cells => _cells;
         ReadOnlyObservableCollection<Cell> _cells;
 
-        [Reactive] public Pirate SelectedPirate { get; set; }
+        [Reactive] public Pirate? SelectedPirate { get; set; }
+        public bool IsPirateSelected => _isPirateSelected.Value;
+        readonly ObservableAsPropertyHelper<bool> _isPirateSelected;
 
         public void SelectCell(Cell cell) => Game.PreSelectCell(cell);
-        public void SelectPirate(Pirate pirate) => Game.PreSelectPirate(pirate);
+        public void SelectPirate(Pirate pirate)
+        {
+            if (Game.PreSelectPirate(pirate))
+                SelectedPirate = pirate;
+        }
         public void Deselect() => Game.Deselect();
     }
 }
