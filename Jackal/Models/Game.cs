@@ -25,30 +25,33 @@ namespace Jackal.Models
         public static readonly int MapSize = 13;
         public static ObservableMap Map { get; private set; }
 
-        static IObservable<Pirate> s { get; set; }
-
         static Pirate? _selectedPirate;
         public static Pirate? SelectedPirate
         {
             get => _selectedPirate;
             set
             {
-                _selectedPirate = value;
-                if (_selectedPirate == null)
-                    DeselectInVM?.Invoke();
+                if (_selectedPirate != value)
+                {
+                    if (_selectedPirate != null)
+                        _selectedPirate.IsSelected = false;
+                    _selectedPirate = value;
+                    if (_selectedPirate != null)
+                        _selectedPirate.IsSelected = true;
+                    else
+                        DeselectInVM?.Invoke();
+                }
             }
         }
         public static bool IsPirateSelected => SelectedPirate != null;
 
-        public static event EventHandler<CellArgs>? StartPirateAnimation;
-        static void OnStartPirateAnimation(Cell cell)
-        {
-            StartPirateAnimation?.Invoke(null, new CellArgs(cell));
-        }
-
         public static ShipCell? SelectedShip { get;private set; }
         public static bool IsShipSelected => SelectedShip != null;
 
+        public static void Initialize(DeselectInViewModel deselect)
+        {
+            DeselectInVM = deselect;
+        }
         public static void CreateMap()
         {
             Map = new ObservableMap(MapSize);
@@ -81,6 +84,8 @@ namespace Jackal.Models
             }
 
             Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
+            Map[1, 7] = new HorseCell(1, 7);
+            Map[3, 8] = new LakeCell(3, 8, OnStartPirateAnimation);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
@@ -105,10 +110,10 @@ namespace Jackal.Models
                 Deselect(false);
                 OnStartPirateAnimation(cell);
             }
-            else if (IsShipSelected)
-                MoveShip(cell);
             else if (cell is ShipCell)
                 SelectShip(cell);
+            else if (IsShipSelected)
+                MoveShip(cell);
         }
         static void SelectShip(Cell cell)
         {
@@ -123,16 +128,17 @@ namespace Jackal.Models
             SelectPirate(pirate);
             return true;
         }
-        static void SelectPirate(Pirate pirate)
+        static void SelectPirate(Pirate pirate, bool deselect = true)
         {
-            Deselect();
+            Deselect(deselect);
             SelectedPirate = pirate;
+            pirate.IsSelected = true;
             foreach (int[] coords in pirate.Cell.SelectableCoords)
                 Map[coords].CanBeSelected = true;
         }
 
         public delegate void DeselectInViewModel();
-        public static DeselectInViewModel? DeselectInVM;
+        static DeselectInViewModel? DeselectInVM;
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
@@ -153,11 +159,24 @@ namespace Jackal.Models
             }
         }
 
-        public static void MovePirate(Cell newCell)
+
+        public static event EventHandler<CellArgs>? StartPirateAnimation;
+        static void OnStartPirateAnimation(Cell cell) => StartPirateAnimation?.Invoke(null, new CellArgs(cell));
+        static void OnStartPirateAnimation(int[] coords) => OnStartPirateAnimation(Map[coords]);
+
+        public static void ContinueMovePirate(Cell cell)
+        {
+            if (MovePirate(cell))
+                SelectedPirate = null;
+            else
+                SelectPirate(SelectedPirate, false);
+        }
+        static bool MovePirate(Cell newCell)
         {
             SelectedPirate.RemoveFromCell();
             newCell.AddPirate(SelectedPirate);
-            SelectedPirate = null;
+
+            return newCell.IsStandable;
         }
         static void MoveShip(Cell newCell)
         {

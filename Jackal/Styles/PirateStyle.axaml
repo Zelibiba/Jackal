@@ -26,6 +26,7 @@
 		</Style.Resources>
 		<Setter Property="Command" Value="{Binding $parent[UserControl;1].DataContext.SelectPirate}"/>
 		<Setter Property="CommandParameter" Value="{Binding .}"/>
+		<Setter Property="IsVisible" Value="{Binding IsVisible}"/>
 		<Setter Property="HorizontalAlignment" Value="Center"/>
 		<Setter Property="VerticalAlignment" Value="Center"/>
 		<Setter Property="Template">
@@ -44,6 +45,18 @@
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
+	</Style>
+	<Style Selector="Button.IsSelected">
+		<Style.Animations>
+			<Animation Duration="0:0:0.3" IterationCount="INFINITE" PlaybackDirection ="Alternate">
+				<KeyFrame Cue="0%">
+					<Setter Property="Opacity" Value="0.6"/>
+				</KeyFrame>
+				<KeyFrame Cue="100%">
+					<Setter Property="Opacity" Value="1"/>
+				</KeyFrame>
+			</Animation>
+		</Style.Animations>
 	</Style>
 
 </Styles>

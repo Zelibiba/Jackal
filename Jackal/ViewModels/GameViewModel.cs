@@ -41,7 +41,7 @@ namespace Jackal.ViewModels
             }
 
             Game.CreateMap();
-            Game.DeselectInVM = () => SelectedPirate = null;
+            Game.Initialize(() => SelectedPirate = null);
 
             _disCells = Game.Map.ToObservableChangeSet()
                                 .Bind(out _cells)

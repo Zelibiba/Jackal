@@ -58,6 +58,7 @@ namespace Jackal.Views
         {
             IsEnabled = false;
             PirateAnimator.IsVisible = true;
+            Game.SelectedPirate.IsVisible = false;
             PirateAnimator.Width = ÑellSize / 3;
 
             Cell[] cells = new Cell[2]
@@ -82,8 +83,9 @@ namespace Jackal.Views
             _pirateAnimation.Children[1].Setters[0].Value = new Thickness(x[1], y[1], 0, 0);
             await _pirateAnimation.RunAsync(PirateAnimator, null);
 
-            Game.MovePirate(e.Cell);
             PirateAnimator.IsVisible = false;
+            Game.SelectedPirate.IsVisible = true;
+            Game.ContinueMovePirate(e.Cell);
             IsEnabled = true;
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using Jackal.Models.Pirates;
+using Microsoft.CodeAnalysis;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -33,18 +34,17 @@ namespace Jackal.Models.Cells
                             .Select(t => t.Item1 > 0 || t.Item2)
                             .ToProperty(this, c => c.Treasure);
 
-            this.isStandable = isStandable;
-
             IsOpened = true;
+            this.IsStandable = isStandable;
         }
-
-        protected readonly bool isStandable;
 
         public int Row { get; protected set; }
         public int Column { get; protected set; }
         [Reactive] public string Image { get; private set; }
         public virtual int Angle => 0;
 
+
+        public readonly bool IsStandable;
         [Reactive] public bool IsOpened { get; set; }
         [Reactive] public bool CanBeSelected { get; set; }
 
@@ -65,7 +65,7 @@ namespace Jackal.Models.Cells
 
 
 
-        public void AddPirate(Pirate pirate)
+        public virtual void AddPirate(Pirate pirate)
         {
             if(!IsOpened)
                 IsOpened = true;
