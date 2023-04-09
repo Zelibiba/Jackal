@@ -42,12 +42,13 @@ namespace Jackal.Models
         static Pirate? _selectedPirate;
         public static bool IsPirateSelected => SelectedPirate != null;
 
-        public static ShipCell? SelectedShip { get;private set; }
+        public static ShipCell? SelectedShip { get; private set; }
         public static bool IsShipSelected => SelectedShip != null;
 
-        public static void Set_DeselectInVM(Action deselect) => DeselectInVM = deselect;
-        public static void Set_StartPirateAnimation(Func<Cell, Task> function) => StartPirateAnimation = function;
-        public static void Set_StartCellAnimation(Func<Cell,Cell,Task> function) => StartCellAnimation = function;
+        public static bool PirateInMotion { get; private set; }
+
+        public static int lostGold;
+
         public static void CreateMap()
         {
             Map = new ObservableMap(MapSize);
@@ -81,6 +82,7 @@ namespace Jackal.Models
 
             Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
             Map[1, 7] = new HorseCell(1, 7);
+            Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
@@ -90,15 +92,17 @@ namespace Jackal.Models
             Map[0, 6].AddPirate(new Pirate(Team.White));
             Map[0, 6].AddPirate(new Pirate(Team.White));
             Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[1, 6].SetGold(2);
+            Map[1, 6].Gold = 2;
 
             Map[6, 6].AddPirate(new Pirate(Team.Red));
         }
 
+        static void NextPlayer() { }
+
         public static void PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
-                cell is ShipCell ship && ship.CanMove)
+                cell is ShipCell ship && ship.CanMove && !PirateInMotion)
                 SelectCell(cell);
         }
         static void SelectCell(Cell cell)
@@ -108,7 +112,7 @@ namespace Jackal.Models
                 if (IsPirateSelected && cell.CanBeSelected)
                 {
                     Deselect(false);
-                    OnStartPirateAnimation(cell);
+                    StartMovePirate(cell);
                 }
                 else if (cell is ShipCell)
                     SelectShip(cell);
@@ -126,16 +130,28 @@ namespace Jackal.Models
 
         public static bool PreSelectPirate(Pirate pirate)
         {
-            SelectPirate(pirate);
-            return true;
+            if (!PirateInMotion)
+            {
+                SelectPirate(pirate);
+                return true;
+            }
+            return false;
         }
         static void SelectPirate(Pirate pirate, bool deselect = true)
         {
             Deselect(deselect);
             SelectedPirate = pirate;
             foreach (int[] coords in pirate.Cell.SelectableCoords)
-                Map[coords].CanBeSelected = true;
+            {
+                Cell cell = Map[coords];
+
+                if (SelectedPirate.Treasure)
+                    cell.CanBeSelected = cell.IsGoldFriendly();
+                else
+                    cell.CanBeSelected = true;
+            }
         }
+        public static void ReselctPirate() => SelectPirate(SelectedPirate, false);
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
@@ -155,28 +171,52 @@ namespace Jackal.Models
                     SelectedShip = null;
             }
         }
-        static Action? DeselectInVM;
+        public static Action? DeselectInVM;
 
 
-        static Func<Cell,Task>? StartPirateAnimation;
+        public static Func<Cell,Task>? StartPirateAnimation;
         static void OnStartPirateAnimation(Cell cell)
         {
             if (StartPirateAnimation != null)
+            {
+                if (!cell.IsPreOpened)
+                    cell.IsPreOpened = true;
                 Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
-            SelectedPirate.IsVisible = true;
+                SelectedPirate.IsVisible = true;
+            }
+        }
+        static void StartMovePirate(Cell cell)
+        {
+            if (!PirateInMotion)
+            {
+                PirateInMotion = true;
+                SelectedPirate.Set_StartCell();
+            }
+
+            OnStartPirateAnimation(cell);
 
             if (MovePirate(cell))
+            {
                 SelectedPirate = null;
+                PirateInMotion = false;
+                NextPlayer();
+            }
             else
                 SelectPirate(SelectedPirate, false);
         }
         static bool ContinueMovePirate(int[] coords)
         {
             Cell cell = Map[coords];
-            if (StartPirateAnimation != null)
-                Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
-            SelectedPirate.IsVisible = true;
+            
+            if(!cell.IsGoldFriendly())
+            {
+                if (SelectedPirate.Gold)
+                    SelectedPirate.Gold = false;
+                if (SelectedPirate.Galeon)
+                    SelectedPirate.Galeon = false;
+            }
 
+            OnStartPirateAnimation(cell);
             return MovePirate(cell);
         }
         static bool MovePirate(Cell newCell)
@@ -186,7 +226,8 @@ namespace Jackal.Models
         }
 
 
-        static Func<Cell, Cell, Task>? StartCellAnimation;
+
+        public static Func<Cell, Cell, Task>? StartCellAnimation;
         static void MoveShip(Cell newCell)
         {
             Deselect(false);
@@ -215,6 +256,7 @@ namespace Jackal.Models
                 Dispatcher.UIThread.InvokeAsync(() => StartCellAnimation(SelectedShip, newCell)).Wait();
 
             SelectedShip = null;
+            NextPlayer();
         }
 
         static void SwapCells(Cell cell1,Cell cell2)

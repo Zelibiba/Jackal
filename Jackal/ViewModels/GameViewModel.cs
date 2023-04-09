@@ -41,7 +41,7 @@ namespace Jackal.ViewModels
             }
 
             Game.CreateMap();
-            Game.Set_DeselectInVM(() => SelectedPirate = Pirate.Empty);
+            Game.DeselectInVM = () => SelectedPirate = Pirate.Empty;
             SelectedPirate = Pirate.Empty;
 
             _disCells = Game.Map.ToObservableChangeSet()
@@ -66,6 +66,12 @@ namespace Jackal.ViewModels
             if (Game.PreSelectPirate(pirate))
                 SelectedPirate = pirate;
         }
-        public void Deselect() => Game.Deselect();
+        public void Deselect()
+        {
+            if (!Game.PirateInMotion)
+                Game.Deselect();
+        }
+
+        public void GrabTreasure(string param) => Game.ReselctPirate();
     }
 }

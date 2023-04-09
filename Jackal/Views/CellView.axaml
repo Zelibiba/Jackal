@@ -49,9 +49,9 @@
 			<Border Classes="Cell Usual"
 					Classes.CanBeSelected="{Binding CanBeSelected}"
 					Classes.IsSelected="{Binding IsSelected}">
-				<Panel IsVisible="{Binding IsVisible}">
+				<Panel IsVisible="{Binding IsVisible}" Background="White">
 					<!--<Image Source="/Assets/Images/Field.png"/>-->
-					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsOpened}">
+					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsPreOpened}">
 						<Image.RenderTransform>
 							<TransformGroup>
 								<RotateTransform Angle="{Binding Angle}"/>

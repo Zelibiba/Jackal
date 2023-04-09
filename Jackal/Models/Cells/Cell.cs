@@ -35,15 +35,16 @@ namespace Jackal.Models.Cells
                             .ToProperty(this, c => c.Treasure);
 
             IsVisible = true;
-            IsOpened = true;
             IsStandable = isStandable;
         }
         public static Cell Copy(Cell cell)
         {
-            Cell _cell = new Cell(cell.Row, cell.Column, cell.Image);
-            _cell.Pirates = cell.Pirates;
-            _cell.IsOpened = cell.IsOpened;
-            _cell.IsVisible= cell.IsVisible;
+            Cell _cell = new(cell.Row, cell.Column, cell.Image)
+            {
+                Pirates = cell.Pirates,
+                IsOpened = cell.IsOpened,
+                IsVisible = cell.IsVisible
+            };
 
             return _cell;
         }
@@ -53,19 +54,28 @@ namespace Jackal.Models.Cells
         [Reactive] public string Image { get; private set; }
         public virtual int Angle => 0;
 
-
-        [Reactive] public bool IsVisible { get; set; }
         public readonly bool IsStandable;
-        [Reactive] public bool IsOpened { get; set; }
+        [Reactive] public bool IsVisible { get; set; }
+        [Reactive] public bool IsPreOpened { get; set; }
+        public bool IsOpened
+        {
+            get => _isOpened;
+            set
+            {
+                _isOpened = value;
+                IsPreOpened = value;
+            }
+        }
+        bool _isOpened;
         [Reactive] public bool CanBeSelected { get; set; }
 
-        public void SetGold(int g) => Gold = g;
-        [Reactive] public int Gold { get; protected set; }
-        [Reactive] public bool Galeon { get; protected set; }
+        [Reactive] public virtual int Gold { get; set; }
+        [Reactive] public virtual bool Galeon { get; set; }
         public bool ContainsGold => _containsGold.Value;
         readonly ObservableAsPropertyHelper<bool> _containsGold;
         public bool Treasure => _treasure.Value;
         readonly ObservableAsPropertyHelper<bool> _treasure;
+        public bool IsGoldFriendly() => IsOpened;
 
         public ObservableCollection<Pirate> Pirates { get; protected set; }
         public List<int[]> SelectableCoords { get; }
@@ -75,7 +85,15 @@ namespace Jackal.Models.Cells
         public virtual Team ShipTeam => Team.None;
 
 
+        public void RemovePirate(Pirate pirate)
+        {
+            Pirates.Remove(pirate);
 
+            if (pirate.Gold)
+                Gold--;
+            else if (pirate.Galeon)
+                Galeon = false;
+        }
         public virtual bool AddPirate(Pirate pirate)
         {
             if(!IsOpened)
@@ -91,17 +109,9 @@ namespace Jackal.Models.Cells
 
             return IsStandable;
         }
-        public void RemovePirate(Pirate pirate)
-        {
-            Pirates.Remove(pirate);
 
-            if (pirate.Gold)
-                Gold--;
-            else if (pirate.Galeon)
-                Galeon = false;
-        }
 
-        public void SetCoordinates(int row,int column)
+        public void SetCoordinates(int row, int column)
         {
             Row = row;
             Column = column;

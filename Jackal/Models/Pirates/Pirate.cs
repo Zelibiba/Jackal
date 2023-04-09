@@ -18,6 +18,28 @@ namespace Jackal.Models.Pirates
             Team = team;
             IsVisible = true;
 
+            this.WhenAnyValue(p => p.Gold)
+                .Skip(1)
+                .Subscribe(x =>
+                {
+                    if (!Cell.IsStandable)
+                    {
+                        Cell.Gold--;
+                        StartCell.Gold++;
+                    }
+                });
+            this.WhenAnyValue(p => p.Galeon)
+                .Skip(1)
+                .Subscribe(x =>
+                {
+                    if (!Cell.IsStandable)
+                    {
+                        Cell.Galeon = false;
+                        StartCell.Galeon = true;
+                    }
+                });
+
+
             _atHorse = this.WhenAnyValue(p => p.Cell)
                            .Skip(1)
                            .Select(cell => cell is HorseCell || (cell is LakeCell && AtHorse))
@@ -27,14 +49,17 @@ namespace Jackal.Models.Pirates
         [Reactive] public bool IsSelected { get; set; }
         [Reactive] public bool IsVisible { get; set; }
 
+        
         [Reactive] public Cell Cell { get; set; }
         public int Row => Cell.Row;
         public int Column => Cell.Column;
+        public Cell StartCell { get; protected set; }
+        public void Set_StartCell() => StartCell = Cell;
 
         [Reactive] public Team Team { get; set; }
         public virtual bool CanDriveShip => true;
         public bool AtHorse => _atHorse.Value;
-        ObservableAsPropertyHelper<bool> _atHorse;
+        readonly ObservableAsPropertyHelper<bool> _atHorse;
 
         [Reactive] public bool Gold { get; set; }
         [Reactive] public bool Galeon { get; set; }
