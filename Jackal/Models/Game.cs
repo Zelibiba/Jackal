@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using DynamicData.Binding;
 using Jackal.Models.Cells;
 using Jackal.Models.Pirates;
@@ -24,8 +25,7 @@ namespace Jackal.Models
     {
         public static readonly int MapSize = 13;
         public static ObservableMap Map { get; private set; }
-
-        static Pirate? _selectedPirate;
+  
         public static Pirate? SelectedPirate
         {
             get => _selectedPirate;
@@ -35,7 +35,9 @@ namespace Jackal.Models
                 {
                     if (_selectedPirate != null)
                         _selectedPirate.IsSelected = false;
+
                     _selectedPirate = value;
+
                     if (_selectedPirate != null)
                         _selectedPirate.IsSelected = true;
                     else
@@ -43,15 +45,14 @@ namespace Jackal.Models
                 }
             }
         }
+        static Pirate? _selectedPirate;
         public static bool IsPirateSelected => SelectedPirate != null;
 
         public static ShipCell? SelectedShip { get;private set; }
         public static bool IsShipSelected => SelectedShip != null;
 
-        public static void Initialize(DeselectInViewModel deselect)
-        {
-            DeselectInVM = deselect;
-        }
+        public static void Set_DeselectInVM(Action deselect) => DeselectInVM = deselect;
+        public static void Set_StartPirateAnimation(Func<Cell, Task> function) => StartPirateAnimation = function;
         public static void CreateMap()
         {
             Map = new ObservableMap(MapSize);
@@ -86,6 +87,8 @@ namespace Jackal.Models
             Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
             Map[1, 7] = new HorseCell(1, 7);
             Map[3, 8] = new LakeCell(3, 8, OnStartPirateAnimation);
+            Map[4, 8] = new LakeCell(4, 8, OnStartPirateAnimation);
+            Map[5, 8] = new LakeCell(5, 8, OnStartPirateAnimation);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
@@ -100,20 +103,23 @@ namespace Jackal.Models
         public static void PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
-               cell is ShipCell ship && ship.CanMove)
+                cell is ShipCell ship && ship.CanMove)
                 SelectCell(cell);
         }
         static void SelectCell(Cell cell)
         {
-            if (IsPirateSelected && cell.CanBeSelected)
+            Task.Run(() =>
             {
-                Deselect(false);
-                OnStartPirateAnimation(cell);
-            }
-            else if (cell is ShipCell)
-                SelectShip(cell);
-            else if (IsShipSelected)
-                MoveShip(cell);
+                if (IsPirateSelected && cell.CanBeSelected)
+                {
+                    Deselect(false);
+                    OnStartPirateAnimation(cell);
+                }
+                else if (cell is ShipCell)
+                    SelectShip(cell);
+                else if (IsShipSelected)
+                    MoveShip(cell);
+            });
         }
         static void SelectShip(Cell cell)
         {
@@ -132,13 +138,11 @@ namespace Jackal.Models
         {
             Deselect(deselect);
             SelectedPirate = pirate;
-            pirate.IsSelected = true;
             foreach (int[] coords in pirate.Cell.SelectableCoords)
                 Map[coords].CanBeSelected = true;
         }
 
-        public delegate void DeselectInViewModel();
-        static DeselectInViewModel? DeselectInVM;
+        static Action? DeselectInVM;
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
@@ -160,23 +164,29 @@ namespace Jackal.Models
         }
 
 
-        public static event EventHandler<CellArgs>? StartPirateAnimation;
-        static void OnStartPirateAnimation(Cell cell) => StartPirateAnimation?.Invoke(null, new CellArgs(cell));
-        static void OnStartPirateAnimation(int[] coords) => OnStartPirateAnimation(Map[coords]);
-
-        public static void ContinueMovePirate(Cell cell)
+        static Func<Cell,Task> StartPirateAnimation;
+        static void OnStartPirateAnimation(Cell cell)
         {
+            Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
+            SelectedPirate.IsVisible = true;
+
             if (MovePirate(cell))
                 SelectedPirate = null;
             else
                 SelectPirate(SelectedPirate, false);
         }
+        static bool OnStartPirateAnimation(int[] coords)
+        {
+            Cell cell = Map[coords];
+            Dispatcher.UIThread.InvokeAsync(() =>  StartPirateAnimation(cell)).Wait();
+            SelectedPirate.IsVisible = true;
+
+            return MovePirate(cell);
+        }
         static bool MovePirate(Cell newCell)
         {
             SelectedPirate.RemoveFromCell();
-            newCell.AddPirate(SelectedPirate);
-
-            return newCell.IsStandable;
+            return newCell.AddPirate(SelectedPirate);
         }
         static void MoveShip(Cell newCell)
         {

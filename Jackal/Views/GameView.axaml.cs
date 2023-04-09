@@ -44,27 +44,22 @@ namespace Jackal.Views
             _pirateAnimation.Children[0].Setters.Add(new Setter() { Property = MarginProperty });
             _pirateAnimation.Children.Add(new KeyFrame { KeyTime = _pirateAnimationDuration });
             _pirateAnimation.Children[1].Setters.Add(new Setter() { Property = MarginProperty });
-            Game.StartPirateAnimation += StartPirateAnimation;
+            Game.Set_StartPirateAnimation(StartPirateAnimation);
         }
         
         double ÑellSize => MapControl.Bounds.Height / Game.MapSize;
 
         readonly Animation _pirateAnimation;
         readonly TimeSpan _pirateAnimationDuration = TimeSpan.FromSeconds(0.3);
-
-
-
-        private async void StartPirateAnimation(object? sender, CellArgs e)
+        async Task StartPirateAnimation(Cell cell)
         {
             IsEnabled = false;
-            PirateAnimator.IsVisible = true;
-            Game.SelectedPirate.IsVisible = false;
             PirateAnimator.Width = ÑellSize / 3;
 
             Cell[] cells = new Cell[2]
             {
                 Game.SelectedPirate.Cell,
-                e.Cell
+                cell
             };
             int[] pirateNumbers = new int[2]
             {
@@ -81,12 +76,17 @@ namespace Jackal.Views
 
             _pirateAnimation.Children[0].Setters[0].Value = new Thickness(x[0], y[0], 0, 0);
             _pirateAnimation.Children[1].Setters[0].Value = new Thickness(x[1], y[1], 0, 0);
-            await _pirateAnimation.RunAsync(PirateAnimator, null);
 
-            PirateAnimator.IsVisible = false;
-            Game.SelectedPirate.IsVisible = true;
-            Game.ContinueMovePirate(e.Cell);
+            PirateAnimator.Margin = new Thickness(x[0], y[0], 0, 0);
+            Game.SelectedPirate.IsVisible = false;
+            await _pirateAnimation.RunAsync(PirateAnimator, null);
             IsEnabled = true;
+        }
+
+        readonly Animation _cellAnimation;
+        async void StartCellAnimation(object? sender, CellArgs e)
+        {
+
         }
     }
 }

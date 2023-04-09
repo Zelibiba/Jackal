@@ -41,13 +41,14 @@ namespace Jackal.ViewModels
             }
 
             Game.CreateMap();
-            Game.Initialize(() => SelectedPirate = null);
+            Game.Set_DeselectInVM(() => SelectedPirate = Pirate.Empty);
+            SelectedPirate = Pirate.Empty;
 
             _disCells = Game.Map.ToObservableChangeSet()
                                 .Bind(out _cells)
                                 .Subscribe();
             _isPirateSelected = this.WhenAnyValue(vm => vm.SelectedPirate)
-                                    .Select(pirate => pirate != null)
+                                    .Select(pirate => pirate != Pirate.Empty)
                                     .ToProperty(this, vm => vm.IsPirateSelected);
         }
 
@@ -55,7 +56,7 @@ namespace Jackal.ViewModels
         public ReadOnlyObservableCollection<Cell> Cells => _cells;
         ReadOnlyObservableCollection<Cell> _cells;
 
-        [Reactive] public Pirate? SelectedPirate { get; set; }
+        [Reactive] public Pirate SelectedPirate { get; set; }
         public bool IsPirateSelected => _isPirateSelected.Value;
         readonly ObservableAsPropertyHelper<bool> _isPirateSelected;
 

@@ -15,8 +15,16 @@
 			<Panel Name="MapControl">
 				<Button Name="PirateAnimator" Classes="Pirate" DataContext="{Binding SelectedPirate}"
 						HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="20" ZIndex="11"
-						IsEnabled="False" IsVisible="False"/>
-				<ItemsControl Height="832" Width="832" Items="{Binding Cells}">
+						IsEnabled="False" IsVisible="{Binding !IsVisible}">
+				</Button>
+				
+				<v:CellView Name="CellAnimator1"
+							HorizontalAlignment="Left" VerticalAlignment="Top"
+							IsEnabled="False" IsVisible="True"/>
+				<v:CellView Name="CellAnimator2"
+							HorizontalAlignment="Left" VerticalAlignment="Top"
+							IsEnabled="False" IsVisible="True"/>
+				<ItemsControl Height="832" Width="832" Items="{Binding Cells}" Background="#FF00A5FF">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
 							<UniformGrid Rows="13" Columns="13"/>

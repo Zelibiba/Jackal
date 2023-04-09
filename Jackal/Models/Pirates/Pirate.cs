@@ -12,6 +12,7 @@ namespace Jackal.Models.Pirates
 {
     public class Pirate : ReactiveObject
     {
+        public static readonly Pirate Empty = new(Team.None) { IsVisible = true };
         public Pirate(Team team)
         {
             Team = team;

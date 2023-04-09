@@ -19,7 +19,7 @@
 	<Style Selector="TextBlock.IsInMaze">
 		<Setter Property="IsVisible" Value="True"/>
 	</Style>
-	
+
 	<Style Selector="Button.Pirate">
 		<Style.Resources>
 			<converters:TeamConverter x:Key="TeamConverter"/>
