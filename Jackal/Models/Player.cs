@@ -23,8 +23,11 @@ namespace Jackal.Models
 
         public readonly int Index;
         [Reactive] public string Name { get; set; }
-        [Reactive] public int IntAlliance { get; set; }
+
         [Reactive] public Team Team { get; set; }
+        [Reactive] public int IntAlliance { get; set; }
+        public Team Alliance { get;private set; }
+
         [Reactive] public bool IsReady { get; set; }
 
         public void Copy(Player player)

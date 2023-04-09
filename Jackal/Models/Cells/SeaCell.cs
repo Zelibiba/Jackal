@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jackal.Models.Pirates;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,25 @@ namespace Jackal.Models.Cells
         public SeaCell(int row, int column) : base(row, column, "Sea")
         {
             IsOpened = true;
+        }
+
+        public override int Gold
+        {
+            get => 0;
+            set => Game.lostGold++;
+        }
+        public override bool Galeon
+        {
+            get => false;
+            set => Game.lostGold += 3;
+        }
+
+        public override bool AddPirate(Pirate pirate)
+        {
+            bool result = base.AddPirate(pirate);
+            pirate.Gold = false;
+            pirate.Galeon = false;
+            return result;
         }
 
         public override void SetSelectableCoords(ObservableMap map)

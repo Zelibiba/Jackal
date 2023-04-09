@@ -45,7 +45,7 @@ namespace Jackal.Views
             _pirateAnimation.Children[0].Setters.Add(new Setter() { Property = MarginProperty });
             _pirateAnimation.Children.Add(new KeyFrame { KeyTime = _pirateAnimation.Duration });
             _pirateAnimation.Children[1].Setters.Add(new Setter() { Property = MarginProperty });
-            Game.Set_StartPirateAnimation(StartPirateAnimation);
+            Game.StartPirateAnimation = StartPirateAnimation;
             #endregion
 
             #region »нициализаци€ анимации перемещени€ клеток
@@ -63,7 +63,7 @@ namespace Jackal.Views
                 _cellAnimation[i].Children.Add(new KeyFrame { KeyTime = _cellAnimation[i].Duration });
                 _cellAnimation[i].Children[1].Setters.Add(new Setter() { Property = MarginProperty });
             }
-            Game.Set_StartCellAnimation(StartCellAnimation); 
+            Game.StartCellAnimation = StartCellAnimation;
             #endregion
         }
         
@@ -138,7 +138,7 @@ namespace Jackal.Views
             for (int i = 0; i < 2; i++)
             {
                 cellViews[i].Margin = thickness[1 - i];
-                cellViews[i].IsVisible = true;
+                cellViews[i].IsVisible = cells[i] is not SeaCell;
                 cells[i].IsVisible = false;
                 tasks[i] = _cellAnimation[i].RunAsync(cellViews[i], null);
             }
