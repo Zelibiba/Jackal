@@ -49,7 +49,7 @@
 			<Border Classes="Cell Usual"
 					Classes.CanBeSelected="{Binding CanBeSelected}"
 					Classes.IsSelected="{Binding IsSelected}">
-				<Panel>
+				<Panel IsVisible="{Binding IsVisible}">
 					<!--<Image Source="/Assets/Images/Field.png"/>-->
 					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsOpened}">
 						<Image.RenderTransform>

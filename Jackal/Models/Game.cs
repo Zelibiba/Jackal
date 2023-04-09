@@ -12,12 +12,6 @@ using ReactiveUI;
 
 namespace Jackal.Models
 {
-    public class CellArgs:EventArgs
-    {
-        public CellArgs(Cell cell) => Cell = cell;
-        public readonly Cell Cell;
-    }
-
     /// <summary>
     /// Класс игровой модели.
     /// </summary>
@@ -53,6 +47,7 @@ namespace Jackal.Models
 
         public static void Set_DeselectInVM(Action deselect) => DeselectInVM = deselect;
         public static void Set_StartPirateAnimation(Func<Cell, Task> function) => StartPirateAnimation = function;
+        public static void Set_StartCellAnimation(Func<Cell,Cell,Task> function) => StartCellAnimation = function;
         public static void CreateMap()
         {
             Map = new ObservableMap(MapSize);
@@ -86,9 +81,9 @@ namespace Jackal.Models
 
             Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
             Map[1, 7] = new HorseCell(1, 7);
-            Map[3, 8] = new LakeCell(3, 8, OnStartPirateAnimation);
-            Map[4, 8] = new LakeCell(4, 8, OnStartPirateAnimation);
-            Map[5, 8] = new LakeCell(5, 8, OnStartPirateAnimation);
+            Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
+            Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
+            Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
@@ -141,8 +136,6 @@ namespace Jackal.Models
             foreach (int[] coords in pirate.Cell.SelectableCoords)
                 Map[coords].CanBeSelected = true;
         }
-
-        static Action? DeselectInVM;
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
@@ -162,12 +155,14 @@ namespace Jackal.Models
                     SelectedShip = null;
             }
         }
+        static Action? DeselectInVM;
 
 
-        static Func<Cell,Task> StartPirateAnimation;
+        static Func<Cell,Task>? StartPirateAnimation;
         static void OnStartPirateAnimation(Cell cell)
         {
-            Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
+            if (StartPirateAnimation != null)
+                Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
             SelectedPirate.IsVisible = true;
 
             if (MovePirate(cell))
@@ -175,10 +170,11 @@ namespace Jackal.Models
             else
                 SelectPirate(SelectedPirate, false);
         }
-        static bool OnStartPirateAnimation(int[] coords)
+        static bool ContinueMovePirate(int[] coords)
         {
             Cell cell = Map[coords];
-            Dispatcher.UIThread.InvokeAsync(() =>  StartPirateAnimation(cell)).Wait();
+            if (StartPirateAnimation != null)
+                Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
             SelectedPirate.IsVisible = true;
 
             return MovePirate(cell);
@@ -188,12 +184,15 @@ namespace Jackal.Models
             SelectedPirate.RemoveFromCell();
             return newCell.AddPirate(SelectedPirate);
         }
+
+
+        static Func<Cell, Cell, Task>? StartCellAnimation;
         static void MoveShip(Cell newCell)
         {
             Deselect(false);
             SwapCells(SelectedShip, newCell);
 
-            if(SelectedShip.Orientation==Orientation.Up||SelectedShip.Orientation==Orientation.Down)
+            if (SelectedShip.Orientation == Orientation.Up || SelectedShip.Orientation == Orientation.Down)
             {
                 int row = SelectedShip.Row;
                 row += (SelectedShip.Orientation == Orientation.Up) ? -1 : +1;
@@ -211,6 +210,9 @@ namespace Jackal.Models
                 for (int i = minRow; i <= maxRow; i++)
                     Map[i, column].SetSelectableCoords(Map);
             }
+
+            if (StartCellAnimation != null)
+                Dispatcher.UIThread.InvokeAsync(() => StartCellAnimation(SelectedShip, newCell)).Wait();
 
             SelectedShip = null;
         }

@@ -34,23 +34,43 @@ namespace Jackal.Views
                     ViewModel.Deselect();
             };
 
+            #region Инициализация анимации перемещения пирата
             _pirateAnimation = new Animation
             {
-                Duration = _pirateAnimationDuration,
+                Duration = TimeSpan.FromSeconds(0.3),
                 IterationCount = new IterationCount(1),
                 FillMode = FillMode.None,
             };
             _pirateAnimation.Children.Add(new KeyFrame { KeyTime = TimeSpan.FromSeconds(0) });
             _pirateAnimation.Children[0].Setters.Add(new Setter() { Property = MarginProperty });
-            _pirateAnimation.Children.Add(new KeyFrame { KeyTime = _pirateAnimationDuration });
+            _pirateAnimation.Children.Add(new KeyFrame { KeyTime = _pirateAnimation.Duration });
             _pirateAnimation.Children[1].Setters.Add(new Setter() { Property = MarginProperty });
             Game.Set_StartPirateAnimation(StartPirateAnimation);
+            #endregion
+
+            #region Инициализация анимации перемещения клеток
+            for (int i = 0; i < 2; i++)
+            {
+                _cellAnimation[i] = new Animation
+                {
+                    Duration = TimeSpan.FromSeconds(0.5),
+                    IterationCount = new IterationCount(1),
+                    FillMode = FillMode.None,
+                    PlaybackDirection = PlaybackDirection.Reverse
+                };
+                _cellAnimation[i].Children.Add(new KeyFrame { KeyTime = TimeSpan.FromSeconds(0) });
+                _cellAnimation[i].Children[0].Setters.Add(new Setter() { Property = MarginProperty });
+                _cellAnimation[i].Children.Add(new KeyFrame { KeyTime = _cellAnimation[i].Duration });
+                _cellAnimation[i].Children[1].Setters.Add(new Setter() { Property = MarginProperty });
+            }
+            Game.Set_StartCellAnimation(StartCellAnimation); 
+            #endregion
         }
         
         double СellSize => MapControl.Bounds.Height / Game.MapSize;
 
+
         readonly Animation _pirateAnimation;
-        readonly TimeSpan _pirateAnimationDuration = TimeSpan.FromSeconds(0.3);
         async Task StartPirateAnimation(Cell cell)
         {
             IsEnabled = false;
@@ -83,10 +103,52 @@ namespace Jackal.Views
             IsEnabled = true;
         }
 
-        readonly Animation _cellAnimation;
-        async void StartCellAnimation(object? sender, CellArgs e)
-        {
 
+        readonly Animation[] _cellAnimation = new Animation[2];
+        async Task StartCellAnimation(Cell cell1, Cell cell2)
+        {
+            IsEnabled = false;
+
+            double[] x = new double[2];
+            double[] y = new double[2];
+            Cell[] cells = new Cell[2] { cell1, cell2 };
+            CellView[] cellViews = new CellView[2] { CellAnimator1, CellAnimator2 };
+            for (int i = 0; i < 2; i++)
+            {
+                Cell cell = Cell.Copy(cells[i]);
+                cell.IsVisible = true;
+                cellViews[i].DataContext = cell;
+
+                y[i] = cells[i].Row * СellSize;
+                x[i] = cells[i].Column * СellSize;
+            }
+
+            Thickness[] thickness = new Thickness[2]
+            {
+                new Thickness(x[0], y[0], 0, 0),
+                new Thickness(x[1], y[1], 0, 0)
+            };
+
+            _cellAnimation[0].Children[0].Setters[0].Value = thickness[0];
+            _cellAnimation[0].Children[1].Setters[0].Value = thickness[1];
+            _cellAnimation[1].Children[0].Setters[0].Value = thickness[1];
+            _cellAnimation[1].Children[1].Setters[0].Value = thickness[0];
+
+            Task[] tasks = new Task[2];
+            for (int i = 0; i < 2; i++)
+            {
+                cellViews[i].Margin = thickness[1 - i];
+                cellViews[i].IsVisible = true;
+                cells[i].IsVisible = false;
+                tasks[i] = _cellAnimation[i].RunAsync(cellViews[i], null);
+            }
+            await Task.WhenAll(tasks);
+
+            cellViews[0].IsVisible = false;
+            cellViews[1].IsVisible = false;
+            cells[0].IsVisible = true;
+            cells[1].IsVisible = true;
+            IsEnabled = true;
         }
     }
 }

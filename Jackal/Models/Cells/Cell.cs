@@ -34,8 +34,18 @@ namespace Jackal.Models.Cells
                             .Select(t => t.Item1 > 0 || t.Item2)
                             .ToProperty(this, c => c.Treasure);
 
+            IsVisible = true;
             IsOpened = true;
-            this.IsStandable = isStandable;
+            IsStandable = isStandable;
+        }
+        public static Cell Copy(Cell cell)
+        {
+            Cell _cell = new Cell(cell.Row, cell.Column, cell.Image);
+            _cell.Pirates = cell.Pirates;
+            _cell.IsOpened = cell.IsOpened;
+            _cell.IsVisible= cell.IsVisible;
+
+            return _cell;
         }
 
         public int Row { get; protected set; }
@@ -44,6 +54,7 @@ namespace Jackal.Models.Cells
         public virtual int Angle => 0;
 
 
+        [Reactive] public bool IsVisible { get; set; }
         public readonly bool IsStandable;
         [Reactive] public bool IsOpened { get; set; }
         [Reactive] public bool CanBeSelected { get; set; }
