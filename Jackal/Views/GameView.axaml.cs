@@ -116,7 +116,6 @@ namespace Jackal.Views
             for (int i = 0; i < 2; i++)
             {
                 Cell cell = Cell.Copy(cells[i]);
-                cell.IsVisible = true;
                 cellViews[i].DataContext = cell;
 
                 y[i] = cells[i].Row * ÑellSize;

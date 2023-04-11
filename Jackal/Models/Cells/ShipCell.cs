@@ -18,7 +18,7 @@ namespace Jackal.Models.Cells
             MovableCoords = new List<int[]>();
 
             if (!(Orientation.Up | Orientation.Right | Orientation.Down | Orientation.Left).HasFlag(Orientation))
-                throw new ArgumentException();
+                throw new ArgumentException("Wrong ship orientation!");
         }
 
         public readonly Orientation Orientation;

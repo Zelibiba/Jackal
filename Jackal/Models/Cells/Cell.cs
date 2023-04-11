@@ -49,10 +49,12 @@ namespace Jackal.Models.Cells
             return _cell;
         }
 
+
         public int Row { get; protected set; }
         public int Column { get; protected set; }
         [Reactive] public string Image { get; private set; }
         public virtual int Angle => 0;
+
 
         public readonly bool IsStandable;
         [Reactive] public bool IsVisible { get; set; }

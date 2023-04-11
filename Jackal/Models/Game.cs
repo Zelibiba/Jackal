@@ -80,12 +80,15 @@ namespace Jackal.Models
                 ShipRegions[3].Item2[i] = new int[2] { 12, i + 2 };
             }
 
+
             Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
             Map[1, 7] = new HorseCell(1, 7);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
+            Map[2, 5] = new ArrowCell(2, 5, ArrowType.Angle3, 3, ContinueMovePirate);
+            Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 

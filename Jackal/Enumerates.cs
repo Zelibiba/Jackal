@@ -17,7 +17,7 @@ namespace Jackal
 
     public enum NetMode
     {
-        None = 0,
+        None,
         Disconnect,
         NewPlayer,
         UpdatePlayer,
@@ -30,9 +30,19 @@ namespace Jackal
         Right = 2,
         Down = 4,
         Left = 8,
-        UpRight = Up | Right,       // 3
+        RightUp = Right | Up,       // 3
         RightDown = Right | Down,   // 6
         LeftUp = Left | Up,         // 9
-        LeftDown = Down | Left      // 12
+        LeftDown = Left | Down      // 12
+    }
+    public enum ArrowType
+    {
+        Side1,
+        Side2,
+        Side4,
+        Angle1,
+        Angle2,
+        Angle3,
+        Angle4
     }
 }

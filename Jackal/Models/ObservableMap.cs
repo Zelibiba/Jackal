@@ -44,13 +44,13 @@ namespace Jackal.Models
             get
             {
                 if (coords.Length != 2)
-                    throw new ArgumentException();
+                    throw new ArgumentException("Wrong massive of coordinates!");
                 return this[coords[0], coords[1]];
             }
             set
             {
                 if (coords.Length != 2)
-                    throw new ArgumentException();
+                    throw new ArgumentException("Wrong massive of coordinates!");
                 this[coords[0], coords[1]] = value;
             }
         }
@@ -58,7 +58,7 @@ namespace Jackal.Models
         void CheckIndexes(int row, int column)
         {
             if (row < 0 || column < 0 || row >= MapSize || column >= MapSize)
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException("Wrong indexes of map!");
         }
     }
 }
