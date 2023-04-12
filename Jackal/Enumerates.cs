@@ -45,4 +45,13 @@ namespace Jackal
         Angle3,
         Angle4
     }
+    public enum Gold
+    {
+        Gold1 = 1,
+        Gold2,
+        Gold3,
+        Gold4,
+        Gold5,
+        Galeon
+    }
 }

@@ -22,7 +22,7 @@ namespace Jackal.Models.Cells
         readonly int _angle;
 
         List<Orientation> IOrientable.Orientations { get; } = new List<Orientation>();
-        Orientation orientation => (this as IOrientable).Orientations[0];
+        Orientation _orientation => (this as IOrientable).Orientations[0];
 
         public override bool AddPirate(Pirate pirate)
         {
@@ -33,8 +33,8 @@ namespace Jackal.Models.Cells
         public override void SetSelectableCoords(ObservableMap map)
         {
             int[] coords = new int[2] { Row, Column };
-            int i_changed = (Orientation.Up | Orientation.Down).HasFlag(orientation) ? 0 : 1;
-            int changing = (Orientation.Down | Orientation.Right).HasFlag(orientation) ? 1 : -1;
+            int i_changed = (Orientation.Up | Orientation.Down).HasFlag(_orientation) ? 0 : 1;
+            int changing = (Orientation.Down | Orientation.Right).HasFlag(_orientation) ? 1 : -1;
             do
                 coords[i_changed] += changing;
             while (map[coords] is not SeaCell && map[coords] is not ShipCell);

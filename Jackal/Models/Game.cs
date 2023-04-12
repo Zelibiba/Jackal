@@ -87,7 +87,7 @@ namespace Jackal.Models
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
-            Map[2, 5] = new ArrowCell(2, 5, ArrowType.Angle3, 3, ContinueMovePirate);
+            Map[2, 5] = new GoldCell(2, 5, Gold.Galeon);
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);

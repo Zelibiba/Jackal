@@ -70,6 +70,7 @@ namespace Jackal.Models.Cells
         }
         bool _isOpened;
         [Reactive] public bool CanBeSelected { get; set; }
+        protected virtual void Open() => IsOpened = true;
 
         [Reactive] public virtual int Gold { get; set; }
         [Reactive] public virtual bool Galeon { get; set; }
@@ -98,8 +99,8 @@ namespace Jackal.Models.Cells
         }
         public virtual bool AddPirate(Pirate pirate)
         {
-            if(!IsOpened)
-                IsOpened = true;
+            if (!IsOpened)
+                Open();
 
             Pirates.Add(pirate);
             pirate.Cell = this;
