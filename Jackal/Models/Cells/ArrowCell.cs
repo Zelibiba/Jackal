@@ -14,6 +14,7 @@ namespace Jackal.Models.Cells
         public ArrowCell(int row, int column, ArrowType arrowType, int rotation, Predicate<int[]> continueMove) : base(row, column, "Arrow" + arrowType.ToString(), false)
         {
             _continueMove = continueMove;
+            _orientations = new List<Orientation>();
             switch (arrowType)
             {
                 case ArrowType.Side1:
@@ -49,15 +50,14 @@ namespace Jackal.Models.Cells
                     break;
             }
 
-            _angle = (this as IOrientable).Rotate(rotation);
+            _angle = (this as IOrientable).Rotate(rotation, ref _orientations);
         }
 
         readonly Predicate<int[]> _continueMove;
 
         public override int Angle => _angle;
         readonly int _angle;
-        List<Orientation> IOrientable.Orientations { get; } = new List<Orientation>();
-        List<Orientation> _orientations => (this as IOrientable).Orientations;
+        readonly List<Orientation> _orientations;
 
         public override bool AddPirate(Pirate pirate)
         {

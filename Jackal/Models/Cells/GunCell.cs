@@ -12,17 +12,17 @@ namespace Jackal.Models.Cells
         public GunCell(int row, int column, int rotation, Predicate<int[]> continueMove) : base(row, column, "Gun", false)
         {
             _continueMove = continueMove;
-            (this as IOrientable).Orientations.Add(Orientation.Up);
-            _angle = (this as IOrientable).Rotate(rotation);
+            _orientation = Orientation.Up;
+            List<Orientation> list = new List<Orientation>() { _orientation };
+            _angle = (this as IOrientable).Rotate(rotation, ref list);
+            _orientation = list[0];
         }
 
-        Predicate<int[]> _continueMove;
+        readonly Predicate<int[]> _continueMove;
 
         public override int Angle => _angle;
         readonly int _angle;
-
-        List<Orientation> IOrientable.Orientations { get; } = new List<Orientation>();
-        Orientation _orientation => (this as IOrientable).Orientations[0];
+        Orientation _orientation;
 
         public override bool AddPirate(Pirate pirate)
         {
@@ -32,7 +32,7 @@ namespace Jackal.Models.Cells
 
         public override void SetSelectableCoords(ObservableMap map)
         {
-            int[] coords = new int[2] { Row, Column };
+            int[] coords = Coords;
             int i_changed = (Orientation.Up | Orientation.Down).HasFlag(_orientation) ? 0 : 1;
             int changing = (Orientation.Down | Orientation.Right).HasFlag(_orientation) ? 1 : -1;
             do

@@ -52,7 +52,7 @@ namespace Jackal.Models.Cells
             SelectableCoords.Add(new int[] { r, c });
 
             int coord = -1;
-            int[] shipCoord = new int[2] { Row, Column };
+            int[] shipCoord = Coords;
             switch (Orientation)
             {
                 case Orientation.Up:

@@ -87,7 +87,7 @@ namespace Jackal.Models
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
-            Map[2, 5] = new GoldCell(2, 5, Gold.Galeon);
+            Map[2, 5] = new AirplaneCell(2, 5);
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -197,6 +197,7 @@ namespace Jackal.Models
         }
         static void StartMovePirate(Cell cell)
         {
+            SelectedPirate.TargetCell = cell;
             if (!PirateInMotion)
             {
                 PirateInMotion = true;
@@ -271,18 +272,16 @@ namespace Jackal.Models
 
         static void SwapCells(Cell cell1,Cell cell2)
         {
-            int row1 = cell1.Row;
-            int column1 = cell1.Column;
-            int row2 = cell2.Row;
-            int column2 = cell2.Column;
+            int[] coords1 = cell1.Coords;
+            int[] coords2 = cell2.Coords;
 
             Cell cell = cell1;
-            Map[row1, column1] = cell2;
-            Map[row1, column1].SetCoordinates(row1, column1);
-            Map[row1, column1].SetSelectableCoords(Map);
-            Map[row2, column2] = cell;
-            Map[row2, column2].SetCoordinates(row2, column2);
-            Map[row2, column2].SetSelectableCoords(Map);
+            Map[coords1] = cell2;
+            Map[coords1].SetCoordinates(coords1[0], coords1[1]);
+            Map[coords1].SetSelectableCoords(Map);
+            Map[coords2] = cell;
+            Map[coords2].SetCoordinates(coords2[0], coords2[1]);
+            Map[coords2].SetSelectableCoords(Map);
         }
     }
 }

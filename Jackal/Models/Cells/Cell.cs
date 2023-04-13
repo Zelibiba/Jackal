@@ -49,11 +49,13 @@ namespace Jackal.Models.Cells
             return _cell;
         }
 
-
-        public int Row { get; protected set; }
-        public int Column { get; protected set; }
         [Reactive] public string Image { get; private set; }
         public virtual int Angle => 0;
+        public int Row { get; protected set; }
+        public int Column { get; protected set; }
+        public int[] Coords => new int[] { Row, Column };
+        public bool HasSameCoords(int row, int column) => row == Row && column == Column;
+        public bool HasSameCoords(int[] coords) => coords.Length == 2 && HasSameCoords(coords[0], coords[1]);
 
 
         public readonly bool IsStandable;
@@ -88,7 +90,7 @@ namespace Jackal.Models.Cells
         public virtual Team ShipTeam => Team.None;
 
 
-        public void RemovePirate(Pirate pirate)
+        public virtual void RemovePirate(Pirate pirate)
         {
             Pirates.Remove(pirate);
 

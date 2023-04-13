@@ -13,14 +13,23 @@ namespace Jackal.Models.Cells
         public LakeCell(int row, int column, Predicate<int[]> continueMove) : base(row, column, "Lake", false)
         {
             _continueMove = continueMove;
+            _mapCoords = new List<int[]>();
         }
 
-        int _mapSize;
         readonly Predicate<int[]> _continueMove;
+        int _mapSize;
+       readonly List<int[]> _mapCoords;
 
         public override void SetSelectableCoords(ObservableMap map)
         {
             _mapSize = map.MapSize;
+            foreach (Cell cell in map)
+            {
+                if (cell is SeaCell || cell is ShipCell ||
+                    cell.HasSameCoords(Row, Column))
+                    continue;
+                _mapCoords.Add(cell.Coords);
+            }
         }
 
         public override bool AddPirate(Pirate pirate)
@@ -36,6 +45,11 @@ namespace Jackal.Models.Cells
                         continue;
                     SelectableCoords.Add(new int[] { row, column });
                 }
+                return base.AddPirate(pirate);
+            }
+            else if(pirate.AtAirplane)
+            {
+                SelectableCoords.AddRange(_mapCoords);
                 return base.AddPirate(pirate);
             }
             else

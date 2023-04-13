@@ -44,6 +44,10 @@ namespace Jackal.Models.Pirates
                            .Skip(1)
                            .Select(cell => cell is HorseCell || (cell is LakeCell && AtHorse))
                            .ToProperty(this, p => p.AtHorse);
+            _atAirplane = this.WhenAnyValue(p => p.Cell)
+                              .Skip(1)
+                              .Select(cell => cell is AirplaneCell || (cell is LakeCell && AtAirplane))
+                              .ToProperty(this, p => p.AtAirplane);
         }
 
         [Reactive] public bool IsSelected { get; set; }
@@ -55,11 +59,14 @@ namespace Jackal.Models.Pirates
         public int Column => Cell.Column;
         public Cell StartCell { get; protected set; }
         public void Set_StartCell() => StartCell = Cell;
+        public Cell TargetCell;
 
         [Reactive] public Team Team { get; set; }
         public virtual bool CanDriveShip => true;
         public bool AtHorse => _atHorse.Value;
         readonly ObservableAsPropertyHelper<bool> _atHorse;
+        public bool AtAirplane => _atAirplane.Value;
+        readonly ObservableAsPropertyHelper<bool> _atAirplane;
 
         [Reactive] public bool Gold { get; set; }
         [Reactive] public bool Galeon { get; set; }
