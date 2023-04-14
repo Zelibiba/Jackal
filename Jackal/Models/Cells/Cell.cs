@@ -27,15 +27,14 @@ namespace Jackal.Models.Cells
             Pirates = new ObservableCollection<Pirate>();
             SelectableCoords = new List<int[]>();
 
-            _containsGold = this.WhenAnyValue(c => c.Gold)
-                              .Select(gold => gold > 0)
-                              .ToProperty(this, c => c.ContainsGold);
             _treasure = this.WhenAnyValue(c => c.Gold, c => c.Galeon)
                             .Select(t => t.Item1 > 0 || t.Item2)
                             .ToProperty(this, c => c.Treasure);
 
             IsVisible = true;
             IsStandable = isStandable;
+            Nodes = new Cell[1] { this };
+            Number = 0;
         }
         public static Cell Copy(Cell cell)
         {
@@ -57,27 +56,27 @@ namespace Jackal.Models.Cells
         public bool HasSameCoords(int row, int column) => row == Row && column == Column;
         public bool HasSameCoords(int[] coords) => coords.Length == 2 && HasSameCoords(coords[0], coords[1]);
 
+        public Cell[] Nodes { get; protected set; }
+        public int Number { get; protected set; }
 
         public readonly bool IsStandable;
         [Reactive] public bool IsVisible { get; set; }
         [Reactive] public bool IsPreOpened { get; set; }
         public bool IsOpened
         {
-            get => _isOpened;
+            get => __isOpened;
             set
             {
-                _isOpened = value;
+                __isOpened = value;
                 IsPreOpened = value;
             }
         }
-        bool _isOpened;
+        bool __isOpened;
         [Reactive] public bool CanBeSelected { get; set; }
         protected virtual void Open() => IsOpened = true;
 
         [Reactive] public virtual int Gold { get; set; }
         [Reactive] public virtual bool Galeon { get; set; }
-        public bool ContainsGold => _containsGold.Value;
-        readonly ObservableAsPropertyHelper<bool> _containsGold;
         public bool Treasure => _treasure.Value;
         readonly ObservableAsPropertyHelper<bool> _treasure;
         public bool IsGoldFriendly() => IsOpened;

@@ -30,7 +30,7 @@ namespace Jackal.Models.Cells
             {
                 _isActive = false;
                 SelectableCoords.RemoveAll(coords => Math.Abs(Row - coords[0]) > 1 || Math.Abs(Column - coords[1]) > 1 ||
-                                                     HasSameCoords(coords);
+                                                     HasSameCoords(coords));
             }
         }
         public override bool AddPirate(Pirate pirate)

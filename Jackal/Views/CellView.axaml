@@ -43,6 +43,41 @@
 			<Setter Property="BorderBrush" Value="{Binding ShipTeam, Converter={StaticResource TeamConverter}}"/>
 			<Setter Property="BorderThickness" Value="6"/>
 		</Style>
+		<Style Selector="ToolTip.Gold">
+			<Setter Property="IsVisible" Value="{Binding Treasure}"/>
+			<Setter Property="ToolTip.Tip">
+				<Setter.Value>
+					<Template>
+						<ItemsControl Items="{Binding Nodes}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<WrapPanel Orientation="Horizontal" IsVisible="{Binding Treasure}">
+										<WrapPanel.Styles>
+											<Style Selector="TextBlock">
+												<Setter Property="HorizontalAlignment" Value="Center"/>
+												<Setter Property="VerticalAlignment" Value="Center"/>
+												<Setter Property="FontSize" Value="20"/>
+												<Setter Property="FontWeight" Value="Bold"/>
+											</Style>
+										</WrapPanel.Styles>
+										<TextBlock VerticalAlignment="Top" Margin="0,0,5,0"
+												   Text="{Binding Number}" IsVisible="{Binding !!Number}"/>
+										<Panel IsVisible="{Binding !!Gold}">
+											<Ellipse Height="30" Width="30" Fill="Gold" Stroke="Black" StrokeThickness="2"/>
+											<TextBlock Text="{Binding Gold}"/>
+										</Panel>
+										<Panel IsVisible="{Binding Galeon}">
+											<Rectangle Height="30" Width="30" Fill="Gold" Stroke="Black" StrokeThickness="2"/>
+											<TextBlock Text="Г"/>
+										</Panel>
+									</WrapPanel>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</Template>
+				</Setter.Value>
+			</Setter>
+		</Style>
 	</UserControl.Styles>
 	<UserControl.Template>
 		<ControlTemplate>
@@ -50,7 +85,6 @@
 					Classes.CanBeSelected="{Binding CanBeSelected}"
 					Classes.IsSelected="{Binding IsSelected}">
 				<Panel IsVisible="{Binding IsVisible}" Background="White">
-					<!--<Image Source="/Assets/Images/Field.png"/>-->
 					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsPreOpened}">
 						<Image.RenderTransform>
 							<TransformGroup>
@@ -58,11 +92,13 @@
 							</TransformGroup>
 						</Image.RenderTransform>
 					</Image>
-					<Button ZIndex="9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+					<Button ZIndex="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
 							Command="{Binding $parent[UserControl;1].DataContext.SelectCell}" CommandParameter="{Binding .}">
 						<Button.Template>
 							<ControlTemplate TargetType="Button">
-								<Grid Background="Transparent"/>
+								<Grid Background="Transparent">
+									<ToolTip Classes="Gold"/>
+								</Grid>
 							</ControlTemplate>
 						</Button.Template>
 					</Button>
@@ -73,7 +109,7 @@
 							<TextBlock Text="Г" FontWeight="Bold" FontSize="20"
 									   IsVisible="{Binding Galeon}"/>
 							<TextBlock Text="{Binding Gold}" FontWeight="Bold" FontSize="20"
-									   IsVisible="{Binding ContainsGold}"/>
+									   IsVisible="{Binding !!Gold}"/>
 						</WrapPanel>
 					</Border>
 					<ItemsControl ZIndex="10" Margin="2" Items="{Binding Pirates}">
@@ -93,6 +129,7 @@
 						<TextBlock Text="{Binding Row}" Margin="5,0"/>
 						<TextBlock Text="{Binding Column}" Margin="5,0"/>
 					</WrapPanel>
+
 				</Panel>
 			</Border>
 		</ControlTemplate>
