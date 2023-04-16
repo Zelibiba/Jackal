@@ -15,7 +15,7 @@ namespace Jackal.Models.Cells
 
         readonly Gold _goldType;
 
-        protected override void Open()
+        public override void Open()
         {
             base.Open();
             if (_goldType == Jackal.Gold.Galeon)

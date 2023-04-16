@@ -48,15 +48,21 @@ namespace Jackal.Models.Pirates
                               .Skip(1)
                               .Select(cell => cell is AirplaneCell || (cell is LakeCell && AtAirplane))
                               .ToProperty(this, p => p.AtAirplane);
+            _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)
+                                  .Skip(1)
+                                  .Select(cell => cell.Number)
+                                  .ToProperty(this, p => p.MazeNodeNumber);
         }
 
         [Reactive] public bool IsSelected { get; set; }
         [Reactive] public bool IsVisible { get; set; }
 
-        
+
         [Reactive] public Cell Cell { get; set; }
         public int Row => Cell.Row;
         public int Column => Cell.Column;
+        public int MazeNodeNumber => _mazeNodeNumber.Value;
+        readonly ObservableAsPropertyHelper<int> _mazeNodeNumber;
         public Cell StartCell { get; protected set; }
         public void Set_StartCell() => StartCell = Cell;
         public Cell TargetCell;
@@ -75,8 +81,6 @@ namespace Jackal.Models.Pirates
 
 
         public bool IsBlocked => false;
-        public int MazeNodeNumber => 0;
-        public bool IsInMaze => false;
 
         public void RemoveFromCell() => Cell.RemovePirate(this);
     }

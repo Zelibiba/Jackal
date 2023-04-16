@@ -82,12 +82,14 @@ namespace Jackal.Models
 
 
             Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
+            Map[1, 6] = new GoldCell(1, 6, Gold.Gold3);
             Map[1, 7] = new HorseCell(1, 7);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
-            Map[2, 5] = new AirplaneCell(2, 5);
+            Map[2, 5] = new MazeCell(2, 5, 4);
+            Map[2, 6] = new MazeCell(2, 6, 2);
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -95,7 +97,6 @@ namespace Jackal.Models
             Map[0, 6].AddPirate(new Pirate(Team.White));
             Map[0, 6].AddPirate(new Pirate(Team.White));
             Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[1, 6].Gold = 2;
 
             Map[6, 6].AddPirate(new Pirate(Team.Red));
         }
@@ -115,7 +116,7 @@ namespace Jackal.Models
                 if (IsPirateSelected && cell.CanBeSelected)
                 {
                     Deselect(false);
-                    StartMovePirate(cell);
+                    StartMovePirate(cell.GetSelectedCell(SelectedPirate));
                 }
                 else if (cell is ShipCell)
                     SelectShip(cell);
@@ -135,18 +136,18 @@ namespace Jackal.Models
         {
             if (!PirateInMotion)
             {
-                SelectPirate(pirate);
+                SelectPirate(pirate, true);
                 return true;
             }
             return false;
         }
-        static void SelectPirate(Pirate pirate, bool deselect = true)
+        static void SelectPirate(Pirate pirate, bool deselect = false)
         {
             Deselect(deselect);
             SelectedPirate = pirate;
             foreach (int[] coords in pirate.Cell.SelectableCoords)
             {
-                Cell cell = Map[coords];
+                Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
 
                 if (SelectedPirate.Treasure)
                     cell.CanBeSelected = cell.IsGoldFriendly();
@@ -160,7 +161,7 @@ namespace Jackal.Models
                 SelectedPirate.Gold = !SelectedPirate.Gold;
             else if (param == "galeon")
                 SelectedPirate.Galeon = !SelectedPirate.Galeon;
-            SelectPirate(SelectedPirate, false);
+            SelectPirate(SelectedPirate);
         }
         public static void Deselect(bool deselect = true)
         {
@@ -213,7 +214,7 @@ namespace Jackal.Models
                 NextPlayer();
             }
             else
-                SelectPirate(SelectedPirate, false);
+                SelectPirate(SelectedPirate);
         }
         static bool ContinueMovePirate(int[] coords)
         {

@@ -39,7 +39,7 @@
 							<Line StartPoint="17,3" EndPoint="3,17" Classes="IsBlocked"/>
 							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
 									   Text="{Binding MazeNodeNumber}" Foreground="#FF56ACA8" FontWeight="Bold" FontSize="15"
-									   Classes="Usual" Classes.IsInMaze="{Binding IsInMaze}"/>
+									   IsVisible="{Binding !!MazeNodeNumber}"/>
 						</Panel>
 					</Viewbox>
 				</ControlTemplate>

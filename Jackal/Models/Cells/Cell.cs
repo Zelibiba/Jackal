@@ -33,7 +33,7 @@ namespace Jackal.Models.Cells
 
             IsVisible = true;
             IsStandable = isStandable;
-            Nodes = new Cell[1] { this };
+            Nodes = new ObservableCollection<Cell>() { this };
             Number = 0;
         }
         public static Cell Copy(Cell cell)
@@ -56,8 +56,9 @@ namespace Jackal.Models.Cells
         public bool HasSameCoords(int row, int column) => row == Row && column == Column;
         public bool HasSameCoords(int[] coords) => coords.Length == 2 && HasSameCoords(coords[0], coords[1]);
 
-        public Cell[] Nodes { get; protected set; }
+        public ObservableCollection<Cell> Nodes { get; }
         public int Number { get; protected set; }
+        public virtual Cell GetSelectedCell(Pirate pirate) => this;
 
         public readonly bool IsStandable;
         [Reactive] public bool IsVisible { get; set; }
@@ -73,7 +74,7 @@ namespace Jackal.Models.Cells
         }
         bool __isOpened;
         [Reactive] public bool CanBeSelected { get; set; }
-        protected virtual void Open() => IsOpened = true;
+        public virtual void Open() => IsOpened = true;
 
         [Reactive] public virtual int Gold { get; set; }
         [Reactive] public virtual bool Galeon { get; set; }
@@ -115,7 +116,7 @@ namespace Jackal.Models.Cells
         }
 
 
-        public void SetCoordinates(int row, int column)
+        public virtual void SetCoordinates(int row, int column)
         {
             Row = row;
             Column = column;
