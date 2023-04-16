@@ -101,9 +101,6 @@ namespace Jackal.Models.Cells
         }
         public virtual bool AddPirate(Pirate pirate)
         {
-            if (!IsOpened)
-                Open();
-
             Pirates.Add(pirate);
             pirate.Cell = this;
 
@@ -111,6 +108,9 @@ namespace Jackal.Models.Cells
                 Gold++;
             else if (pirate.Galeon)
                 Galeon = true;
+
+            if (!IsOpened)
+                Open();
 
             return IsStandable;
         }

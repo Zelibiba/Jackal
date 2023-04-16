@@ -34,7 +34,7 @@
 				<ControlTemplate>
 					<Viewbox>
 						<Panel Height="20" Width="20">
-							<Ellipse Fill="{Binding Team, Converter={StaticResource TeamConverter}}" Stroke="Black" StrokeThickness="2"/>
+							<Ellipse Fill="{Binding Image, Converter={StaticResource TeamConverter}}" Stroke="Black" StrokeThickness="2"/>
 							<Line StartPoint="3,3" EndPoint="17,17" Classes="IsBlocked"/>
 							<Line StartPoint="17,3" EndPoint="3,17" Classes="IsBlocked"/>
 							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"

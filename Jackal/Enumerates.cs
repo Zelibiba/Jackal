@@ -54,4 +54,10 @@ namespace Jackal
         Gold5,
         Galeon
     }
+    public enum ResidentType
+    {
+        Ben,
+        Friday,
+        Missioner
+    }
 }

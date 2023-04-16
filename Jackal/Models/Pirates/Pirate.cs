@@ -14,10 +14,11 @@ namespace Jackal.Models.Pirates
     {
         public static readonly Pirate Empty = new() { IsVisible = true };
         public Pirate() { }
-        public Pirate(Player owner)
+        public Pirate(Player owner, string? image = null)
         {
             Owner = owner;
             Manager = owner;
+            Image = image ?? Team.ToString();
             IsVisible = true;
 
             this.WhenAnyValue(p => p.Gold)
@@ -41,9 +42,6 @@ namespace Jackal.Models.Pirates
                     }
                 });
 
-            _team = this.WhenAnyValue(p => p.Owner)
-                        .Select(player => player.Team)
-                        .ToProperty(this, p => p.Team);
             _atHorse = this.WhenAnyValue(p => p.Cell)
                            .Skip(1)
                            .Select(cell => cell is HorseCell || (cell is LakeCell && AtHorse))
@@ -58,14 +56,14 @@ namespace Jackal.Models.Pirates
                                   .ToProperty(this, p => p.MazeNodeNumber);
         }
 
-        [Reactive] public Player Owner { get; private set; }
+        public Player Owner { get; protected set; }
         public Player Manager { get; private set; }
-        public Team Team => _team?.Value ?? Team.None;
-        readonly ObservableAsPropertyHelper<Team> _team;
+        public Team Team => Owner?.Team ?? Team.None;
         public Team Alliance => Owner.Alliance;
 
         [Reactive] public bool IsSelected { get; set; }
         [Reactive] public bool IsVisible { get; set; }
+        public string Image { get; }
 
 
         [Reactive] public Cell Cell { get; set; }
