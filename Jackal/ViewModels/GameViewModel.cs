@@ -22,7 +22,8 @@ namespace Jackal.ViewModels
     public class GameViewModel : ViewModelBase, IActivatableViewModel
     {
         public ViewModelActivator Activator { get; }
-        IDisposable _disCells;
+        readonly IDisposable _disCells;
+        readonly IDisposable _disPlayers;
         static bool _falshStart = true;
 
 
@@ -32,6 +33,7 @@ namespace Jackal.ViewModels
             this.WhenActivated(disposable =>
             {
                 _disCells.DisposeWith(disposable);
+                _disPlayers.DisposeWith(disposable);
             });
 
             if (_falshStart)
@@ -40,27 +42,40 @@ namespace Jackal.ViewModels
                 return;
             }
 
+            IsEnabled = true;
             Game.CreateMap();
             Game.DeselectInVM = () => SelectedPirate = Pirate.Empty;
+            Game.SetIsEnable = (isEnabled) => IsEnabled = isEnabled;
             SelectedPirate = Pirate.Empty;
 
             _disCells = Game.Map.ToObservableChangeSet()
                                 .Bind(out _cells)
                                 .Subscribe();
+            _disPlayers = Game.Players.ToObservableChangeSet()
+                                      .Bind(out _players)
+                                      .Subscribe();
             _isPirateSelected = this.WhenAnyValue(vm => vm.SelectedPirate)
                                     .Select(pirate => pirate != Pirate.Empty)
                                     .ToProperty(this, vm => vm.IsPirateSelected);
         }
 
+        [Reactive] public bool IsEnabled { get; set; }
 
         public ReadOnlyObservableCollection<Cell> Cells => _cells;
-        ReadOnlyObservableCollection<Cell> _cells;
+        readonly ReadOnlyObservableCollection<Cell> _cells;
+
+        public ReadOnlyObservableCollection<Player> Players => _players;
+        readonly ReadOnlyObservableCollection<Player> _players;
 
         [Reactive] public Pirate SelectedPirate { get; set; }
         public bool IsPirateSelected => _isPirateSelected.Value;
         readonly ObservableAsPropertyHelper<bool> _isPirateSelected;
 
-        public void SelectCell(Cell cell) => Game.PreSelectCell(cell);
+        public void SelectCell(Cell cell)
+        {
+            IsEnabled = false;
+            Game.PreSelectCell(cell);
+        }
         public void SelectPirate(Pirate pirate)
         {
             if (Game.PreSelectPirate(pirate))

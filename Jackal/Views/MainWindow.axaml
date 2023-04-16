@@ -8,7 +8,7 @@
         x:Class="Jackal.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="Jackal"
-		Width="600"
+		Width="800"
 		Height="450"
 	    Content="{Binding Content}">
 </Window>

@@ -19,6 +19,8 @@ namespace Jackal.Models
     {
         public static readonly int MapSize = 13;
         public static ObservableMap Map { get; private set; }
+
+        public static ObservableCollection<Player> Players { get; } = new ObservableCollection<Player>();
   
         public static Pirate? SelectedPirate
         {
@@ -42,12 +44,12 @@ namespace Jackal.Models
         static Pirate? _selectedPirate;
         public static bool IsPirateSelected => SelectedPirate != null;
 
-        public static ShipCell? SelectedShip { get; private set; }
+        static ShipCell? SelectedShip { get; set; }
         public static bool IsShipSelected => SelectedShip != null;
 
         public static bool PirateInMotion { get; private set; }
 
-        public static int lostGold;
+        public static int LostGold { get; set; }
 
         public static void CreateMap()
         {
@@ -80,8 +82,11 @@ namespace Jackal.Models
                 ShipRegions[3].Item2[i] = new int[2] { 12, i + 2 };
             }
 
+            Players.Add(new Player(0, "TEST", Team.White));
+            Players.Add(new Player(1, "AETHNAETRN", Team.Red));
 
-            Map[0, 6] = new ShipCell(0, 6, Team.White, ShipRegions[0]);
+
+            Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[1, 6] = new GoldCell(1, 6, Gold.Gold3);
             Map[1, 7] = new HorseCell(1, 7);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
@@ -93,16 +98,11 @@ namespace Jackal.Models
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
-
-            Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[0, 6].AddPirate(new Pirate(Team.White));
-            Map[0, 6].AddPirate(new Pirate(Team.White));
-
-            Map[6, 6].AddPirate(new Pirate(Team.Red));
         }
 
         static void NextPlayer() { }
 
+        public static Action<bool>? SetIsEnable;
         public static void PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
@@ -113,6 +113,7 @@ namespace Jackal.Models
         {
             Task.Run(() =>
             {
+                SetIsEnable?.Invoke(false);
                 if (IsPirateSelected && cell.CanBeSelected)
                 {
                     Deselect(false);
@@ -122,6 +123,7 @@ namespace Jackal.Models
                     SelectShip(cell);
                 else if (IsShipSelected)
                     MoveShip(cell);
+                SetIsEnable?.Invoke(true);
             });
         }
         static void SelectShip(Cell cell)

@@ -73,7 +73,6 @@ namespace Jackal.Views
         readonly Animation _pirateAnimation;
         async Task StartPirateAnimation(Cell cell)
         {
-            IsEnabled = false;
             PirateAnimator.Width = ÑellSize / 3;
 
             Cell[] cells = new Cell[2]
@@ -100,15 +99,12 @@ namespace Jackal.Views
             PirateAnimator.Margin = new Thickness(x[0], y[0], 0, 0);
             Game.SelectedPirate.IsVisible = false;
             await _pirateAnimation.RunAsync(PirateAnimator, null);
-            IsEnabled = true;
         }
 
 
         readonly Animation[] _cellAnimation = new Animation[2];
         async Task StartCellAnimation(Cell cell1, Cell cell2)
         {
-            IsEnabled = false;
-
             double[] x = new double[2];
             double[] y = new double[2];
             Cell[] cells = new Cell[2] { cell1, cell2 };
@@ -147,7 +143,6 @@ namespace Jackal.Views
             cellViews[1].IsVisible = false;
             cells[0].IsVisible = true;
             cells[1].IsVisible = true;
-            IsEnabled = true;
         }
     }
 }

@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reactive;
 using System.IO;
+using Jackal.Models.Pirates;
+using Jackal.Models.Cells;
+using DynamicData;
 
 namespace Jackal.Models
 {
@@ -19,6 +22,15 @@ namespace Jackal.Models
             Name = name;
             IntAlliance = index;
             Team = team;
+
+            Alliance = team;
+
+            _pirates = new List<Pirate>()
+            {
+                new Pirate(this),
+                new Pirate(this),
+                new Pirate(this)
+            };
         }
 
         public readonly int Index;
@@ -29,7 +41,6 @@ namespace Jackal.Models
         public Team Alliance { get;private set; }
 
         [Reactive] public bool IsReady { get; set; }
-
         public void Copy(Player player)
         {
             Name = player.Name;
@@ -37,5 +48,20 @@ namespace Jackal.Models
             Team = player.Team;
             IsReady = player.IsReady;
         }
+
+
+        private List<Pirate> _pirates;
+        public ShipCell Ship { get; private set; }
+        public void SetShip(ShipCell ship)
+        {
+            Ship = ship;
+            foreach (Pirate pirate in _pirates)
+                Ship.AddPirate(pirate);
+        }
+
+        [Reactive] public bool Turn { get; set; }
+
+        [Reactive] public int Gold { get; set; }
+        [Reactive] public int Bottles { get; set; }
     }
 }

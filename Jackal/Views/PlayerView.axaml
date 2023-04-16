@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:converters="clr-namespace:Jacal.Converters;assembly=Jackal"
+			 x:Class="Jackal.Views.PlayerView"
+             mc:Ignorable="d"
+			 BorderBrush="Black"
+			 BorderThickness="1"
+			 HorizontalAlignment="Stretch">
+	<UserControl.Resources>
+		<converters:TeamConverter x:Key="TeamConverter"/>
+	</UserControl.Resources>
+	<UserControl.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="FontSize" Value="20"/>
+		</Style>
+	</UserControl.Styles>
+	<Grid RowDefinitions="*,*">
+		<WrapPanel Grid.Row="0" Margin="5">
+			<Rectangle Height="25" Width="25" Margin="0,0,5,0"
+					   Fill="{Binding Team, Converter={StaticResource TeamConverter}}"
+					   Stroke="Black" StrokeThickness="1"/>
+			<TextBlock Text="Игрок: "/>
+			<TextBlock Text="{Binding Name}"/>
+		</WrapPanel>
+		<Grid Grid.Row="1" ColumnDefinitions="150,*" Margin="5">
+			<WrapPanel Grid.Column="0">
+				<TextBlock Text="Золото: "/>
+				<TextBlock Text="{Binding Gold}" FontWeight="Bold"/>
+			</WrapPanel>
+			<WrapPanel Grid.Column="1">
+				<TextBlock Text="Ром: "/>
+				<TextBlock Text="{Binding Bottles}" FontWeight="Bold"/>
+			</WrapPanel>
+		</Grid>
+	</Grid>
+</UserControl>

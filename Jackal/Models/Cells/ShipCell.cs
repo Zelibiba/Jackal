@@ -9,10 +9,13 @@ namespace Jackal.Models.Cells
 {
     public class ShipCell : Cell
     {
-        public ShipCell(int row, int column, Team team, (Orientation, int[][]) shipRegion) : base(row, column, "Ship")
+        public ShipCell(int row, int column, Player owner, (Orientation, int[][]) shipRegion) : base(row, column, "Ship")
         {
             IsOpened = true;
-            ShipTeam = team;
+            _owner = owner;
+            Manager = owner;
+            _owner.SetShip(this);
+
             Orientation = shipRegion.Item1;
             _shipRegion = shipRegion.Item2;
             MovableCoords = new List<int[]>();
@@ -23,14 +26,24 @@ namespace Jackal.Models.Cells
 
         public readonly Orientation Orientation;
         readonly int[][] _shipRegion;
-        public List<int[]> MovableCoords;
+        readonly public List<int[]> MovableCoords;
 
         public override bool IsShip => true;
-        public override Team ShipTeam { get; }
-        public bool CanMove => (from Pirate pirate in Pirates
-                                where pirate.CanDriveShip
-                                select pirate).Count() > 0;
+        readonly Player _owner;
+        public Player Manager { get; private set; }
+        public override Team ShipTeam => _owner.Team;
+        public bool CanMove => Pirates.Any(pirate => pirate.CanDriveShip);
 
+        public override int Gold
+        {
+            get => 0;
+            set => _owner.Gold++;
+        }
+        public override bool Galeon
+        {
+            get => false;
+            set => _owner.Gold += 3;
+        }
 
         public override void SetSelectableCoords(ObservableMap map)
         {

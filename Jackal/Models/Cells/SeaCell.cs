@@ -17,12 +17,12 @@ namespace Jackal.Models.Cells
         public override int Gold
         {
             get => 0;
-            set => Game.lostGold++;
+            set => Game.LostGold++;
         }
         public override bool Galeon
         {
             get => false;
-            set => Game.lostGold += 3;
+            set => Game.LostGold += 3;
         }
 
         public override bool AddPirate(Pirate pirate)

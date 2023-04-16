@@ -6,7 +6,8 @@
              xmlns:vm="using:Jackal.ViewModels"
 			 xmlns:v="using:Jackal.Views"
 			 x:Class="Jackal.Views.GameView"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450">
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 IsEnabled="{Binding IsEnabled}">
 	<UserControl.Styles>
 		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
 	</UserControl.Styles>
@@ -15,9 +16,7 @@
 			<Panel Name="MapControl">
 				<Button Name="PirateAnimator" Classes="Pirate" DataContext="{Binding SelectedPirate}"
 						HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="20" ZIndex="2"
-						IsEnabled="False" IsVisible="{Binding !IsVisible}">
-				</Button>
-				
+						IsEnabled="False" IsVisible="{Binding !IsVisible}"/>
 				<v:CellView Name="CellAnimator1"
 							HorizontalAlignment="Left" VerticalAlignment="Top" Height="64" Width="64" ZIndex="4"
 							IsEnabled="False" IsVisible="False"/>
@@ -38,10 +37,14 @@
 				</ItemsControl>
 			</Panel>
 		</Viewbox>
-		<Border Grid.Column="1" Background="AliceBlue">
-			<WrapPanel Orientation="Vertical">
-				<Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"
-						BorderBrush="Black" BorderThickness="2" Padding="5">
+		<StackPanel Grid.Column="1" Background="AliceBlue">
+			<Grid Margin="10">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="10"/>
+					<ColumnDefinition Width="*" MinWidth="250"/>
+				</Grid.ColumnDefinitions>
+				<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
 					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
 						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.Cell.ContainsGold}"
 									  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
@@ -49,8 +52,14 @@
 									  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
 					</WrapPanel>
 				</Border>
-				<Button Name="Butt" Content="EER" Height="30" Width="50"/>
-			</WrapPanel>
-		</Border>
+				<ItemsControl Grid.Column="2" Items="{Binding Players}" BorderBrush="Black" BorderThickness="1">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<v:PlayerView/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</Grid>
+		</StackPanel>
 	</Grid>
 </UserControl>
