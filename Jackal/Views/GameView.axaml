@@ -46,7 +46,7 @@
 				</Grid.ColumnDefinitions>
 				<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
 					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
-						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.Cell.ContainsGold}"
+						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}" IsEnabled="{Binding !!SelectedPirate.Cell.Gold}"
 									  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
 						<ToggleButton Content="G" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.Cell.Galeon}" Margin="0,5,0,0"
 									  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>

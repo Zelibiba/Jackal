@@ -93,7 +93,7 @@ namespace Jackal.Models
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
-            Map[2, 5] = new MazeCell(2, 5, 4);
+            Map[2, 5] = new BalloonCell(2, 5, ContinueMovePirate);
             Map[2, 6] = new MazeCell(2, 6, 2);
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
