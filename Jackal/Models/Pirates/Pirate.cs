@@ -48,7 +48,8 @@ namespace Jackal.Models.Pirates
                            .ToProperty(this, p => p.AtHorse);
             _atAirplane = this.WhenAnyValue(p => p.Cell)
                               .Skip(1)
-                              .Select(cell => cell is AirplaneCell || (cell is LakeCell && AtAirplane))
+                              .Select(cell => cell is AirplaneCell airpane && airpane.IsActive
+                                              || (cell is LakeCell && AtAirplane))
                               .ToProperty(this, p => p.AtAirplane);
             _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)
                                   .Skip(1)

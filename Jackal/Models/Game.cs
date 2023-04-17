@@ -88,12 +88,12 @@ namespace Jackal.Models
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[1, 6] = new GoldCell(1, 6, Gold.Gold3);
-            Map[1, 7] = new HorseCell(1, 7);
+            Map[1, 7] = new AirplaneCell(1, 7);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
-            Map[2, 5] = new CannibalCell(2, 5);
+            Map[2, 5] = new CrocodileCell(2, 5, ContinueMovePirate);
             Map[2, 6] = new MazeCell(2, 6, 2);
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
@@ -103,11 +103,16 @@ namespace Jackal.Models
         static void NextPlayer() { }
 
         public static Action<bool>? SetIsEnable;
-        public static void PreSelectCell(Cell cell)
+        public static bool PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
                 cell is ShipCell ship && ship.CanMove && !PirateInMotion)
+            {
                 SelectCell(cell);
+                return true;
+            }
+            else
+                return false;
         }
         static void SelectCell(Cell cell)
         {
@@ -220,7 +225,7 @@ namespace Jackal.Models
         }
         static bool ContinueMovePirate(int[] coords)
         {
-            Cell cell = Map[coords];
+            Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
             
             if(!cell.IsGoldFriendly())
             {
@@ -233,10 +238,10 @@ namespace Jackal.Models
             OnStartPirateAnimation(cell);
             return MovePirate(cell);
         }
-        static bool MovePirate(Cell newCell)
+        static bool MovePirate(Cell cell)
         {
             SelectedPirate.RemoveFromCell();
-            return newCell.AddPirate(SelectedPirate);
+            return cell.AddPirate(SelectedPirate);
         }
 
 

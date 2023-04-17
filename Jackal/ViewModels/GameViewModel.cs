@@ -1,5 +1,6 @@
 ﻿using Avalonia.Animation;
 using Avalonia.Controls.Mixins;
+using Avalonia.Threading;
 using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models;
@@ -74,7 +75,8 @@ namespace Jackal.ViewModels
         public void SelectCell(Cell cell)
         {
             IsEnabled = false;
-            Game.PreSelectCell(cell);
+            if (!Game.PreSelectCell(cell))
+                IsEnabled = true;
         }
         public void SelectPirate(Pirate pirate)
         {

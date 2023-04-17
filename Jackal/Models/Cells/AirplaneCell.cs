@@ -12,11 +12,11 @@ namespace Jackal.Models.Cells
     {
         public AirplaneCell (int row,int column) : base(row, column, "Airplane")
         {
-            _isActive = true;
+            IsActive = true;
             _opening = true;
         }
 
-        bool _isActive;
+        public bool IsActive { get; private set; }
         bool _opening;
 
         public override void RemovePirate(Pirate pirate)
@@ -26,9 +26,9 @@ namespace Jackal.Models.Cells
 
             if (pirate.TargetCell == this)
                 SelectableCoords.RemoveAll(coords => HasSameCoords(coords));
-            else if (_isActive && (Pirates.Count == 0 || Math.Abs(Row - pirate.TargetCell.Row) > 1 || Math.Abs(Column - pirate.TargetCell.Column) > 1))
+            else if (IsActive && (Pirates.Count == 0 || Math.Abs(Row - pirate.TargetCell.Row) > 1 || Math.Abs(Column - pirate.TargetCell.Column) > 1))
             {
-                _isActive = false;
+                IsActive = false;
                 SelectableCoords.RemoveAll(coords => Math.Abs(Row - coords[0]) > 1 || Math.Abs(Column - coords[1]) > 1 ||
                                                      HasSameCoords(coords));
             }
@@ -40,7 +40,7 @@ namespace Jackal.Models.Cells
         }
         public override void SetSelectableCoords(ObservableMap map)
         {
-            if (_isActive)
+            if (IsActive)
             {
                 SelectableCoords.Clear();
                 for (int i = 0; i < map.MapSize; i++)
