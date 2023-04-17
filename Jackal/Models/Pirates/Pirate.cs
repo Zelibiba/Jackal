@@ -90,5 +90,11 @@ namespace Jackal.Models.Pirates
         public bool IsBlocked => false;
 
         public void RemoveFromCell() => Cell.RemovePirate(this);
+
+        public void Kill()
+        {
+            Cell.Pirates.Remove(this);
+            Manager.Pirates.Remove(this);
+        }
     }
 }

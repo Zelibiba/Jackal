@@ -25,7 +25,7 @@ namespace Jackal.Models
 
             Alliance = team;
 
-            _pirates = new List<Pirate>()
+            Pirates = new List<Pirate>()
             {
                 new Pirate(this),
                 new Pirate(this),
@@ -50,12 +50,12 @@ namespace Jackal.Models
         }
 
 
-        private List<Pirate> _pirates;
+        public List<Pirate> Pirates { get; }
         public ShipCell Ship { get; private set; }
         public void SetShip(ShipCell ship)
         {
             Ship = ship;
-            foreach (Pirate pirate in _pirates)
+            foreach (Pirate pirate in Pirates)
                 Ship.AddPirate(pirate);
         }
 
