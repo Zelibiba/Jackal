@@ -56,9 +56,11 @@ namespace Jackal.Models.Cells
         public bool HasSameCoords(int row, int column) => row == Row && column == Column;
         public bool HasSameCoords(int[] coords) => coords.Length == 2 && HasSameCoords(coords[0], coords[1]);
 
+
         public ObservableCollection<Cell> Nodes { get; }
         public int Number { get; protected set; }
         public virtual Cell GetSelectedCell(Pirate pirate) => this;
+
 
         public readonly bool IsStandable;
         [Reactive] public bool IsVisible { get; set; }
@@ -66,15 +68,16 @@ namespace Jackal.Models.Cells
         public bool IsOpened
         {
             get => __isOpened;
-            set
+            protected set
             {
                 __isOpened = value;
                 IsPreOpened = value;
             }
         }
         bool __isOpened;
-        [Reactive] public bool CanBeSelected { get; set; }
         public virtual void Open() => IsOpened = true;
+        [Reactive] public bool CanBeSelected { get; set; }
+        [Reactive] public bool IsSelected { get; set; }
 
         [Reactive] public virtual int Gold { get; set; }
         [Reactive] public virtual bool Galeon { get; set; }
@@ -85,7 +88,6 @@ namespace Jackal.Models.Cells
         public ObservableCollection<Pirate> Pirates { get; protected set; }
         public List<int[]> SelectableCoords { get; }
 
-        public bool IsSelected => false;
         public virtual bool IsShip => false;
         public virtual Team ShipTeam => Team.None;
 

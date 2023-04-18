@@ -72,12 +72,7 @@ namespace Jackal.ViewModels
         public bool IsPirateSelected => _isPirateSelected.Value;
         readonly ObservableAsPropertyHelper<bool> _isPirateSelected;
 
-        public void SelectCell(Cell cell)
-        {
-            IsEnabled = false;
-            if (!Game.PreSelectCell(cell))
-                IsEnabled = true;
-        }
+        public void SelectCell(Cell cell) => Game.PreSelectCell(cell);
         public void SelectPirate(Pirate pirate)
         {
             if (Game.PreSelectPirate(pirate))

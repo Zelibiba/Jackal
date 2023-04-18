@@ -21,6 +21,21 @@ namespace Jackal.Models
         public static ObservableMap Map { get; private set; }
 
         public static ObservableCollection<Player> Players { get; } = new ObservableCollection<Player>();
+        static Player CurrentPlayer => Players[CurrentPlayerNumber];
+        static int CurrentPlayerNumber
+        {
+            get => __currentPlayerNumber;
+            set
+            {
+                if (value >= Players.Count)
+                    __currentPlayerNumber = value - Players.Count;
+                else if (value < 0)
+                    __currentPlayerNumber = Players.Count - value;
+                else
+                    __currentPlayerNumber = value;
+            }
+        }
+        static int __currentPlayerNumber;
   
         public static Pirate? SelectedPirate
         {
@@ -42,10 +57,15 @@ namespace Jackal.Models
             }
         }
         static Pirate? _selectedPirate;
-        public static bool IsPirateSelected => SelectedPirate != null;
+        static bool IsPirateSelected => SelectedPirate != null;
+
 
         static ShipCell? SelectedShip { get; set; }
-        public static bool IsShipSelected => SelectedShip != null;
+        static bool IsShipSelected => SelectedShip != null;
+
+
+        static bool IsEarthQuake;
+        static Cell? EarthQuakeSelectedCell;
 
         public static bool PirateInMotion { get; private set; }
 
@@ -53,6 +73,7 @@ namespace Jackal.Models
 
         public static void CreateMap()
         {
+            #region создание каркаса
             Map = new ObservableMap(MapSize);
             for(int i = 0; i < MapSize; i++)
             {
@@ -81,12 +102,14 @@ namespace Jackal.Models
                 ShipRegions[2].Item2[i] = new int[2] { 12, i + 2 };
                 ShipRegions[3].Item2[i] = new int[2] { 12, i + 2 };
             }
+            #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White));
+            Players.Add(new Player(0, "TEST", Team.White) { Turn = true });
             Players.Add(new Player(1, "AETHNAETRN", Team.Red));
 
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
+            Map[1, 5] = new EarthQuakeCell(1, 5, StartEarthQuake);
             Map[1, 6] = new GoldCell(1, 6, Gold.Gold3);
             Map[1, 7] = new AirplaneCell(1, 7);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
@@ -100,19 +123,19 @@ namespace Jackal.Models
                 cell.SetSelectableCoords(Map);
         }
 
-        static void NextPlayer() { }
+        static void NextPlayer()
+        {
+            CurrentPlayer.Turn = false;
+            CurrentPlayerNumber++;
+            CurrentPlayer.Turn = true;
+        }
 
         public static Action<bool>? SetIsEnable;
-        public static bool PreSelectCell(Cell cell)
+        public static void PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
                 cell is ShipCell ship && ship.CanMove && !PirateInMotion)
-            {
                 SelectCell(cell);
-                return true;
-            }
-            else
-                return false;
         }
         static void SelectCell(Cell cell)
         {
@@ -128,6 +151,8 @@ namespace Jackal.Models
                     SelectShip(cell);
                 else if (IsShipSelected)
                     MoveShip(cell);
+                else if (IsEarthQuake)
+                    SelectEarthQuakeCell(cell);
                 SetIsEnable?.Invoke(true);
             });
         }
@@ -138,6 +163,32 @@ namespace Jackal.Models
             foreach (int[] coords in SelectedShip.MovableCoords)
                 Map[coords].CanBeSelected = true;
         }
+        static void SelectEarthQuakeCell(Cell cell)
+        {
+            if (cell.IsSelected)
+            {
+                cell.IsSelected = false;
+                EarthQuakeSelectedCell = null;
+            }
+            else
+            {
+                if (EarthQuakeSelectedCell == null)
+                {
+                    cell.IsSelected = true;
+                    EarthQuakeSelectedCell = cell;
+                }
+                else
+                {
+                    EarthQuakeSelectedCell.IsSelected = false;
+                    SwapCells(EarthQuakeSelectedCell, cell);
+                    Deselect();
+                    EarthQuakeSelectedCell = null;
+                    IsEarthQuake = false;
+                    NextPlayer();
+                }
+            }
+        }
+
 
         public static bool PreSelectPirate(Pirate pirate)
         {
@@ -188,6 +239,11 @@ namespace Jackal.Models
                 if (deselect)
                     SelectedShip = null;
             }
+            else
+            {
+                foreach (Cell cell in Map)
+                    cell.CanBeSelected = false;
+            }
         }
         public static Action? DeselectInVM;
 
@@ -220,7 +276,7 @@ namespace Jackal.Models
                 PirateInMotion = false;
                 NextPlayer();
             }
-            else
+            else 
                 SelectPirate(SelectedPirate);
         }
         static bool ContinueMovePirate(int[] coords)
@@ -247,6 +303,11 @@ namespace Jackal.Models
 
 
         public static Func<Cell, Cell, Task>? StartCellAnimation;
+        static void OnStartCellAnimation(Cell cell1, Cell cell2)
+        {
+            if (StartCellAnimation != null)
+                Dispatcher.UIThread.InvokeAsync(() => StartCellAnimation(cell1, cell2)).Wait();
+        }
         static void MoveShip(Cell newCell)
         {
             Deselect(false);
@@ -271,14 +332,10 @@ namespace Jackal.Models
                     Map[i, column].SetSelectableCoords(Map);
             }
 
-            if (StartCellAnimation != null)
-                Dispatcher.UIThread.InvokeAsync(() => StartCellAnimation(SelectedShip, newCell)).Wait();
-
             SelectedShip = null;
             NextPlayer();
         }
-
-        static void SwapCells(Cell cell1,Cell cell2)
+        static void SwapCells(Cell cell1, Cell cell2)
         {
             int[] coords1 = cell1.Coords;
             int[] coords2 = cell2.Coords;
@@ -290,6 +347,20 @@ namespace Jackal.Models
             Map[coords2] = cell;
             Map[coords2].SetCoordinates(coords2[0], coords2[1]);
             Map[coords2].SetSelectableCoords(Map);
+
+            OnStartCellAnimation(cell1, cell2);
+        }
+
+        static void StartEarthQuake()
+        {
+            IsEarthQuake = true;
+            foreach (Cell cell in Map)
+            {
+                if (cell is not SeaCell && cell is not ShipCell &&
+                    cell.Gold == 0 && !cell.Galeon &&
+                    cell.Pirates.Count == 0)
+                    cell.CanBeSelected = true;
+            }
         }
     }
 }

@@ -15,8 +15,11 @@
 		<Style Selector="TextBlock">
 			<Setter Property="FontSize" Value="20"/>
 		</Style>
+		<Style Selector="Grid.IsTurn">
+			<Setter Property="Background" Value="YellowGreen"/>
+		</Style>
 	</UserControl.Styles>
-	<Grid RowDefinitions="*,*">
+	<Grid RowDefinitions="*,*" Classes.IsTurn="{Binding Turn}">
 		<WrapPanel Grid.Row="0" Margin="5">
 			<Rectangle Height="25" Width="25" Margin="0,0,5,0"
 					   Fill="{Binding Team, Converter={StaticResource TeamConverter}}"
