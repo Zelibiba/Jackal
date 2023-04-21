@@ -10,7 +10,7 @@ namespace Jackal.Models.Cells
 {
     public class AirplaneCell : Cell
     {
-        public AirplaneCell (int row,int column) : base(row, column, "Airplane")
+        public AirplaneCell(int row, int column) : base(row, column, "Airplane")
         {
             IsActive = true;
             _opening = true;
@@ -33,28 +33,23 @@ namespace Jackal.Models.Cells
                                                      HasSameCoords(coords));
             }
         }
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
-            return !_opening;
+            return _opening ? MovementResult.Continue : MovementResult.End;
         }
         public override void SetSelectableCoords(ObservableMap map)
         {
-            if (IsActive)
+            SelectableCoords.Clear();
+            for (int i = 0; i < map.MapSize; i++)
             {
-                SelectableCoords.Clear();
-                for (int i = 0; i < map.MapSize; i++)
+                for (int j = 0; j < map.MapSize; j++)
                 {
-                    for (int j = 0; j < map.MapSize; j++)
-                    {
-                        if (map[i, j] is not SeaCell && map[i, j] is not ShipCell
-                            && !(HasSameCoords(i, j) && !_opening))
-                            SelectableCoords.Add(new int[2] { i, j });
-                    }
+                    if (map[i, j] is not SeaCell && map[i, j] is not ShipCell
+                        && !(HasSameCoords(i, j) && !_opening))
+                        SelectableCoords.Add(new int[2] { i, j });
                 }
             }
-            else
-                base.SetSelectableCoords(map);
         }
     }
 }

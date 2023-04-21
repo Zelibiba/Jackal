@@ -30,7 +30,7 @@ namespace Jackal.Models.Cells
                 _owner.Pirates.Remove(pirate);
             base.RemovePirate(pirate);
         }
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             if(Number == 1)
                 _owner.Pirates.Add(pirate);

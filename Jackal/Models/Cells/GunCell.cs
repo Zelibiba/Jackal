@@ -9,7 +9,7 @@ namespace Jackal.Models.Cells
 {
     public class GunCell : Cell, IOrientable
     {
-        public GunCell(int row, int column, int rotation, Predicate<int[]> continueMove) : base(row, column, "Gun", false)
+        public GunCell(int row, int column, int rotation, Func<int[], MovementResult> continueMove) : base(row, column, "Gun", false)
         {
             _continueMove = continueMove;
             _orientation = Orientation.Up;
@@ -18,13 +18,13 @@ namespace Jackal.Models.Cells
             _orientation = list[0];
         }
 
-        readonly Predicate<int[]> _continueMove;
+        readonly Func<int[], MovementResult> _continueMove;
 
         public override int Angle => _angle;
         readonly int _angle;
         Orientation _orientation;
 
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
             return _continueMove(SelectableCoords[0]);
@@ -32,6 +32,7 @@ namespace Jackal.Models.Cells
 
         public override void SetSelectableCoords(ObservableMap map)
         {
+            SelectableCoords.Clear();
             int[] coords = Coords;
             int i_changed = (Orientation.Up | Orientation.Down).HasFlag(_orientation) ? 0 : 1;
             int changing = (Orientation.Down | Orientation.Right).HasFlag(_orientation) ? 1 : -1;

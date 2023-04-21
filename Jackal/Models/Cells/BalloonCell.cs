@@ -9,14 +9,14 @@ namespace Jackal.Models.Cells
 {
     public class BalloonCell : Cell
     {
-        public BalloonCell(int row, int column, Predicate<int[]> continueMove) : base(row, column, "Balloon", false)
+        public BalloonCell(int row, int column, Func<int[], MovementResult> continueMove) : base(row, column, "Balloon", false)
         {
             _continueMove = continueMove;
         }
 
-        readonly Predicate<int[]> _continueMove;
+        readonly Func<int[], MovementResult> _continueMove;
 
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
             return _continueMove(pirate.Owner.Ship.Coords);

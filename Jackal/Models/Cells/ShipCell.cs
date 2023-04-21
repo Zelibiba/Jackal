@@ -32,7 +32,7 @@ namespace Jackal.Models.Cells
         readonly Player _owner;
         public Player Manager { get; private set; }
         public override Team ShipTeam => _owner.Team;
-        public bool CanMove => Pirates.Any(pirate => pirate.CanDriveShip);
+        public bool CanMove => Pirates.Any(pirate => pirate.IsFighter);
 
         public override int Gold
         {

@@ -14,12 +14,14 @@ namespace Jackal.Models.Pirates
     {
         public static readonly Pirate Empty = new() { IsVisible = true };
         public Pirate() { }
-        public Pirate(Player owner, string? image = null)
+        public Pirate(Player owner, Player? manager = null, string? image = null, bool isFighter = true)
         {
             Owner = owner;
-            Manager = owner;
+            Manager = manager ?? owner;
             Image = image ?? Team.ToString();
             IsVisible = true;
+
+            IsFighter = isFighter;
 
             this.WhenAnyValue(p => p.Gold)
                 .Skip(1)
@@ -55,6 +57,9 @@ namespace Jackal.Models.Pirates
                                   .Skip(1)
                                   .Select(cell => cell.Number)
                                   .ToProperty(this, p => p.MazeNodeNumber);
+            this.WhenAnyValue(p => p.Cell, p => p.Manager.IsEnoughtPirates)
+                .Select(x => x.Item1 is FortressCell fortress && fortress.Putana && !x.Item2)
+                .ToPropertyEx(this, p => p.CanHaveSex);
         }
 
         public Player Owner { get; protected set; }
@@ -76,7 +81,7 @@ namespace Jackal.Models.Pirates
         public void Set_StartCell() => StartCell = Cell;
         public Cell TargetCell;
 
-        public virtual bool CanDriveShip => true;
+        readonly public bool IsFighter;
         public bool AtHorse => _atHorse.Value;
         readonly ObservableAsPropertyHelper<bool> _atHorse;
         public bool AtAirplane => _atAirplane.Value;
@@ -86,6 +91,7 @@ namespace Jackal.Models.Pirates
         [Reactive] public bool Galeon { get; set; }
         public bool Treasure => Gold || Galeon;
 
+        [ObservableAsProperty] public virtual bool CanHaveSex { get; }
 
 
         public bool IsBlocked => false;
@@ -96,6 +102,12 @@ namespace Jackal.Models.Pirates
         {
             Cell.Pirates.Remove(this);
             Manager.Pirates.Remove(this);
+        }
+        public void GiveBirth()
+        {
+            Pirate newPirate = new(Owner, Manager);
+            Cell.AddPirate(newPirate);
+            Manager.Pirates.Add(newPirate);
         }
     }
 }

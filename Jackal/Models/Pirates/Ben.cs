@@ -8,6 +8,6 @@ namespace Jackal.Models.Pirates
 {
     public class Ben : Pirate
     {
-        public Ben(Player owner) : base(owner, "Green") { }
+        public Ben(Player owner) : base(owner, image: "Green") { }
     }
 }

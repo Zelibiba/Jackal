@@ -75,15 +75,19 @@ namespace Jackal.ViewModels
         public void SelectCell(Cell cell) => Game.PreSelectCell(cell);
         public void SelectPirate(Pirate pirate)
         {
-            if (Game.PreSelectPirate(pirate))
+            if (Game.CanChangeSelection)
+            {
+                Game.SelectPirate(pirate, true);
                 SelectedPirate = pirate;
+            }
         }
         public void Deselect()
         {
-            if (!Game.PirateInMotion)
+            if (Game.CanChangeSelection)
                 Game.Deselect();
         }
 
         public void GrabTreasure(string param) => Game.ReselctPirate(param);
+        public void PirateBirth(object param) => Game.PirateBirth();
     }
 }

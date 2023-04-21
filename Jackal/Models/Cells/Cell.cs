@@ -83,7 +83,7 @@ namespace Jackal.Models.Cells
         [Reactive] public virtual bool Galeon { get; set; }
         public bool Treasure => _treasure.Value;
         readonly ObservableAsPropertyHelper<bool> _treasure;
-        public bool IsGoldFriendly() => IsOpened;
+        public virtual bool IsGoldFriendly() => IsOpened;
 
         public ObservableCollection<Pirate> Pirates { get; protected set; }
         public List<int[]> SelectableCoords { get; }
@@ -101,7 +101,7 @@ namespace Jackal.Models.Cells
             else if (pirate.Galeon)
                 Galeon = false;
         }
-        public virtual bool AddPirate(Pirate pirate)
+        public virtual MovementResult AddPirate(Pirate pirate)
         {
             Pirates.Add(pirate);
             pirate.Cell = this;
@@ -114,7 +114,7 @@ namespace Jackal.Models.Cells
             if (!IsOpened)
                 Open();
 
-            return IsStandable;
+            return IsStandable ? MovementResult.End : MovementResult.Continue;
         }
 
 

@@ -11,7 +11,7 @@ namespace Jackal.Models.Cells
 {
     public class ArrowCell : Cell, IOrientable
     {
-        public ArrowCell(int row, int column, ArrowType arrowType, int rotation, Predicate<int[]> continueMove) : base(row, column, "Arrow" + arrowType.ToString(), false)
+        public ArrowCell(int row, int column, ArrowType arrowType, int rotation, Func<int[], MovementResult> continueMove) : base(row, column, "Arrow" + arrowType.ToString(), false)
         {
             _continueMove = continueMove;
             _orientations = new List<Orientation>();
@@ -53,22 +53,23 @@ namespace Jackal.Models.Cells
             _angle = (this as IOrientable).Rotate(rotation, ref _orientations);
         }
 
-        readonly Predicate<int[]> _continueMove;
+        readonly Func<int[], MovementResult> _continueMove;
 
         public override int Angle => _angle;
         readonly int _angle;
         readonly List<Orientation> _orientations;
 
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
             if (SelectableCoords.Count == 1)
                 return _continueMove(SelectableCoords[0]);
             else
-                return false;
+                return MovementResult.Continue;
         }
         public override void SetSelectableCoords(ObservableMap map)
         {
+            SelectableCoords.Clear();
             foreach (Orientation orientation in _orientations)
             {
                 int r = Row;

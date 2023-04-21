@@ -9,14 +9,14 @@ namespace Jackal.Models.Cells
 {
     public class CrocodileCell : Cell
     {
-        public CrocodileCell (int row, int column, Predicate<int[]> continueMove):base(row,column,"Crocodile",false)
+        public CrocodileCell (int row, int column, Func<int[], MovementResult> continueMove):base(row,column,"Crocodile",false)
         {
             _continueMove = continueMove;
         }
 
-        readonly Predicate<int[]> _continueMove;
+        readonly Func<int[], MovementResult> _continueMove;
 
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             int[] coords = pirate.Cell.Coords;
             base.AddPirate(pirate);

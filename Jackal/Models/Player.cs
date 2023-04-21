@@ -11,6 +11,10 @@ using System.IO;
 using Jackal.Models.Pirates;
 using Jackal.Models.Cells;
 using DynamicData;
+using System.Collections.ObjectModel;
+using DynamicData.Binding;
+using DynamicData.Aggregation;
+using System.Reactive.Linq;
 
 namespace Jackal.Models
 {
@@ -25,12 +29,17 @@ namespace Jackal.Models
 
             Alliance = team;
 
-            Pirates = new List<Pirate>()
+            Pirates = new ObservableCollection<Pirate>()
             {
                 new Pirate(this),
                 new Pirate(this),
                 new Pirate(this)
             };
+
+            Pirates.ToObservableChangeSet()
+                   .ToCollection()
+                   .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
+                   .ToPropertyEx(this, p => p.IsEnoughtPirates);
         }
 
         public readonly int Index;
@@ -50,7 +59,9 @@ namespace Jackal.Models
         }
 
 
-        public List<Pirate> Pirates { get; }
+        public ObservableCollection<Pirate> Pirates { get; }
+        [ObservableAsProperty] public bool IsEnoughtPirates { get; }
+
         public ShipCell Ship { get; private set; }
         public void SetShip(ShipCell ship)
         {

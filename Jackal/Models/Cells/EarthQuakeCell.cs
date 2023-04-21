@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jackal.Models.Pirates;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,17 +9,13 @@ namespace Jackal.Models.Cells
 {
     public class EarthQuakeCell : Cell
     {
-        public EarthQuakeCell(int row, int column, Action startEarthQuake) : base(row, column, "Earthquake")
-        {
-            _startEarthQuake = startEarthQuake;
-        }
+        public EarthQuakeCell(int row, int column) : base(row, column, "Earthquake") { }
 
-        readonly Action _startEarthQuake;
-
-        public override void Open()
+        public override MovementResult AddPirate(Pirate pirate)
         {
-            base.Open();
-            _startEarthQuake();
+            MovementResult result = IsOpened ? MovementResult.End : MovementResult.EarthQuake;
+            base.AddPirate(pirate);
+            return result;
         }
     }
 }

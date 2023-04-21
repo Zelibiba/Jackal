@@ -39,24 +39,24 @@ namespace Jackal.Models
   
         public static Pirate? SelectedPirate
         {
-            get => _selectedPirate;
+            get => __selectedPirate;
             set
             {
-                if (_selectedPirate != value)
+                if (__selectedPirate != value)
                 {
-                    if (_selectedPirate != null)
-                        _selectedPirate.IsSelected = false;
+                    if (__selectedPirate != null)
+                        __selectedPirate.IsSelected = false;
 
-                    _selectedPirate = value;
+                    __selectedPirate = value;
 
-                    if (_selectedPirate != null)
-                        _selectedPirate.IsSelected = true;
+                    if (__selectedPirate != null)
+                        __selectedPirate.IsSelected = true;
                     else
                         DeselectInVM?.Invoke();
                 }
             }
         }
-        static Pirate? _selectedPirate;
+        static Pirate? __selectedPirate;
         static bool IsPirateSelected => SelectedPirate != null;
 
 
@@ -66,8 +66,9 @@ namespace Jackal.Models
 
         static bool IsEarthQuake;
         static Cell? EarthQuakeSelectedCell;
+        static bool PirateInMotion { get; set; }
+        public static bool CanChangeSelection => !(PirateInMotion || IsEarthQuake);
 
-        public static bool PirateInMotion { get; private set; }
 
         public static int LostGold { get; set; }
 
@@ -109,15 +110,15 @@ namespace Jackal.Models
 
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
-            Map[1, 5] = new EarthQuakeCell(1, 5, StartEarthQuake);
-            Map[1, 6] = new GoldCell(1, 6, Gold.Gold3);
-            Map[1, 7] = new AirplaneCell(1, 7);
+            Map[1, 5] = new CannibalCell(1, 5);
+            Map[1, 6] = new ArrowCell(1, 6, ArrowType.Side2, 1, ContinueMovePirate);
+            Map[1, 7] = new FortressCell(1, 7, true);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
             Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
             Map[2, 5] = new CrocodileCell(2, 5, ContinueMovePirate);
-            Map[2, 6] = new MazeCell(2, 6, 2);
+            Map[2, 6] = new EarthQuakeCell(2, 6);
             Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -190,16 +191,7 @@ namespace Jackal.Models
         }
 
 
-        public static bool PreSelectPirate(Pirate pirate)
-        {
-            if (!PirateInMotion)
-            {
-                SelectPirate(pirate, true);
-                return true;
-            }
-            return false;
-        }
-        static void SelectPirate(Pirate pirate, bool deselect = false)
+        public static void SelectPirate(Pirate pirate, bool deselect = false)
         {
             Deselect(deselect);
             SelectedPirate = pirate;
@@ -270,16 +262,23 @@ namespace Jackal.Models
 
             OnStartPirateAnimation(cell);
 
-            if (MovePirate(cell))
+            switch (MovePirate(cell))
             {
-                SelectedPirate = null;
-                PirateInMotion = false;
-                NextPlayer();
+                case MovementResult.End:
+                    SelectedPirate = null;
+                    PirateInMotion = false;
+                    NextPlayer();
+                    break;
+                case MovementResult.Continue:
+                    SelectPirate(SelectedPirate); break;
+                case MovementResult.EarthQuake:
+                    SelectedPirate = null;
+                    StartEarthQuake();
+                    PirateInMotion = false;
+                    break;
             }
-            else 
-                SelectPirate(SelectedPirate);
         }
-        static bool ContinueMovePirate(int[] coords)
+        static MovementResult ContinueMovePirate(int[] coords)
         {
             Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
             
@@ -294,7 +293,7 @@ namespace Jackal.Models
             OnStartPirateAnimation(cell);
             return MovePirate(cell);
         }
-        static bool MovePirate(Cell cell)
+        static MovementResult MovePirate(Cell cell)
         {
             SelectedPirate.RemoveFromCell();
             return cell.AddPirate(SelectedPirate);
@@ -355,12 +354,16 @@ namespace Jackal.Models
         {
             IsEarthQuake = true;
             foreach (Cell cell in Map)
-            {
-                if (cell is not SeaCell && cell is not ShipCell &&
-                    cell.Gold == 0 && !cell.Galeon &&
-                    cell.Pirates.Count == 0)
-                    cell.CanBeSelected = true;
-            }
+                cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
+                                     cell.Gold == 0 && !cell.Galeon &&
+                                     cell.Pirates.Count == 0;
+        }
+
+        public static void PirateBirth()
+        {
+            SelectedPirate.GiveBirth();
+            Deselect();
+            NextPlayer();
         }
     }
 }

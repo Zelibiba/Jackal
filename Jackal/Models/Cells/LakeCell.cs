@@ -10,13 +10,13 @@ namespace Jackal.Models.Cells
 {
     internal class LakeCell : Cell
     {
-        public LakeCell(int row, int column, Predicate<int[]> continueMove) : base(row, column, "Lake", false)
+        public LakeCell(int row, int column, Func<int[], MovementResult> continueMove) : base(row, column, "Lake", false)
         {
             _continueMove = continueMove;
             _mapCoords = new List<int[]>();
         }
 
-        readonly Predicate<int[]> _continueMove;
+        readonly Func<int[], MovementResult> _continueMove;
         int _mapSize;
        readonly List<int[]> _mapCoords;
 
@@ -32,7 +32,7 @@ namespace Jackal.Models.Cells
             }
         }
 
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             SelectableCoords.Clear();
             if (pirate.AtHorse)

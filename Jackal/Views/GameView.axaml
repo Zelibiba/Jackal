@@ -48,8 +48,10 @@
 					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
 						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}" IsEnabled="{Binding !!SelectedPirate.Cell.Gold}"
 									  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
-						<ToggleButton Content="G" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.Cell.Galeon}" Margin="0,5,0,0"
+						<ToggleButton Content="G" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.Cell.Galeon}" Margin="0,5,0,5"
 									  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
+						<Button Content="B" IsEnabled="{Binding SelectedPirate.CanHaveSex}" HorizontalAlignment="Stretch"
+								Command="{Binding PirateBirth}"/>
 					</WrapPanel>
 				</Border>
 				<ItemsControl Grid.Column="2" Items="{Binding Players}" BorderBrush="Black" BorderThickness="1">

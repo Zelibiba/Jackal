@@ -18,7 +18,7 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
-            if (_goldType == Jackal.Gold.Galeon)
+            if (_goldType == Models.Gold.Galeon)
                 Galeon = true;
             else
                 Gold = (int)_goldType;

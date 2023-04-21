@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jackal
+namespace Jackal.Models
 {
     public enum Team
     {
@@ -22,6 +22,12 @@ namespace Jackal
         NewPlayer,
         UpdatePlayer,
         DeletePlayer
+    }
+    public enum MovementResult
+    {
+        End,
+        Continue,
+        EarthQuake
     }
     public enum Orientation
     {

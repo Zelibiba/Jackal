@@ -12,11 +12,11 @@ namespace Jackal.Models.Cells
         public CannibalCell(int row, int column) : base(row, column, "Cannibal")
         { }
 
-        public override bool AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
             pirate.Kill();
-            return true;
+            return MovementResult.End;
         }
     }
 }
