@@ -52,11 +52,8 @@ namespace Jackal.Network
                 }
                 _writer.Flush();
 
-                SendToOther(writer =>
-                {
-                    writer.Write(NetMode.NewPlayer);
-                    writer.Write(_player);
-                });
+                SendToOther(NetMode.NewPlayer, writer => 
+                            writer.Write(_player));
 
                 bool continueListening = true;
                 byte[] buffer = new byte[1];
@@ -70,19 +67,13 @@ namespace Jackal.Network
                             await Task.Delay(500);
                             Server.Clients.Remove(this);
                             continueListening = false;
-                            SendToOther(writer =>
-                            {
-                                writer.Write(NetMode.DeletePlayer);
-                                writer.Write(_player.Index);
-                            });
+                            SendToOther(NetMode.DeletePlayer, writer =>
+                                        writer.Write(_player.Index));
                             break;
                         case NetMode.UpdatePlayer:
                             _player.Copy(_reader.ReadPlayer());
-                            SendToOther(writer =>
-                            {
-                                writer.Write(NetMode.UpdatePlayer);
-                                writer.Write(_player);
-                            });
+                            SendToOther(NetMode.UpdatePlayer, writer =>
+                                        writer.Write(_player));
                             break;
                     }
                 }
@@ -112,13 +103,14 @@ namespace Jackal.Network
             _listening.Wait();
         }
 
-        void SendToOther(Action<BinaryWriter> messageFunc)
+        void SendToOther(NetMode netMode, Action<BinaryWriter> messageFunc)
         {
             foreach(ClientListener client in Server.Clients)
             {
                 if (client == this)
                     continue;
 
+                client._writer.Write(netMode);
                 messageFunc(client._writer);
                 client._writer.Flush();
             }

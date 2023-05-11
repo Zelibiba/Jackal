@@ -17,11 +17,29 @@ namespace Jackal.Models
     /// </summary>
     public static class Game
     {
+        /// <summary>
+        /// Размер карты.
+        /// </summary>
         public static readonly int MapSize = 13;
+        /// <summary>
+        /// Карта.
+        /// </summary>
+        /// <remarks>
+        /// Представляяет собой массив клеток типа <see cref="Cell"/>.
+        /// </remarks>
         public static ObservableMap Map { get; private set; }
 
+        /// <summary>
+        /// Лист игроков.
+        /// </summary>
         public static ObservableCollection<Player> Players { get; } = new ObservableCollection<Player>();
+        /// <summary>
+        /// Игрок, активный в текущий момент.
+        /// </summary>
         static Player CurrentPlayer => Players[CurrentPlayerNumber];
+        /// <summary>
+        /// Номер текущего игрока в списке.
+        /// </summary>
         static int CurrentPlayerNumber
         {
             get => __currentPlayerNumber;
@@ -36,7 +54,13 @@ namespace Jackal.Models
             }
         }
         static int __currentPlayerNumber;
-  
+
+        /// <summary>
+        /// Пират, выбранный на текущий момент.
+        /// </summary>
+        /// <remarks>
+        /// Содержит логику.
+        /// </remarks>
         public static Pirate? SelectedPirate
         {
             get => __selectedPirate;
@@ -52,29 +76,56 @@ namespace Jackal.Models
                     if (__selectedPirate != null)
                         __selectedPirate.IsSelected = true;
                     else
-                        DeselectInVM?.Invoke();
+                        DeselectPirate?.Invoke();
                 }
             }
         }
         static Pirate? __selectedPirate;
+        /// <summary>
+        /// Флаг того, что какой-то пират выбран.
+        /// </summary>
         static bool IsPirateSelected => SelectedPirate != null;
 
-
+        /// <summary>
+        /// Корабль, выбранный на текущий момент.
+        /// </summary>
         static ShipCell? SelectedShip { get; set; }
+        /// <summary>
+        /// Флаг того, что какой-то корабль выбран.
+        /// </summary>
         static bool IsShipSelected => SelectedShip != null;
 
-
+        /// <summary>
+        /// Флаг того, что происходит землетрясение.
+        /// </summary>
         static bool IsEarthQuake;
+        /// <summary>
+        /// Клетка, выбранная в течение землетрясения.
+        /// </summary>
         static Cell? EarthQuakeSelectedCell;
+        /// <summary>
+        /// Флаг того, что некоторый пират начал ходить.
+        /// </summary>
+        /// <remarks>
+        /// Необходим для блокировки выбора других пиратов и корабля.
+        /// </remarks>
         static bool PirateInMotion { get; set; }
+        /// <summary>
+        /// Флаг того, что можно выбрать другого пирата или снять выделение.
+        /// </summary>
         public static bool CanChangeSelection => !(PirateInMotion || IsEarthQuake);
 
-
+        /// <summary>
+        /// Счётчик потерянного золота.
+        /// </summary>
         public static int LostGold { get; set; }
 
+        /// <summary>
+        /// Метод инициализирует игру.
+        /// </summary>
         public static void CreateMap()
         {
-            #region создание каркаса
+            #region создание каркаса карты
             Map = new ObservableMap(MapSize);
             for(int i = 0; i < MapSize; i++)
             {
@@ -101,11 +152,11 @@ namespace Jackal.Models
                 ShipRegions[0].Item2[i] = new int[2] { 0, i + 2 };
                 ShipRegions[1].Item2[i] = new int[2] { i + 2, 12 };
                 ShipRegions[2].Item2[i] = new int[2] { 12, i + 2 };
-                ShipRegions[3].Item2[i] = new int[2] { 12, i + 2 };
+                ShipRegions[3].Item2[i] = new int[2] { i + 2, 0 };
             }
             #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White) { Turn = true });
+            Players.Add(new Player(0, "TEST", Team.White) { Turn = true, Bottles=10 });
             Players.Add(new Player(1, "AETHNAETRN", Team.Red));
 
 
@@ -124,6 +175,9 @@ namespace Jackal.Models
                 cell.SetSelectableCoords(Map);
         }
 
+        /// <summary>
+        /// Метод передаёт ход следующему игроку.
+        /// </summary>
         static void NextPlayer()
         {
             CurrentPlayer.Turn = false;
@@ -131,13 +185,24 @@ namespace Jackal.Models
             CurrentPlayer.Turn = true;
         }
 
+        /// <summary>
+        /// Делегат для блокировки интерфейса.
+        /// </summary>
         public static Action<bool>? SetIsEnable;
+        /// <summary>
+        /// Метод проверки возможности выбора клетки.
+        /// </summary>
+        /// <param name="cell">Выбираемая клетка.</param>
         public static void PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
-                cell is ShipCell ship && ship.CanMove && !PirateInMotion)
+                cell is ShipCell ship && ship.CanMove && CanChangeSelection)
                 SelectCell(cell);
         }
+        /// <summary>
+        /// Метод выбора клетки.
+        /// </summary>
+        /// <param name="cell">Выбираемая клетка.</param>
         static void SelectCell(Cell cell)
         {
             Task.Run(() =>
@@ -157,6 +222,10 @@ namespace Jackal.Models
                 SetIsEnable?.Invoke(true);
             });
         }
+        /// <summary>
+        /// Метод выбора корабля.
+        /// </summary>
+        /// <param name="cell">Выбираемый корабль.</param>
         static void SelectShip(Cell cell)
         {
             Deselect();
@@ -164,6 +233,10 @@ namespace Jackal.Models
             foreach (int[] coords in SelectedShip.MovableCoords)
                 Map[coords].CanBeSelected = true;
         }
+        /// <summary>
+        /// Метод выбора клетки во время землетрясения.
+        /// </summary>
+        /// <param name="cell">Выбираемая клетка.</param>
         static void SelectEarthQuakeCell(Cell cell)
         {
             if (cell.IsSelected)
@@ -191,20 +264,29 @@ namespace Jackal.Models
         }
 
 
+        /// <summary>
+        /// Метод выбора пирата.
+        /// </summary>
+        /// <param name="pirate">Выбираемый пират.</param>
+        /// <param name="deselect">Флаг того, необходимо ли снять выделение с предыдущего пирата.</param>
         public static void SelectPirate(Pirate pirate, bool deselect = false)
         {
             Deselect(deselect);
             SelectedPirate = pirate;
-            foreach (int[] coords in pirate.Cell.SelectableCoords)
+            foreach (int[] coords in pirate.SelectableCoords)
             {
                 Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
 
                 if (SelectedPirate.Treasure)
-                    cell.CanBeSelected = cell.IsGoldFriendly();
+                    cell.CanBeSelected = cell.IsGoldFriendly(pirate);
                 else
                     cell.CanBeSelected = true;
             }
         }
+        /// <summary>
+        /// Метод перевыделения пирата при изменении параметров перетаскивания сокровища.
+        /// </summary>
+        /// <param name="param">Тип перетаскиваемого сокровища.</param>
         public static void ReselctPirate(string param)
         {
             if (param == "gold")
@@ -213,12 +295,16 @@ namespace Jackal.Models
                 SelectedPirate.Galeon = !SelectedPirate.Galeon;
             SelectPirate(SelectedPirate);
         }
+        /// <summary>
+        /// Метод отмены возможности выделения с клеток.
+        /// </summary>
+        /// <param name="deselect">Флаг того, что необходимо отменить выделения текущего пирата или корабля.</param>
         public static void Deselect(bool deselect = true)
         {
             if (SelectedPirate != null)
             {
-                foreach (int[] coords in SelectedPirate.Cell.SelectableCoords)
-                    Map[coords].CanBeSelected = false;
+                foreach (int[] coords in SelectedPirate.SelectableCoords)
+                    Map[coords].GetSelectedCell(SelectedPirate).CanBeSelected = false;
 
                 if (deselect)
                     SelectedPirate = null;
@@ -237,10 +323,20 @@ namespace Jackal.Models
                     cell.CanBeSelected = false;
             }
         }
-        public static Action? DeselectInVM;
+        /// <summary>
+        /// Делегат для отмены выделения текущего пирата в интерфейсе.
+        /// </summary>
+        public static Action? DeselectPirate;
 
 
+        /// <summary>
+        /// Делегат запуска анимации перемещения пирата.
+        /// </summary>
         public static Func<Cell,Task>? StartPirateAnimation;
+        /// <summary>
+        /// Метод запуска анимации перемещения пирата.
+        /// </summary>
+        /// <param name="cell">Клетка, куда перемещается пират.</param>
         static void OnStartPirateAnimation(Cell cell)
         {
             if (StartPirateAnimation != null)
@@ -251,6 +347,10 @@ namespace Jackal.Models
                 SelectedPirate.IsVisible = true;
             }
         }
+        /// <summary>
+        /// Метод обработки перемещения пирата.
+        /// </summary>
+        /// <param name="cell">Клетка, куда перемещается пират.</param>
         static void StartMovePirate(Cell cell)
         {
             SelectedPirate.TargetCell = cell;
@@ -278,11 +378,16 @@ namespace Jackal.Models
                     break;
             }
         }
+        /// <summary>
+        /// Метод безусловного продолжения перемещения пирата.
+        /// </summary>
+        /// <param name="coords">Координаты клетки, куда перемещается пират.</param>
+        /// <returns></returns>
         static MovementResult ContinueMovePirate(int[] coords)
         {
             Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
             
-            if(!cell.IsGoldFriendly())
+            if(!cell.IsGoldFriendly(SelectedPirate))
             {
                 if (SelectedPirate.Gold)
                     SelectedPirate.Gold = false;
@@ -293,6 +398,11 @@ namespace Jackal.Models
             OnStartPirateAnimation(cell);
             return MovePirate(cell);
         }
+        /// <summary>
+        /// Метод перемещения пирата.
+        /// </summary>
+        /// <param name="cell">Клетка, куда перемещается пират.</param>
+        /// <returns>Флаг действия, которое необходимо выполнить.</returns>
         static MovementResult MovePirate(Cell cell)
         {
             SelectedPirate.RemoveFromCell();
@@ -300,13 +410,24 @@ namespace Jackal.Models
         }
 
 
-
+        /// <summary>
+        /// Делегат запуска анимации премещения клеток.
+        /// </summary>
         public static Func<Cell, Cell, Task>? StartCellAnimation;
+        /// <summary>
+        /// Метод запуска анимации премещения клеток.
+        /// </summary>
+        /// <param name="cell1">Первая перемещаемая клетка.</param>
+        /// <param name="cell2">Вторая перемещаемая клетка.</param>
         static void OnStartCellAnimation(Cell cell1, Cell cell2)
         {
             if (StartCellAnimation != null)
                 Dispatcher.UIThread.InvokeAsync(() => StartCellAnimation(cell1, cell2)).Wait();
         }
+        /// <summary>
+        /// Метод перемещения корабля.
+        /// </summary>
+        /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
         static void MoveShip(Cell newCell)
         {
             Deselect(false);
@@ -334,6 +455,11 @@ namespace Jackal.Models
             SelectedShip = null;
             NextPlayer();
         }
+        /// <summary>
+        /// Метод для перемены двух клеток местами.
+        /// </summary>
+        /// <param name="cell1">Первая перемещаемая клетка.</param>
+        /// <param name="cell2">Вторая перемещаемая клетка.</param>
         static void SwapCells(Cell cell1, Cell cell2)
         {
             int[] coords1 = cell1.Coords;
@@ -350,6 +476,9 @@ namespace Jackal.Models
             OnStartCellAnimation(cell1, cell2);
         }
 
+        /// <summary>
+        /// Метод запуска землетрясения.
+        /// </summary>
         static void StartEarthQuake()
         {
             IsEarthQuake = true;
@@ -359,6 +488,9 @@ namespace Jackal.Models
                                      cell.Pirates.Count == 0;
         }
 
+        /// <summary>
+        /// Метод рождения пирата.
+        /// </summary>
         public static void PirateBirth()
         {
             SelectedPirate.GiveBirth();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jackal.Models.Pirates;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,8 +14,11 @@ namespace Jackal.Models.Cells
             Putana = putana;
         }
 
+        /// <summary>
+        /// Флаг того, что крепость содержит путану.
+        /// </summary>
         public bool Putana { get; }
 
-        public override bool IsGoldFriendly() => false;
+        public override bool IsGoldFriendly(Pirate pirate) => false;
     }
 }

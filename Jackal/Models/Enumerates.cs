@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Jackal.Models
 {
+    /// <summary>
+    /// Перечисление команд.
+    /// </summary>
     public enum Team
     {
         None = 0,
@@ -15,6 +18,9 @@ namespace Jackal.Models
         Black = 8
     }
 
+    /// <summary>
+    /// Перечисление типов сообщений клиент-сервер.
+    /// </summary>
     public enum NetMode
     {
         None,
@@ -23,12 +29,18 @@ namespace Jackal.Models
         UpdatePlayer,
         DeletePlayer
     }
+    /// <summary>
+    /// Перечисление результатов перемещения пирата.
+    /// </summary>
     public enum MovementResult
     {
-        End,
-        Continue,
-        EarthQuake
+        End,        // Полный конец движения
+        Continue,   // Необходимо выбрать клетку, куда перемещаться дальше
+        EarthQuake  // Происходит землетрясение.
     }
+    /// <summary>
+    /// Перечисление ориентаций поворота клетки.
+    /// </summary>
     public enum Orientation
     {
         None = 0,
@@ -41,6 +53,9 @@ namespace Jackal.Models
         LeftUp = Left | Up,         // 9
         LeftDown = Left | Down      // 12
     }
+    /// <summary>
+    /// Перечисление типов стрелок.
+    /// </summary>
     public enum ArrowType
     {
         Side1,
@@ -51,6 +66,9 @@ namespace Jackal.Models
         Angle3,
         Angle4
     }
+    /// <summary>
+    /// Перечисление типов клеток с сокровищем.
+    /// </summary>
     public enum Gold
     {
         Gold1 = 1,
@@ -60,6 +78,9 @@ namespace Jackal.Models
         Gold5,
         Galeon
     }
+    /// <summary>
+    /// Перечисление типов местных жителей.
+    /// </summary>
     public enum ResidentType
     {
         Ben,

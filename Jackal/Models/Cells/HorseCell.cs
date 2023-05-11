@@ -9,9 +9,11 @@ namespace Jackal.Models.Cells
     public class HorseCell : Cell
     {
         public HorseCell(int row, int column) : base(row, column, "Horse", false)
-        {
-        }
+        { }
 
+        /// <summary>
+        /// Массив относительных координат хода конём.
+        /// </summary>
         public static readonly int[][] SelectableCoordsPattern = new int[8][]
         {
             new int[2] { -2,  1 },

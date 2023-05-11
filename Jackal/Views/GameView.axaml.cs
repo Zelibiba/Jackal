@@ -89,8 +89,8 @@ namespace Jackal.Views
             double[] y = new double[2];
             for (int i = 0; i < 2; i++)
             {
-                y[i] = cells[i].Row * ÑellSize + (pirateNumbers[i] / 3) * PirateAnimator.Bounds.Height + 7;
-                x[i] = cells[i].Column * ÑellSize + (pirateNumbers[i] % 3) * PirateAnimator.Bounds.Width + 3;
+                y[i] = cells[i].Row * ÑellSize + (pirateNumbers[i] / 3) * PirateAnimator.Height + 7;
+                x[i] = cells[i].Column * ÑellSize + (pirateNumbers[i] % 3) * PirateAnimator.Width + 3;
             }
 
             _pirateAnimation.Children[0].Setters[0].Value = new Thickness(x[0], y[0], 0, 0);

@@ -45,7 +45,7 @@ namespace Jackal.ViewModels
 
             IsEnabled = true;
             Game.CreateMap();
-            Game.DeselectInVM = () => SelectedPirate = Pirate.Empty;
+            Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
             Game.SetIsEnable = (isEnabled) => IsEnabled = isEnabled;
             SelectedPirate = Pirate.Empty;
 

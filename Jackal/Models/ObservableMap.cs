@@ -55,6 +55,11 @@ namespace Jackal.Models
             }
         }
 
+        /// <summary>
+        /// Метод проверяет, не вышли ли индексы за границы массива.
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
         void CheckIndexes(int row, int column)
         {
             if (row < 0 || column < 0 || row >= MapSize || column >= MapSize)

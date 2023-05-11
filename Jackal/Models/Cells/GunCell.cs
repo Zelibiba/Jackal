@@ -13,9 +13,7 @@ namespace Jackal.Models.Cells
         {
             _continueMove = continueMove;
             _orientation = Orientation.Up;
-            List<Orientation> list = new List<Orientation>() { _orientation };
-            _angle = (this as IOrientable).Rotate(rotation, ref list);
-            _orientation = list[0];
+            _angle = (this as IOrientable).Rotate(rotation, ref _orientation);
         }
 
         readonly Func<int[], MovementResult> _continueMove;

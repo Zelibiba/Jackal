@@ -18,7 +18,7 @@ namespace Jackal.Models.Cells
 
         readonly Func<int[], MovementResult> _continueMove;
         int _mapSize;
-       readonly List<int[]> _mapCoords;
+        readonly List<int[]> _mapCoords;
 
         public override void SetSelectableCoords(ObservableMap map)
         {

@@ -13,15 +13,15 @@ namespace Jackal.Models.Cells
         public AirplaneCell(int row, int column) : base(row, column, "Airplane")
         {
             IsActive = true;
-            _opening = true;
         }
 
+        /// <summary>
+        /// Флаг того, что самолёт может быть использован.
+        /// </summary>
         public bool IsActive { get; private set; }
-        bool _opening;
 
         public override void RemovePirate(Pirate pirate)
         {
-            _opening = false;
             base.RemovePirate(pirate);
 
             if (pirate.TargetCell == this)
@@ -35,8 +35,9 @@ namespace Jackal.Models.Cells
         }
         public override MovementResult AddPirate(Pirate pirate)
         {
+            bool isOpened = IsOpened;
             base.AddPirate(pirate);
-            return _opening ? MovementResult.Continue : MovementResult.End;
+            return isOpened ? MovementResult.End : MovementResult.Continue;
         }
         public override void SetSelectableCoords(ObservableMap map)
         {
@@ -45,8 +46,7 @@ namespace Jackal.Models.Cells
             {
                 for (int j = 0; j < map.MapSize; j++)
                 {
-                    if (map[i, j] is not SeaCell && map[i, j] is not ShipCell
-                        && !(HasSameCoords(i, j) && !_opening))
+                    if (map[i, j] is not SeaCell && map[i, j] is not ShipCell)
                         SelectableCoords.Add(new int[2] { i, j });
                 }
             }

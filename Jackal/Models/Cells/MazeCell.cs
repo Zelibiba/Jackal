@@ -48,14 +48,10 @@ namespace Jackal.Models.Cells
                  .AutoRefresh(cell => cell.CanBeSelected)
                  .Subscribe(_ =>
                  {
-                     foreach (Cell cell in Nodes)
-                     {
-                         if (cell.CanBeSelected)
-                         {
-                             CanBeSelected = true;
-                             break;
-                         }
-                     }
+                     bool result = false;
+                     for (int i = 0; i < Nodes.Count && !result; i++)
+                         result |= Nodes[i].CanBeSelected;
+                     CanBeSelected = result;
                  });
             this.WhenAnyValue(cell => cell.CanBeSelected)
                 .Where(x => !x)

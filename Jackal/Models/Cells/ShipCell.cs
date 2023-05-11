@@ -24,14 +24,23 @@ namespace Jackal.Models.Cells
                 throw new ArgumentException("Wrong ship orientation!");
         }
 
-        public readonly Orientation Orientation;
+        /// <summary>
+        /// Направление выхода с корабля.
+        /// </summary>
+        readonly public Orientation Orientation;
         readonly int[][] _shipRegion;
+        /// <summary>
+        /// Координаты, на которые корабль может переместиться.
+        /// </summary>
         readonly public List<int[]> MovableCoords;
 
         public override bool IsShip => true;
         readonly Player _owner;
         public Player Manager { get; private set; }
         public override Team ShipTeam => _owner.Team;
+        /// <summary>
+        /// Флаг того, что корабль может перемещаться.
+        /// </summary>
         public bool CanMove => Pirates.Any(pirate => pirate.IsFighter);
 
         public override int Gold

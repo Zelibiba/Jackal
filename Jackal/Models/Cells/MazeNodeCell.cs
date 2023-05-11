@@ -15,7 +15,7 @@ namespace Jackal.Models.Cells
             Number = step;
         }
 
-        MazeCell _owner;
+        readonly MazeCell _owner;
 
         public override void Open()
         {

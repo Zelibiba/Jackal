@@ -12,9 +12,7 @@ namespace Jacal.Converters
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value == null)
-                return 0;
-            switch (value.ToString())
+            switch (value?.ToString())
             {
                 case "White":
                     return Brush.Parse("AntiqueWhite");
@@ -32,8 +30,9 @@ namespace Jacal.Converters
                     return Brush.Parse("Blue");
                 case "DrunkMissioner":
                     return Brush.Parse("LightBlue");
+                default:
+                    return Brush.Parse("Transparent");
             }
-            return 0;
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
