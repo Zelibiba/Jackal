@@ -24,9 +24,9 @@ namespace Jacal.Converters
                     return Brush.Parse("#FF3A3A3A");
                 case "Green":
                     return Brush.Parse("Green");
-                case "Brown":
+                case "Friday":
                     return Brush.Parse("Brown");
-                case "Blue":
+                case "Missioner":
                     return Brush.Parse("Blue");
                 case "DrunkMissioner":
                     return Brush.Parse("LightBlue");

@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jackal.Models
+namespace Jackal.Models.Cells
 {
     /// <summary>
     /// Интерфейс для клеток с изменяемой ориетнацией.
     /// </summary>
-    internal interface IOrientable
+    internal interface IOrientableCell
     {
         /// <summary>
         /// Метод поворачивает клетку и изменяет её ориентацию.

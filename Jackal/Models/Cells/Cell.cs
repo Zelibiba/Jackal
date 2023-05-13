@@ -26,11 +26,12 @@ namespace Jackal.Models.Cells
         /// <param name="column">Колонка клетки.</param>
         /// <param name="image">Название изображения клетки.</param>
         /// <param name="isStandable">Флаг того, что пират может стоять на клетке.</param>
-        public Cell(int row, int column, string image, bool isStandable = true)
+        public Cell(int row, int column, string image, bool isStandable = true, int angle = 0)
         {
             Row = row;
             Column= column;
             Image = image;
+            Angle = angle;
             Pirates = new ObservableCollection<Pirate>();
             SelectableCoords = new List<int[]>();
 
@@ -50,14 +51,12 @@ namespace Jackal.Models.Cells
         /// <returns>Копия клетки.</returns>
         public static Cell Copy(Cell cell)
         {
-            Cell _cell = new(cell.Row, cell.Column, cell.Image)
+            return new Cell(cell.Row, cell.Column, cell.Image, angle: cell.Angle)
             {
                 Pirates = cell.Pirates,
                 IsOpened = cell.IsOpened,
                 IsVisible = cell.IsVisible
             };
-
-            return _cell;
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Угол, на который повёрнута клетка.
         /// </summary>
-        public virtual int Angle => 0;
+        public virtual int Angle { get; }
         /// <summary>
         /// Строка клетки.
         /// </summary>

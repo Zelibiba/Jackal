@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Jackal.Models.Cells
 {
-    public class ArrowCell : Cell, IOrientable
+    public class ArrowCell : Cell, IOrientableCell
     {
         public ArrowCell(int row, int column, ArrowType arrowType, int rotation, Func<int[], MovementResult> continueMove) : base(row, column, "Arrow" + arrowType.ToString(), false)
         {
@@ -50,7 +50,7 @@ namespace Jackal.Models.Cells
                     break;
             }
 
-            _angle = (this as IOrientable).Rotate(rotation, ref _orientations);
+            _angle = (this as IOrientableCell).Rotate(rotation, ref _orientations);
         }
 
         readonly Func<int[], MovementResult> _continueMove;

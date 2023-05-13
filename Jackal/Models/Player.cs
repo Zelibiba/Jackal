@@ -38,17 +38,14 @@ namespace Jackal.Models
 
             Alliance = team;
 
-            Pirates = new ObservableCollection<Pirate>()
-            {
-                new Pirate(this),
-                new Pirate(this),
-                new Pirate(this)
-            };
-
+            Pirates = new ObservableCollection<Pirate>();
             Pirates.ToObservableChangeSet()
                    .ToCollection()
                    .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
                    .ToPropertyEx(this, p => p.IsEnoughtPirates);
+            Pirates.Add(new Pirate(this));
+            Pirates.Add(new Pirate(this));
+            Pirates.Add(new Pirate(this));
         }
 
         /// <summary>
@@ -130,5 +127,9 @@ namespace Jackal.Models
         /// Количество бутылок с ромом у игрока.
         /// </summary>
         [Reactive] public int Bottles { get; set; }
+        /// <summary>
+        /// Флаг того, что игрок может пользоваться ромом.
+        /// </summary>
+        public bool CanUseRum => Bottles > 0;
     }
 }

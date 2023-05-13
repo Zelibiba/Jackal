@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Jackal.Models.Cells
 {
-    public class GunCell : Cell, IOrientable
+    public class GunCell : Cell, IOrientableCell
     {
         public GunCell(int row, int column, int rotation, Func<int[], MovementResult> continueMove) : base(row, column, "Gun", false)
         {
             _continueMove = continueMove;
             _orientation = Orientation.Up;
-            _angle = (this as IOrientable).Rotate(rotation, ref _orientation);
+            _angle = (this as IOrientableCell).Rotate(rotation, ref _orientation);
         }
 
         readonly Func<int[], MovementResult> _continueMove;

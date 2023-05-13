@@ -77,7 +77,7 @@ namespace Jackal.ViewModels
         {
             if (Game.CanChangeSelection)
             {
-                Game.SelectPirate(pirate, true);
+                Game.SelectPirate(pirate);
                 SelectedPirate = pirate;
             }
         }
@@ -88,6 +88,7 @@ namespace Jackal.ViewModels
         }
 
         public void GrabTreasure(string param) => Game.ReselctPirate(param);
+        public void GetPirateDrunk(object param) => Game.GetPirateDrunk();
         public void PirateBirth(object param) => Game.PirateBirth();
     }
 }

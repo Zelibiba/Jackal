@@ -111,9 +111,13 @@ namespace Jackal.Models
         /// </remarks>
         static bool PirateInMotion { get; set; }
         /// <summary>
+        /// Флаг того, что пирата напоили ромом.
+        /// </summary>
+        static bool PirateIsDrunk { get; set; }
+        /// <summary>
         /// Флаг того, что можно выбрать другого пирата или снять выделение.
         /// </summary>
-        public static bool CanChangeSelection => !(PirateInMotion || IsEarthQuake);
+        public static bool CanChangeSelection => !(PirateInMotion || PirateIsDrunk || IsEarthQuake);
 
         /// <summary>
         /// Счётчик потерянного золота.
@@ -156,12 +160,12 @@ namespace Jackal.Models
             }
             #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White) { Turn = true, Bottles=10 });
+            Players.Add(new Player(0, "TEST", Team.White) { Turn = true });
             Players.Add(new Player(1, "AETHNAETRN", Team.Red));
 
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
-            Map[1, 5] = new CannibalCell(1, 5);
+            Map[1, 5] = new MazeCell(1, 5, 3);
             Map[1, 6] = new ArrowCell(1, 6, ArrowType.Side2, 1, ContinueMovePirate);
             Map[1, 7] = new FortressCell(1, 7, true);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
@@ -174,6 +178,9 @@ namespace Jackal.Models
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
         }
+
+
+
 
         /// <summary>
         /// Метод передаёт ход следующему игроку.
@@ -358,6 +365,8 @@ namespace Jackal.Models
             {
                 PirateInMotion = true;
                 SelectedPirate.Set_StartCell();
+                if (PirateIsDrunk)
+                    PirateIsDrunk = false;
             }
 
             OnStartPirateAnimation(cell);
@@ -486,6 +495,15 @@ namespace Jackal.Models
                 cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
                                      cell.Gold == 0 && !cell.Galeon &&
                                      cell.Pirates.Count == 0;
+        }
+
+        public static void GetPirateDrunk()
+        {
+            PirateIsDrunk = true;
+            CurrentPlayer.Bottles--;
+            Deselect(false);
+            SelectedPirate.IsDrunk = true;
+            SelectPirate(SelectedPirate);
         }
 
         /// <summary>

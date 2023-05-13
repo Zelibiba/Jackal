@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 
 namespace Jackal.Models.Cells
 {
-    public class MazeNodeCell : Cell
+    public class MazeNodeCell : Cell, ITrapCell
     {
         public MazeNodeCell(int row, int column, MazeCell owner, int step) : base(row, column, string.Empty)
         {
             _owner = owner;
             Number = step;
+            AltSelectableCoords = new List<int[]>();
         }
 
         readonly MazeCell _owner;
+        public List<int[]> AltSelectableCoords { get; }
 
         public override void Open()
         {
@@ -26,7 +28,9 @@ namespace Jackal.Models.Cells
 
         public override void RemovePirate(Pirate pirate)
         {
-            if (_owner.Nodes.Count == Number)
+            //if (_owner.Nodes.Count == Number)
+            //    _owner.Pirates.Remove(pirate);
+            if(!_owner.Nodes.Contains(pirate.TargetCell))
                 _owner.Pirates.Remove(pirate);
             base.RemovePirate(pirate);
         }
@@ -46,6 +50,8 @@ namespace Jackal.Models.Cells
                 SelectableCoords.Clear();
                 SelectableCoords.Add(Coords);
             }
+            AltSelectableCoords.Clear();
+            AltSelectableCoords.AddRange(_owner.SelectableCoords);
         }
     }
 }

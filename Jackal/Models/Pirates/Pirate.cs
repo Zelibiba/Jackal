@@ -71,11 +71,12 @@ namespace Jackal.Models.Pirates
                                   .Skip(1)
                                   .Select(cell => cell.Number)
                                   .ToProperty(this, p => p.MazeNodeNumber);
-            this.WhenAnyValue(p => p.Cell, p => p.Manager.IsEnoughtPirates)
-                .Select(x => x.Item1 is FortressCell fortress && fortress.Putana && !x.Item2)
+            this.WhenAnyValue(p => p.Cell, p => p.Manager.IsEnoughtPirates,
+                (cell,isEnought) => cell is FortressCell fortress && fortress.Putana && !isEnought)
                 .ToPropertyEx(this, p => p.CanHaveSex);
             this.WhenAnyValue(p => p.MazeNodeNumber)
-                .Select(number => number > 0 && number < (Cell?.Number ?? 0))
+                .Select(number => Manager.CanUseRum &&
+                                  number > 0)
                 .ToPropertyEx(this, p => p.CanDrinkRum);
         }
 
@@ -149,7 +150,15 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
         /// </summary>
-        public List<int[]> SelectableCoords => Cell.SelectableCoords;
+        public List<int[]> SelectableCoords
+        {
+            get
+            {
+                if (IsDrunk)
+                    return (Cell as ITrapCell).AltSelectableCoords;
+                return Cell.SelectableCoords;
+            }
+        }
 
         /// <summary>
         /// Флаг того, что пират перемещается конём.
@@ -183,31 +192,20 @@ namespace Jackal.Models.Pirates
         /// Флаг того, что пират может сражаться и управлять кораблём.
         /// </summary>
         readonly public bool IsFighter;
-        /// <summary>
-        /// Флаг того, что пират может родить пирата.
-        /// </summary>
-        [ObservableAsProperty] public virtual bool CanHaveSex { get; }
+
         /// <summary>
         /// Флаг того, что пират может выпить ром.
         /// </summary>
         [ObservableAsProperty] public bool CanDrinkRum { get; }
-
-
-        public bool IsBlocked => false;
+        /// <summary>
+        /// Флаг того, что пират выпил ром.
+        /// </summary>
+        public bool IsDrunk { get; set; }
 
         /// <summary>
-        /// Метод удаляет пирата с клетки, на которой он находится.
+        /// Флаг того, что пират может родить пирата.
         /// </summary>
-        public void RemoveFromCell() => Cell.RemovePirate(this);
-
-        /// <summary>
-        /// Метод убивает пирата.
-        /// </summary>
-        public void Kill()
-        {
-            Cell.Pirates.Remove(this);
-            Manager.Pirates.Remove(this);
-        }
+        [ObservableAsProperty] public virtual bool CanHaveSex { get; }
         /// <summary>
         /// Метод рождает нового пирата рядом с данным пиратом.
         /// </summary>
@@ -216,6 +214,28 @@ namespace Jackal.Models.Pirates
             Pirate newPirate = new(Owner, Manager);
             Cell.AddPirate(newPirate);
             Manager.Pirates.Add(newPirate);
+        }
+
+
+        public bool IsBlocked => false;
+
+        /// <summary>
+        /// Метод удаляет пирата с клетки, на которой он находится.
+        /// </summary>
+        public void RemoveFromCell()
+        {
+            if (IsDrunk)
+                IsDrunk = false;
+            Cell.RemovePirate(this);
+        }
+
+        /// <summary>
+        /// Метод убивает пирата.
+        /// </summary>
+        public void Kill()
+        {
+            Cell.Pirates.Remove(this);
+            Manager.Pirates.Remove(this);
         }
     }
 }
