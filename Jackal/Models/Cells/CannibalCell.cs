@@ -15,7 +15,8 @@ namespace Jackal.Models.Cells
         public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
-            pirate.Kill();
+            if (pirate is not Friday)
+                pirate.Kill();
             return MovementResult.End;
         }
     }

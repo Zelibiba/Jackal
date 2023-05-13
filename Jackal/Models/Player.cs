@@ -24,6 +24,12 @@ namespace Jackal.Models
     public class Player : ReactiveObject
     {
         /// <summary>
+        /// Заглушка игрока для корректной работы <see cref="Pirate.Empty"/>
+        /// </summary>
+        public Player() { }
+
+
+        /// <summary>
         /// конструктор игрока.
         /// </summary>
         /// <param name="index">Индекс игрока.</param>
@@ -46,6 +52,7 @@ namespace Jackal.Models
             Pirates.Add(new Pirate(this));
             Pirates.Add(new Pirate(this));
             Pirates.Add(new Pirate(this));
+            Pirates.Add(new Friday(this));
         }
 
         /// <summary>
@@ -130,6 +137,6 @@ namespace Jackal.Models
         /// <summary>
         /// Флаг того, что игрок может пользоваться ромом.
         /// </summary>
-        public bool CanUseRum => Bottles > 0;
+        public bool RumIsBlocked { get; set; }
     }
 }

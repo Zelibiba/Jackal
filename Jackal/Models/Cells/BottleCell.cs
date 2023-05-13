@@ -21,7 +21,15 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
-            Pirates[0].Owner.Bottles += _count;
+            int bottles = _count;
+            Pirate pirate = Pirates[0];
+            if (pirate is Friday)
+            {
+                bottles--;
+                pirate.Kill();
+            }
+
+            pirate.Owner.Bottles += bottles;
         }
     }
 }

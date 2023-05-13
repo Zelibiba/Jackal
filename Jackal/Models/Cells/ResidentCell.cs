@@ -24,6 +24,8 @@ namespace Jackal.Models.Cells
             {
                 case ResidentType.Ben:
                     AddPirate(new Ben(owner)); break;
+                case ResidentType.Friday:
+                    AddPirate(new Friday(owner)); break;
             }
         }
     }

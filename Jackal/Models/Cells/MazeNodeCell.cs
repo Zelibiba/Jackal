@@ -28,8 +28,6 @@ namespace Jackal.Models.Cells
 
         public override void RemovePirate(Pirate pirate)
         {
-            //if (_owner.Nodes.Count == Number)
-            //    _owner.Pirates.Remove(pirate);
             if(!_owner.Nodes.Contains(pirate.TargetCell))
                 _owner.Pirates.Remove(pirate);
             base.RemovePirate(pirate);

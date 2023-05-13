@@ -18,7 +18,11 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Заглушка пирата для корректной работы интерфейса.
         /// </summary>
-        public static readonly Pirate Empty = new() { IsVisible = true };
+        public static readonly Pirate Empty = new()
+        {
+            IsVisible = true,
+            Manager = new Player()
+        };
         public Pirate() { }
 
         /// <summary>
@@ -71,13 +75,6 @@ namespace Jackal.Models.Pirates
                                   .Skip(1)
                                   .Select(cell => cell.Number)
                                   .ToProperty(this, p => p.MazeNodeNumber);
-            this.WhenAnyValue(p => p.Cell, p => p.Manager.IsEnoughtPirates,
-                (cell,isEnought) => cell is FortressCell fortress && fortress.Putana && !isEnought)
-                .ToPropertyEx(this, p => p.CanHaveSex);
-            this.WhenAnyValue(p => p.MazeNodeNumber)
-                .Select(number => Manager.CanUseRum &&
-                                  number > 0)
-                .ToPropertyEx(this, p => p.CanDrinkRum);
         }
 
         /// <summary>
@@ -150,7 +147,10 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
         /// </summary>
-        public List<int[]> SelectableCoords
+        /// <remarks>
+        /// Имеет логику.
+        /// </remarks>
+        public virtual List<int[]> SelectableCoords
         {
             get
             {
@@ -196,7 +196,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может выпить ром.
         /// </summary>
-        [ObservableAsProperty] public bool CanDrinkRum { get; }
+        public bool CanDrinkRum => Cell is ITrapCell && Manager.Bottles > 0 && !Manager.RumIsBlocked;
         /// <summary>
         /// Флаг того, что пират выпил ром.
         /// </summary>
@@ -205,7 +205,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может родить пирата.
         /// </summary>
-        [ObservableAsProperty] public virtual bool CanHaveSex { get; }
+        public virtual bool CanHaveSex => !Manager.IsEnoughtPirates && Cell is FortressCell fortress && fortress.Putana;
         /// <summary>
         /// Метод рождает нового пирата рядом с данным пиратом.
         /// </summary>

@@ -167,7 +167,7 @@ namespace Jackal.Models
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[1, 5] = new MazeCell(1, 5, 3);
             Map[1, 6] = new ArrowCell(1, 6, ArrowType.Side2, 1, ContinueMovePirate);
-            Map[1, 7] = new FortressCell(1, 7, true);
+            Map[1, 7] = new BottleCell(1, 7, 3);
             Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
             Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
             Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
