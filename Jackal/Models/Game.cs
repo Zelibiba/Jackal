@@ -167,7 +167,7 @@ namespace Jackal.Models
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
-            Map[2, 7] = new MazeCell(2, 7, 3);
+            Map[2, 7] = new JungleCell(2, 7);
             foreach (Pirate pirate in Players[1].Pirates)
             {
                 pirate.RemoveFromCell();
@@ -508,6 +508,9 @@ namespace Jackal.Models
                                      cell.Pirates.Count == 0;
         }
 
+        /// <summary>
+        /// Метод спаивания выбранного пирата.
+        /// </summary>
         public static void GetPirateDrunk()
         {
             PirateIsDrunk = true;
