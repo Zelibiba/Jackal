@@ -20,5 +20,6 @@ namespace Jackal.Models.Cells
         public bool Putana { get; }
 
         public override bool IsGoldFriendly(Pirate pirate) => false;
+        protected override bool CanBeSelectedBy(Pirate pirate) => IsFriendlyTo(pirate);
     }
 }

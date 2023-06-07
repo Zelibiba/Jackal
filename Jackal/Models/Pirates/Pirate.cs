@@ -21,6 +21,7 @@ namespace Jackal.Models.Pirates
         public static readonly Pirate Empty = new()
         {
             IsVisible = true,
+            Owner = new Player(),
             Manager = new Player()
         };
         public Pirate() { }
@@ -36,6 +37,10 @@ namespace Jackal.Models.Pirates
         {
             Owner = owner;
             Manager = manager ?? owner;
+            this.WhenAnyValue(p => p.Owner)
+                .Select(owner => owner.Team)
+                .ToPropertyEx(this, p => p.Team);
+
             Image = image ?? Team.ToString();
             IsVisible = true;
 
@@ -80,7 +85,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Игрок, владеющий пиратом.
         /// </summary>
-        public Player Owner { get; protected set; }
+        [Reactive] public Player Owner { get; protected set; }
         /// <summary>
         /// Игрок, управляющий пиратом.
         /// </summary>
@@ -88,7 +93,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Команда пирата.
         /// </summary>
-        public Team Team => Owner?.Team ?? Team.None;
+        [ObservableAsProperty] public Team Team { get; }
         /// <summary>
         /// Альянс, в котором состоит пират.
         /// </summary>
@@ -142,7 +147,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Клетка, куда движется пират.
         /// </summary>
-        public Cell TargetCell;
+        public Cell TargetCell { get; set; }
 
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
@@ -191,7 +196,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может сражаться и управлять кораблём.
         /// </summary>
-        readonly public bool IsFighter;
+        public bool IsFighter { get; }
 
         /// <summary>
         /// Флаг того, что пират может выпить ром.

@@ -119,7 +119,7 @@ namespace Jackal.Models.Cells
         /// </remarks>
         public int Number { get; protected set; }
         /// <summary>
-        /// Метод возвращает ту часть клетки, на которую может перейти данный пират.
+        /// Метод возвращает ту часть клетки, которая досягаема для выбранного пирата.
         /// </summary>
         /// <remarks>
         /// В обычном случае возвращает саму клетку. Возвращает иное в случаях лабиринта, пещеры.
@@ -170,6 +170,24 @@ namespace Jackal.Models.Cells
         /// Флаг того, что клетка выбрана во время землетрясения.
         /// </summary>
         [Reactive] public bool IsSelected { get; set; }
+        /// <summary>
+        /// Метод определения возможности перемещения пирата без сокровищ.
+        /// </summary>
+        /// <param name="pirate"></param>
+        /// <returns>True, если можно переместиться.</returns>
+        protected virtual bool CanBeSelectedBy(Pirate pirate) => pirate.IsFighter || IsFriendlyTo(pirate);
+        /// <summary>
+        /// Метод определения занчения <see cref="CanBeSelected"/>.
+        /// </summary>
+        /// <param name="pirate">Выбранный пират.</param>
+        public void DefineSelectability(Pirate pirate)
+        {
+            if (pirate.Treasure)
+                CanBeSelected = IsGoldFriendly(pirate);
+            else
+                CanBeSelected = CanBeSelectedBy(pirate);
+        }
+
 
         /// <summary>
         /// Количество монет на клетке.
@@ -188,12 +206,25 @@ namespace Jackal.Models.Cells
         /// </summary>
         /// <param name="pirate">Пират, заходящий на клетку.</param>
         /// <returns>true, если пират может зайти с сокровищем.</returns>
-        public virtual bool IsGoldFriendly(Pirate pirate) => IsOpened;
+        public virtual bool IsGoldFriendly(Pirate pirate) => IsOpened && IsFriendlyTo(pirate);
 
         /// <summary>
         /// Список пиратов, находящихся на клетке.
         /// </summary>
         public ObservableCollection<Pirate> Pirates { get; protected set; }
+        /// <summary>
+        /// Команда, которая владеет данной клеткой.
+        /// </summary>
+        protected virtual Team Team => Pirates.ElementAtOrDefault(0)?.Team ?? Team.None;
+        /// <summary>
+        /// Флаг того, что на клетке не стоят вражеские пираты.
+        /// </summary>
+        /// <param name="pirate">Выбранный пират.</param>
+        /// <returns>True, если на клетке есть враги.</returns>
+        public bool IsFriendlyTo(Pirate pirate) => (pirate.Alliance | Team.None).HasFlag(Team);
+
+
+
         /// <summary>
         /// Список координат клеток, на которые можно переместиться с данной клетки.
         /// </summary>
@@ -252,8 +283,35 @@ namespace Jackal.Models.Cells
         /// <returns></returns>
         public virtual MovementResult AddPirate(Pirate pirate)
         {
-            Pirates.Add(pirate);
+            Pirates.Add(pirate);    // Сначала добавить пирата, потом убрать врагов (для корректной работы AirplaneCell)
             pirate.Cell = this;
+
+            // Побить пиратов на клетке и забрать пятницу (или умереть самому)
+            if (!IsFriendlyTo(pirate))
+            {
+                if(!pirate.IsFighter)
+                {
+                    pirate.Kill();
+                    return MovementResult.End;
+                }
+
+                List<Pirate> pirates = new();
+                foreach (Pirate pir in Pirates.Take(Pirates.Count - 1))
+                {
+                    if (pir is Friday friday)
+                        friday.SetNewOwner(pirate.Owner);
+                    else
+                        pirates.Add(pir);
+                }
+                foreach (Pirate pir in pirates)
+                {
+                    pir.Gold = false;
+                    pir.Galeon = false;
+                    pir.TargetCell = pir.Owner.Ship;
+                    RemovePirate(pir);
+                    pir.Owner.Ship.AddPirate(pir);
+                }
+            }
 
             if (pirate.Gold)
                 Gold++;

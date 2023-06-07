@@ -91,5 +91,17 @@ namespace Jackal.Models.Cells
                     MovableCoords.Add(coords);
             }
         }
+
+        protected override bool CanBeSelectedBy(Pirate pirate) => pirate.Cell is SeaCell || IsFriendlyTo(pirate);
+        public override MovementResult AddPirate(Pirate pirate)
+        {
+            if (IsFriendlyTo(pirate))
+                return base.AddPirate(pirate);
+            else
+            {
+                pirate.Kill();
+                return MovementResult.End;
+            }    
+        }
     }
 }

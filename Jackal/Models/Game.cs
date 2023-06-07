@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models.Cells;
 using Jackal.Models.Pirates;
@@ -165,16 +166,13 @@ namespace Jackal.Models
 
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
-            Map[1, 5] = new MazeCell(1, 5, 3);
-            Map[1, 6] = new ArrowCell(1, 6, ArrowType.Side2, 1, ContinueMovePirate);
-            Map[1, 7] = new BottleCell(1, 7, 3);
-            Map[2, 7] = new LakeCell(2, 7, ContinueMovePirate);
-            Map[3, 8] = new LakeCell(3, 8, ContinueMovePirate);
-            Map[4, 8] = new LakeCell(4, 8, ContinueMovePirate);
-            Map[5, 8] = new LakeCell(5, 8, ContinueMovePirate);
-            Map[2, 5] = new CrocodileCell(2, 5, ContinueMovePirate);
-            Map[2, 6] = new EarthQuakeCell(2, 6);
-            Map[5, 6] = new GunCell(5, 6, 1, ContinueMovePirate);
+            Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
+            Map[2, 7] = new MazeCell(2, 7, 3);
+            foreach (Pirate pirate in Players[1].Pirates)
+            {
+                pirate.RemoveFromCell();
+                Map[2, 6].AddPirate(pirate);
+            }
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
         }
@@ -275,19 +273,14 @@ namespace Jackal.Models
         /// Метод выбора пирата.
         /// </summary>
         /// <param name="pirate">Выбираемый пират.</param>
-        /// <param name="deselect">Флаг того, необходимо ли снять выделение с предыдущего пирата.</param>
-        public static void SelectPirate(Pirate pirate, bool deselect = false)
+        public static void SelectPirate(Pirate pirate)
         {
-            Deselect(deselect);
+            Deselect(false);
             SelectedPirate = pirate;
             foreach (int[] coords in pirate.SelectableCoords)
             {
-                Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
-
-                if (SelectedPirate.Treasure)
-                    cell.CanBeSelected = cell.IsGoldFriendly(pirate);
-                else
-                    cell.CanBeSelected = true;
+                Cell cell = Map[coords].GetSelectedCell(pirate);
+                cell.DefineSelectability(pirate);
             }
         }
         /// <summary>
@@ -437,17 +430,35 @@ namespace Jackal.Models
         /// Метод перемещения корабля.
         /// </summary>
         /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
-        static void MoveShip(Cell newCell)
+        static void MoveShip(Cell cell)
         {
             Deselect(false);
-            SwapCells(SelectedShip, newCell);
+            SwapCells(SelectedShip, cell);
 
+            // Подобрать или убить пиратов в море
+            if (cell.Pirates.Count > 0)
+            {
+                if (SelectedShip.IsFriendlyTo(cell.Pirates[0]))
+                {
+                    SelectedShip.Pirates.AddRange(cell.Pirates);
+                    foreach (Pirate pirate in cell.Pirates)
+                        pirate.Cell = SelectedShip;
+                    cell.Pirates.Clear();
+                }
+                else
+                {
+                    while(cell.Pirates.Count > 0)
+                        cell.Pirates[0].Kill();
+                }
+            }
+
+            // обновить достигаемые координаты для побережья
             if (SelectedShip.Orientation == Orientation.Up || SelectedShip.Orientation == Orientation.Down)
             {
                 int row = SelectedShip.Row;
                 row += (SelectedShip.Orientation == Orientation.Up) ? -1 : +1;
-                int minColumn = Math.Min(SelectedShip.Column, newCell.Column) - 1;
-                int maxColumn = Math.Max(SelectedShip.Column, newCell.Column) + 1;
+                int minColumn = Math.Min(SelectedShip.Column, cell.Column) - 1;
+                int maxColumn = Math.Max(SelectedShip.Column, cell.Column) + 1;
                 for (int j = minColumn; j <= maxColumn; j++)
                     Map[row, j].SetSelectableCoords(Map);
             }
@@ -455,8 +466,8 @@ namespace Jackal.Models
             {
                 int column = SelectedShip.Column;
                 column += (SelectedShip.Orientation == Orientation.Left) ? -1 : +1;
-                int minRow = Math.Min(SelectedShip.Row, newCell.Row) - 1;
-                int maxRow = Math.Max(SelectedShip.Row, newCell.Row) + 1;
+                int minRow = Math.Min(SelectedShip.Row, cell.Row) - 1;
+                int maxRow = Math.Max(SelectedShip.Row, cell.Row) + 1;
                 for (int i = minRow; i <= maxRow; i++)
                     Map[i, column].SetSelectableCoords(Map);
             }

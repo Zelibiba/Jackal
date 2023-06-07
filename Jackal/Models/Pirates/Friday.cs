@@ -24,5 +24,11 @@ namespace Jackal.Models.Pirates
                 return Cell.SelectableCoords;
             }
         }
+
+        public void SetNewOwner(Player player)
+        {
+            Owner = player;
+            Manager = player;
+        }
     }
 }
