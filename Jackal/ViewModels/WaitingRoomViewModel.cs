@@ -60,11 +60,7 @@ namespace Jackal.ViewModels
             }
             return true;
         }
-        public void AddPlayer(Player player)
-        {
-            bool isControllable = Players.Count == 0;
-            Players.Add(new PlayerAdderViewModel(player, isControllable));
-        }
+        public void AddPlayer(Player player) => Players.Add(new PlayerAdderViewModel(player));
         public void UpdatePlayer(Player player)
         {
             foreach (PlayerAdderViewModel playerVM in Players)

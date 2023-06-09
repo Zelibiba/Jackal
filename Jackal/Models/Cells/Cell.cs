@@ -48,13 +48,13 @@ namespace Jackal.Models.Cells
         /// Метод создаёт поверхностную копию клетки.
         /// </summary>
         /// <param name="cell">Клетка, с которой копируются значения.</param>
-        /// <returns>Копия клетки.</returns>
+        /// <remarks>Необходим для анимации перемещения ячейки.</remarks>
         public static Cell Copy(Cell cell)
         {
             return new Cell(cell.Row, cell.Column, cell.Image, angle: cell.Angle)
             {
                 Pirates = cell.Pirates,
-                IsOpened = cell.IsOpened,
+                IsPreOpened = cell.IsPreOpened,
                 IsVisible = cell.IsVisible
             };
         }
@@ -62,11 +62,26 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Название изображения клетки.
         /// </summary>
-        [Reactive] public string Image { get; private set; }
+        [Reactive] public string Image { get; protected set; }
         /// <summary>
         /// Угол, на который повёрнута клетка.
         /// </summary>
         public virtual int Angle { get; }
+        /// <summary>
+        /// Флаг того, что изображение чёрно-белое.
+        /// </summary>
+        bool IsGray => Image.EndsWith("_gray");
+        /// <summary>
+        /// Метод смены тона изображения на чёрно-белый и обратно.
+        /// </summary>
+        public void ChangeGrayStatus()
+        {
+            if (IsGray)
+                Image = Image[0..^5];
+            else
+                Image += "_gray";
+        }
+
         /// <summary>
         /// Строка клетки.
         /// </summary>
@@ -146,30 +161,34 @@ namespace Jackal.Models.Cells
         /// Флаг того, что клетка открыта пиратом.
         /// </summary>
         /// <remarks>
-        /// Имеет логику.
+        /// Изменять параметр только через <see cref="Open"/>
         /// </remarks>
-        public bool IsOpened
-        {
-            get => __isOpened;
-            protected set
-            {
-                __isOpened = value;
-                IsPreOpened = value;
-            }
-        }
-        bool __isOpened;
+        public bool IsOpened { get; protected set; }
         /// <summary>
         /// Метод открывает клетку.
         /// </summary>
-        public virtual void Open() => IsOpened = true;
+        public virtual void Open()
+        {
+            if (IsGray)
+                ChangeGrayStatus();
+            IsOpened = true;
+            IsPreOpened = true;
+        }
         /// <summary>
         /// Флаг того, что клетка может быть выбрана.
         /// </summary>
         [Reactive] public bool CanBeSelected { get; set; }
         /// <summary>
-        /// Флаг того, что клетка выбрана во время землетрясения.
+        /// Флаг того, что клетка выбрана во время землетрясения или хода маяка.
         /// </summary>
         [Reactive] public bool IsSelected { get; set; }
+        /// <summary>
+        /// Флаг того, что клетка была вскрыта во время хода маяка.
+        /// </summary>
+        /// <remarks>
+        /// Необходима для окрашивания фона клетки.
+        /// </remarks>
+        [Reactive] public bool IsLightHousePicked { get; set; }
         /// <summary>
         /// Метод определения возможности перемещения пирата без сокровищ.
         /// </summary>

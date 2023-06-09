@@ -11,7 +11,7 @@ namespace Jackal.Models.Cells
     {
         public SeaCell(int row, int column) : base(row, column, "Sea")
         {
-            IsOpened = true;
+            Open();
         }
 
         public override int Gold

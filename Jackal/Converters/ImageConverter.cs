@@ -5,7 +5,8 @@ using Avalonia.Data.Converters;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Jacal.Converters
 {
@@ -16,25 +17,39 @@ namespace Jacal.Converters
             if (value == null) return null;
 
             string name = value.ToString();
-            using (var imageStream = File.OpenRead("..\\..\\..\\Assets\\Images\\"+name+".png"))
+            string[] words = name.Split('_');
+
+            if (words.Length == 1)
+                return new Avalonia.Media.Imaging.Bitmap("..\\..\\..\\Assets\\Images\\" + words[0] + ".png");
+            if (words[1] == "gray")
             {
-                return new Bitmap(imageStream);
+                Avalonia.Media.Imaging.Bitmap bitmap;
+                Bitmap origBitmap = new("..\\..\\..\\Assets\\Images\\" + words[0] + ".png");
+                Bitmap newBitmap = new(origBitmap.Width, origBitmap.Height);
+                using (Graphics graphics = Graphics.FromImage(newBitmap))
+                {
+                    ColorMatrix matrix = new ColorMatrix(new float[][]
+                    {
+                        new float[] {.3f, .3f, .3f, 0, 0},
+                        new float[] {.59f, .59f, .59f, 0, 0},
+                        new float[] {.11f, .11f, .11f, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] {0, 0, 0, 0, 1}
+                    });
+                    ImageAttributes attributes = new ImageAttributes();
+                    attributes.SetColorMatrix(matrix);
+                    graphics.DrawImage(origBitmap, new Rectangle(0, 0, origBitmap.Width, origBitmap.Height),
+                                       0, 0, origBitmap.Width, origBitmap.Height, GraphicsUnit.Pixel, attributes);
+                }
+                using (MemoryStream stream = new())
+                {
+                    newBitmap.Save(stream, ImageFormat.Png);
+                    stream.Position = 0;
+                    bitmap = new(stream);
+                }
+                return bitmap;
             }
-
-            //string image = value.ToString();
-            //string[] words = image.Split('_');
-            //if (words.Length == 1)
-            //    return "Images\\" + image + ".png";
-
-                //if (words[1] == "gray")
-                //{
-                //    FormatConvertedBitmap btm = new FormatConvertedBitmap();
-                //    btm.BeginInit();
-                //    btm.Source = new BitmapImage(new Uri("..\\..\\Images\\Cells\\" + words[0] + ".png", UriKind.Relative));
-                //    btm.DestinationFormat = PixelFormats.Gray8;
-                //    btm.EndInit();
-                //    return btm;
-                //}
+            throw new NotImplementedException();
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

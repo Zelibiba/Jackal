@@ -35,12 +35,14 @@ namespace Jackal.Models
         /// <param name="index">Индекс игрока.</param>
         /// <param name="name">Имя игрока.</param>
         /// <param name="team">Команда игрока.</param>
-        public Player(int index, string name, Team team)
+        /// <param name="isControllable">Флаг контролья данного игрока клиентом.</param>
+        public Player(int index, string name, Team team, bool isControllable = false)
         {
             Index = index;
             Name = name;
             IntAlliance = index;
             Team = team;
+            IsControllable = isControllable;
 
             Alliance = team;
 
@@ -52,7 +54,6 @@ namespace Jackal.Models
             Pirates.Add(new Pirate(this));
             Pirates.Add(new Pirate(this));
             Pirates.Add(new Pirate(this));
-            Pirates.Add(new Friday(this));
         }
 
         /// <summary>
@@ -66,6 +67,7 @@ namespace Jackal.Models
         /// Имя игрока.
         /// </summary>
         [Reactive] public string Name { get; set; }
+        public bool IsControllable { get; }
 
         /// <summary>
         /// Команда игрока.

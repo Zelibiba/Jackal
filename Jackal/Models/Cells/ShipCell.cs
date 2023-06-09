@@ -11,7 +11,7 @@ namespace Jackal.Models.Cells
     {
         public ShipCell(int row, int column, Player owner, (Orientation, int[][]) shipRegion) : base(row, column, "Ship")
         {
-            IsOpened = true;
+            Open();
             _owner = owner;
             Manager = owner;
             _owner.SetShip(this);

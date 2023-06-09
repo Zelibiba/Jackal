@@ -19,6 +19,7 @@
 		<Style Selector="Border.Cell.Usual">
 			<Setter Property="BorderBrush" Value="Black"/>
 			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Background" Value="White"/>
 		</Style>
 		<Style Selector="Border.CanBeSelected">
 			<Setter Property="BorderBrush" Value="#FF28F91E"/>
@@ -27,6 +28,9 @@
 		<Style Selector="Border.IsSelected">
 			<Setter Property="BorderBrush" Value="Red"/>
 			<Setter Property="BorderThickness" Value="4"/>
+		</Style>
+		<Style Selector="Border.IsLightHousePicked">
+			<Setter Property="Background" Value="LightPink"/>
 		</Style>
 
 		<!-- Классы для отображения золота. -->
@@ -79,12 +83,16 @@
 			</Setter>
 		</Style>
 	</UserControl.Styles>
+	
+	
 	<UserControl.Template>
 		<ControlTemplate>
-			<Border Classes="Cell Usual"
+			<Border IsVisible="{Binding IsVisible}"
+					Classes="Cell Usual"
 					Classes.CanBeSelected="{Binding CanBeSelected}"
-					Classes.IsSelected="{Binding IsSelected}">
-				<Panel IsVisible="{Binding IsVisible}" Background="White">
+					Classes.IsSelected="{Binding IsSelected}"
+					Classes.IsLightHousePicked="{Binding IsLightHousePicked}">
+				<Panel>
 					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsPreOpened}">
 						<Image.RenderTransform>
 							<TransformGroup>

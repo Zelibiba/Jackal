@@ -21,11 +21,12 @@ namespace Jackal
         }
 
 
-        public static Player ReadPlayer(this BinaryReader reader)
+        public static Player ReadPlayer(this BinaryReader reader, bool isControllable = false)
         {
             return new Player(index: reader.ReadInt32(),
                               name: reader.ReadString(),
-                              team: reader.ReadTeam())
+                              team: reader.ReadTeam(),
+                              isControllable)
             {
                 IntAlliance = reader.ReadInt32(),
                 IsReady = reader.ReadBoolean()

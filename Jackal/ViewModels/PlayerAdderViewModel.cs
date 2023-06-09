@@ -16,10 +16,10 @@ namespace Jackal.ViewModels
 {
     public class PlayerAdderViewModel : ViewModelBase
     {
-        public PlayerAdderViewModel(Player player, bool isControllable)
+        public PlayerAdderViewModel(Player player)
         {
             Player = player;
-            IsControllable = isControllable;
+            IsControllable = player.IsControllable;
             if (IsControllable)
             {
                 this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.IntAlliance, vm => vm.Player.IsReady)

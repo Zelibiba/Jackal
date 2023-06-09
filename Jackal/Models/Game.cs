@@ -97,14 +97,6 @@ namespace Jackal.Models
         static bool IsShipSelected => SelectedShip != null;
 
         /// <summary>
-        /// Флаг того, что происходит землетрясение.
-        /// </summary>
-        static bool IsEarthQuake;
-        /// <summary>
-        /// Клетка, выбранная в течение землетрясения.
-        /// </summary>
-        static Cell? EarthQuakeSelectedCell;
-        /// <summary>
         /// Флаг того, что некоторый пират начал ходить.
         /// </summary>
         /// <remarks>
@@ -118,7 +110,7 @@ namespace Jackal.Models
         /// <summary>
         /// Флаг того, что можно выбрать другого пирата или снять выделение.
         /// </summary>
-        public static bool CanChangeSelection => !(PirateInMotion || PirateIsDrunk || IsEarthQuake);
+        public static bool CanChangeSelection => !(PirateInMotion || PirateIsDrunk || earthQuake.IsActive || lightHouse.IsActive);
 
         /// <summary>
         /// Счётчик потерянного золота.
@@ -161,13 +153,13 @@ namespace Jackal.Models
             }
             #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White) { Turn = true });
-            Players.Add(new Player(1, "AETHNAETRN", Team.Red));
+            Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true });
+            Players.Add(new Player(1, "AETHNAETRN", Team.Red, true));
 
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
-            Map[2, 7] = new JungleCell(2, 7);
+            Map[2, 7] = new LightHouseCell(2, 7);
             foreach (Pirate pirate in Players[1].Pirates)
             {
                 pirate.RemoveFromCell();
@@ -222,8 +214,10 @@ namespace Jackal.Models
                     SelectShip(cell);
                 else if (IsShipSelected)
                     MoveShip(cell);
-                else if (IsEarthQuake)
+                else if (earthQuake.IsActive)
                     SelectEarthQuakeCell(cell);
+                else if (lightHouse.IsActive)
+                    SelectLightHouseCell(cell);
                 SetIsEnable?.Invoke(true);
             });
         }
@@ -244,26 +238,61 @@ namespace Jackal.Models
         /// <param name="cell">Выбираемая клетка.</param>
         static void SelectEarthQuakeCell(Cell cell)
         {
-            if (cell.IsSelected)
+            if (earthQuake.SelectedCell == null)
+                earthQuake.SelectCell(cell);
+            else if (cell.IsSelected)
+                earthQuake.DeselectCell();
+            else
             {
-                cell.IsSelected = false;
-                EarthQuakeSelectedCell = null;
+                Deselect();
+                SwapCells(earthQuake.SelectedCell, cell);
+                earthQuake.DeselectCell();
+                earthQuake.IsActive = false;
+                NextPlayer();
+            }
+        }
+        static void SelectLightHouseCell(Cell cell)
+        {
+            if (lightHouse.SelectedCells.Count < lightHouse.SelectedCells.Capacity)
+            {
+                cell.CanBeSelected = false;
+                cell.IsSelected = true;
+                cell.IsLightHousePicked = true;
+                cell.IsPreOpened = true;
+                lightHouse.SelectedCells.Add(cell);
+                if (lightHouse.SelectedCells.Count == lightHouse.SelectedCells.Capacity)
+                {
+                    Deselect();
+                    foreach (Cell c in lightHouse.SelectedCells)
+                    {
+                        c.CanBeSelected = true;
+                        c.IsSelected = false;
+                    }
+                    lightHouse.Lighthouse.CanBeSelected = true;
+                }
             }
             else
             {
-                if (EarthQuakeSelectedCell == null)
+                if (cell is LightHouseCell)
                 {
-                    cell.IsSelected = true;
-                    EarthQuakeSelectedCell = cell;
+                    cell.CanBeSelected = false;
+                    foreach (Cell c in lightHouse.SelectedCells)
+                    {
+                        c.CanBeSelected = false;
+                        c.IsSelected = false;
+                        c.ChangeGrayStatus();
+                    }
+                    lightHouse.IsActive = false;
+                    NextPlayer();
                 }
+                else if (lightHouse.SelectedCell == null)
+                    lightHouse.SelectCell(cell);
+                else if (cell.IsSelected)
+                    lightHouse.DeselectCell();
                 else
                 {
-                    EarthQuakeSelectedCell.IsSelected = false;
-                    SwapCells(EarthQuakeSelectedCell, cell);
-                    Deselect();
-                    EarthQuakeSelectedCell = null;
-                    IsEarthQuake = false;
-                    NextPlayer();
+                    SwapCells(cell, lightHouse.SelectedCell);
+                    lightHouse.DeselectCell();
                 }
             }
         }
@@ -378,6 +407,11 @@ namespace Jackal.Models
                     StartEarthQuake();
                     PirateInMotion = false;
                     break;
+                case MovementResult.LightHouse:
+                    SelectedPirate = null;
+                    StartLightHouse(cell as LightHouseCell);
+                    PirateInMotion = false;
+                    break;
             }
         }
         /// <summary>
@@ -480,7 +514,8 @@ namespace Jackal.Models
         /// </summary>
         /// <param name="cell1">Первая перемещаемая клетка.</param>
         /// <param name="cell2">Вторая перемещаемая клетка.</param>
-        static void SwapCells(Cell cell1, Cell cell2)
+        /// <param name="animation">Флаг того, что перемещение ячеек нужно анимировать.</param>
+        static void SwapCells(Cell cell1, Cell cell2, bool animation = true)
         {
             int[] coords1 = cell1.Coords;
             int[] coords2 = cell2.Coords;
@@ -493,19 +528,35 @@ namespace Jackal.Models
             Map[coords2].SetCoordinates(coords2[0], coords2[1]);
             Map[coords2].SetSelectableCoords(Map);
 
-            OnStartCellAnimation(cell1, cell2);
+            if (animation)
+                OnStartCellAnimation(cell1, cell2);
         }
 
+        static readonly EarthQuake earthQuake = new();
+        static readonly LightHouse lightHouse = new();
         /// <summary>
         /// Метод запуска землетрясения.
         /// </summary>
         static void StartEarthQuake()
         {
-            IsEarthQuake = true;
+            earthQuake.IsActive = true;
             foreach (Cell cell in Map)
                 cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
                                      cell.Gold == 0 && !cell.Galeon &&
                                      cell.Pirates.Count == 0;
+        }
+        /// <summary>
+        /// Метод запуска хода маяка.
+        /// </summary>
+        /// <param name="LightHouse">Клетка маяка, вызвавшая этот ход маяка.</param>
+        static void StartLightHouse(LightHouseCell LightHouse)
+        {
+            lightHouse.IsActive = true;
+            lightHouse.Lighthouse = LightHouse;
+            IEnumerable<Cell> closedCells = Map.Where(cell => !cell.IsOpened);
+            lightHouse.SelectedCells = new(Math.Min(closedCells.Count(), 4));
+            foreach (Cell cell in closedCells)
+                cell.CanBeSelected = true;
         }
 
         /// <summary>
@@ -519,7 +570,6 @@ namespace Jackal.Models
             SelectedPirate.IsDrunk = true;
             SelectPirate(SelectedPirate);
         }
-
         /// <summary>
         /// Метод рождения пирата.
         /// </summary>
