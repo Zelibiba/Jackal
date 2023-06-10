@@ -46,7 +46,7 @@ namespace Jackal.ViewModels
             IsEnabled = true;
             Game.CreateMap();
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
-            Game.SetIsEnable = (isEnabled) => IsEnabled = isEnabled;
+            Game.SetInterfaceEnable = (isEnabled) => IsEnabled = isEnabled;
             SelectedPirate = Pirate.Empty;
 
             _disCells = Game.Map.ToObservableChangeSet()
@@ -75,7 +75,7 @@ namespace Jackal.ViewModels
         public void SelectCell(Cell cell) => Game.PreSelectCell(cell);
         public void SelectPirate(Pirate pirate)
         {
-            if (Game.CanChangeSelection)
+            if (Game.CanChangeSelection && Game.PreSelectPirate(pirate))
             {
                 Game.SelectPirate(pirate);
                 SelectedPirate = pirate;

@@ -92,7 +92,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Игрок, управляющий пиратом.
         /// </summary>
-        public Player Manager { get; protected set; }
+        public Player Manager { get; set; }
         /// <summary>
         /// Команда пирата.
         /// </summary>
@@ -149,7 +149,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Метод задаёт <see cref="StartCell"/> как клетку, где сейчас находится пират.
         /// </summary>
-        public void Set_StartCell() => StartCell = Cell;
+        public void SetStartCell() => StartCell = Cell;
 
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
@@ -216,7 +216,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может выпить ром.
         /// </summary>
-        public virtual bool CanDrinkRum => Cell is ITrapCell && Manager.Bottles > 0 && !Manager.RumIsBlocked;
+        public virtual bool CanDrinkRum => Cell is ITrapCell && Manager.Bottles > 0 && !Manager.IsRumBlocked;
         /// <summary>
         /// Флаг того, что пират выпил ром.
         /// </summary>

@@ -64,6 +64,9 @@ namespace Jackal.Models
         /// Имя игрока.
         /// </summary>
         [Reactive] public string Name { get; set; }
+        /// <summary>
+        /// Флаг того, что игрок контролируется клиентом.
+        /// </summary>
         public bool IsControllable { get; }
 
         /// <summary>
@@ -106,9 +109,13 @@ namespace Jackal.Models
         [ObservableAsProperty] public bool IsEnoughtPirates { get; }
 
         /// <summary>
-        /// Корабль игрока.
+        /// Корабль команды игрока.
         /// </summary>
         public ShipCell Ship { get; private set; }
+        /// <summary>
+        /// Корабль, управляемый игроком.
+        /// </summary>
+        public ShipCell ManagedShip { get; set; }
         /// <summary>
         /// Метод для установки корабля игрока.
         /// </summary>
@@ -116,6 +123,7 @@ namespace Jackal.Models
         public void SetShip(ShipCell ship)
         {
             Ship = ship;
+            ManagedShip = ship;
             for (int i = 0; i < 3; i++)
                 ship.AddPirate(new Pirate(this));
         }
@@ -133,9 +141,36 @@ namespace Jackal.Models
         /// Количество бутылок с ромом у игрока.
         /// </summary>
         [Reactive] public int Bottles { get; set; }
+        
+        public bool CannabisStarter { get; set; }
         /// <summary>
         /// Флаг того, что игрок может пользоваться ромом.
         /// </summary>
-        public bool RumIsBlocked { get; set; }
+        public bool IsRumBlocked { get; set; }
+        /// <summary>
+        /// Метод копирует список пиратов и управляемый корабль, а также изменяет блокировку рома.
+        /// </summary>
+        /// <param name="pirates">Спиок пиратов.</param>
+        /// <param name="ship">Управляемый корабль.</param>
+        /// <param name="blockRum">Флаг блокировки рома <see cref="IsRumBlocked"/>.</param>
+        public void SetPiratesAndShip(IEnumerable<Pirate> pirates, ShipCell ship, bool blockRum)
+        {
+            Pirates.Clear();
+            Pirates.AddRange(pirates);
+            foreach (Pirate pirate in Pirates)
+                pirate.Manager = this;
+            ManagedShip = ship;
+            ManagedShip.Manager = this;
+            IsRumBlocked = blockRum;
+        }
+        /// <summary>
+        /// <inheritdoc cref="SetPiratesAndShip(IEnumerable{Pirate}, ShipCell, bool)" path="/summary"/>
+        /// </summary>
+        /// <param name="soursePlayer">Игрок, предоставляющий пиратов и корабль для копирования.</param>
+        /// <param name="blockRum"></param>
+        public void SetPiratesAndShip(Player soursePlayer, bool blockRum)
+        {
+            SetPiratesAndShip(soursePlayer.Pirates, soursePlayer.ManagedShip, blockRum);
+        }
     }
 }

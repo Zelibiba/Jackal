@@ -36,7 +36,11 @@ namespace Jackal.Models.Cells
 
         public override bool IsShip => true;
         readonly Player _owner;
-        public Player Manager { get; private set; }
+        /// <summary>
+        /// Игрок, управляющий кораблём.
+        /// </summary>
+        public Player Manager { get; set; }
+
         public override Team ShipTeam => _owner.Team;
         /// <summary>
         /// Флаг того, что корабль может перемещаться.
@@ -67,9 +71,9 @@ namespace Jackal.Models.Cells
                 case Orientation.Down:
                     r++; break;
                 case Orientation.Left:
-                    c++; break;
-                case Orientation.Right:
                     c--; break;
+                case Orientation.Right:
+                    c++; break;
             }
             SelectableCoords.Add(new int[] { r, c });
 

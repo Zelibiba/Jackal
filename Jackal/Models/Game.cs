@@ -154,15 +154,20 @@ namespace Jackal.Models
             #endregion
 
             Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles=2 });
-            Players.Add(new Player(1, "AETHNAETRN", Team.Red, true));
+            Players.Add(new Player(1, "DD", Team.Black, true));
+            Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
+            Players.Add(new Player(3, "djk", Team.Yellow, true));
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[0, 6].AddPirate(new Friday(Players[0], Players[0]));
-            Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
-            Map[12, 6].AddPirate(new Missioner(Players[1], Players[1]));
+            Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
+            Map[12, 6] = new ShipCell(12, 6, Players[2], ShipRegions[2]);
+            Map[12, 6].AddPirate(new Missioner(Players[2], Players[2]));
+            Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
 
-            Map[2, 7] = new RumCell(2, 7);
-            Map[1, 6].Gold = 1;
+            Map[2, 7] = new CannabisCell(2, 7);
+            Map[11, 6] = new CannabisCell(11, 6);
+            Map[1, 6] = new MazeCell(1, 6, 3);
             foreach (Pirate pirate in Players[1].Pirates)
             {
                 pirate.RemoveFromCell();
@@ -178,10 +183,11 @@ namespace Jackal.Models
         /// <summary>
         /// Метод передаёт ход следующему игроку.
         /// </summary>
-        static void NextPlayer()
+        static void NextPlayer(bool checkOnly = false)
         {
             foreach (Pirate pirate in CurrentPlayer.Pirates)
             {
+                #region Обработка бочки рома
                 if (pirate.RumCount == 1)
                 {
                     pirate.IsEnabled = true;
@@ -189,17 +195,26 @@ namespace Jackal.Models
                 }
                 if (pirate.RumCount > 0)
                     pirate.RumCount--;
+                #endregion
             }
 
-            CurrentPlayer.Turn = false;
-            CurrentPlayerNumber++;
-            CurrentPlayer.Turn = true;
+            if (!checkOnly)
+            {
+                if (CurrentPlayer.CannabisStarter)
+                    EndCannabis();
+                else
+                {
+                    CurrentPlayer.Turn = false;
+                    CurrentPlayerNumber++;
+                    CurrentPlayer.Turn = true;
+                }
+            }
         }
 
         /// <summary>
         /// Делегат для блокировки интерфейса.
         /// </summary>
-        public static Action<bool>? SetIsEnable;
+        public static Action<bool>? SetInterfaceEnable;
         /// <summary>
         /// Метод проверки возможности выбора клетки.
         /// </summary>
@@ -207,7 +222,7 @@ namespace Jackal.Models
         public static void PreSelectCell(Cell cell)
         {
             if (cell.CanBeSelected ||
-                cell is ShipCell ship && ship.CanMove && CanChangeSelection)
+                cell is ShipCell ship && ship.CanMove && ship.Manager == CurrentPlayer && CanChangeSelection)
                 SelectCell(cell);
         }
         /// <summary>
@@ -218,7 +233,10 @@ namespace Jackal.Models
         {
             Task.Run(() =>
             {
-                SetIsEnable?.Invoke(false);
+                //? Вероятно, чтоит перенести SetInterfaceEnable во ViewModel
+                if (CurrentPlayer.IsControllable)
+                    SetInterfaceEnable?.Invoke(false);
+
                 if (IsPirateSelected && cell.CanBeSelected)
                 {
                     Deselect(false);
@@ -232,7 +250,9 @@ namespace Jackal.Models
                     SelectEarthQuakeCell(cell);
                 else if (lightHouse.IsActive)
                     SelectLightHouseCell(cell);
-                SetIsEnable?.Invoke(true);
+
+                if (CurrentPlayer.IsControllable)
+                    SetInterfaceEnable?.Invoke(true);
             });
         }
         /// <summary>
@@ -315,7 +335,12 @@ namespace Jackal.Models
             }
         }
 
-
+        /// <summary>
+        /// Метод проверки возможности выбора пирата.
+        /// </summary>
+        /// <param name="pirate"></param>
+        /// <returns></returns>
+        public static bool PreSelectPirate(Pirate pirate) => pirate.Manager == CurrentPlayer;
         /// <summary>
         /// Метод выбора пирата.
         /// </summary>
@@ -391,7 +416,6 @@ namespace Jackal.Models
                 if (!cell.IsPreOpened)
                     cell.IsPreOpened = true;
                 Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
-                SelectedPirate.IsVisible = true;
             }
         }
         /// <summary>
@@ -404,14 +428,16 @@ namespace Jackal.Models
             if (!PirateInMotion)
             {
                 PirateInMotion = true;
-                SelectedPirate.Set_StartCell();
+                SelectedPirate.SetStartCell();
                 if (PirateIsDrunk)
                     PirateIsDrunk = false;
             }
 
             OnStartPirateAnimation(cell);
 
-            switch (MovePirate(cell))
+            MovementResult result = MovePirate(cell);
+            SelectedPirate.IsVisible = true;
+            switch (result)
             {
                 case MovementResult.End:
                     if (SelectedPirate is Friday && cell.ContainsMissioner || SelectedPirate is Missioner && cell.ContainsFriday)
@@ -434,6 +460,11 @@ namespace Jackal.Models
                     SelectedPirate = null;
                     StartLightHouse(cell as LightHouseCell);
                     PirateInMotion = false;
+                    break;
+                case MovementResult.Cannabis:
+                    SelectedPirate = null;
+                    PirateInMotion = false;
+                    StartCannabis();
                     break;
             }
         }
@@ -592,6 +623,41 @@ namespace Jackal.Models
             lightHouse.SelectedCells = new(Math.Min(closedCells.Count(), 4));
             foreach (Cell cell in closedCells)
                 cell.CanBeSelected = true;
+        }
+        /// <summary>
+        /// Метод запуска хода конопли.
+        /// </summary>
+        static void StartCannabis()
+        {
+            Pirate[] bufferPirates = Players[^1].Pirates.ToArray();
+            ShipCell bufferShip = Players[^1].ManagedShip;
+
+            for (int i = Players.Count - 1; i > 0; i--)
+                Players[i].SetPiratesAndShip(Players[i - 1], true);
+            Players[0].SetPiratesAndShip(bufferPirates, bufferShip, true);
+
+            NextPlayer(checkOnly: true);
+            CurrentPlayer.Turn = false;
+            CurrentPlayerNumber++;
+            CurrentPlayer.CannabisStarter = true;
+            CurrentPlayerNumber++;
+            CurrentPlayer.Turn = true;
+        }
+        /// <summary>
+        /// Метод окончания хода конопли.
+        /// </summary>
+        static void EndCannabis()
+        {
+            Pirate[] bufferPirates = Players[0].Pirates.ToArray();
+            ShipCell bufferShip = Players[0].ManagedShip;
+
+            bool blockRum = Players.Count(player => player.CannabisStarter) > 1;
+            for (int i = 0; i < Players.Count - 1; i++)
+                Players[i].SetPiratesAndShip(Players[i + 1], blockRum);
+            Players[^1].SetPiratesAndShip(bufferPirates, bufferShip, blockRum);
+
+            CurrentPlayer.CannabisStarter = false;
+            NextPlayer(checkOnly: true);
         }
 
         /// <summary>

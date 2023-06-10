@@ -19,6 +19,7 @@ namespace Jackal.ViewModels
         public PlayerAdderViewModel(Player player)
         {
             Player = player;
+            //? необходимо изменить
             IsControllable = player.IsControllable;
             if (IsControllable)
             {

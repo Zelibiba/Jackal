@@ -317,20 +317,14 @@ namespace Jackal.Models.Cells
             Pirates.Add(pirate);    // Сначала добавить пирата, потом убрать врагов (для корректной работы AirplaneCell)
             pirate.Cell = this;
 
-            // Побить пиратов на клетке и забрать пятницу (или умереть самому)
+            // Побить пиратов на клетке и забрать пятницу
             if (!IsFriendlyTo(pirate))
             {
-                if(!pirate.IsFighter)
-                {
-                    pirate.Kill();
-                    return MovementResult.End;
-                }
-
                 List<Pirate> pirates = new();
                 foreach (Pirate pir in Pirates.Take(Pirates.Count - 1))
                 {
                     if (pir is Friday friday)
-                        friday.SetNewOwner(pirate.Owner);
+                        friday.SetNewOwner(pirate.Owner, pirate.Manager);
                     else
                         pirates.Add(pir);
                 }

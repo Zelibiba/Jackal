@@ -24,10 +24,10 @@ namespace Jackal.Models.Pirates
             }
         }
 
-        public void SetNewOwner(Player player)
+        public void SetNewOwner(Player owner, Player manager)
         {
-            Owner = player;
-            Manager = player;
+            Owner = owner;
+            Manager = manager;
         }
     }
 }
