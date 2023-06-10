@@ -37,9 +37,11 @@ namespace Jackal.Models.Pirates
         {
             Owner = owner;
             Manager = manager ?? owner;
+            Manager.Pirates.Add(this);
             this.WhenAnyValue(p => p.Owner)
                 .Select(owner => owner.Team)
                 .ToPropertyEx(this, p => p.Team);
+
 
             Image = image ?? Team.ToString();
             IsVisible = true;
@@ -222,12 +224,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Метод рождает нового пирата рядом с данным пиратом.
         /// </summary>
-        public void GiveBirth()
-        {
-            Pirate newPirate = new(Owner, Manager);
-            Cell.AddPirate(newPirate);
-            Manager.Pirates.Add(newPirate);
-        }
+        public void GiveBirth() => Cell.AddPirate(new Pirate(Owner, Manager));
 
         /// <summary>
         /// Флаг того, что пират заблокирован в яме или пещере.

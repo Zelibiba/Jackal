@@ -8,7 +8,7 @@ namespace Jackal.Models.Pirates
 {
     public class Missioner : Pirate
     {
-        public Missioner(Player owner) : base(owner, image: "Missioner", isFighter: false) { }
+        public Missioner(Player owner, Player manager) : base(owner, manager, image: "Missioner", isFighter: false) { }
 
         public override bool CanDrinkRum => false;
         public override bool CanHaveSex => false;

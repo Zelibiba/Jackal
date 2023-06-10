@@ -154,13 +154,12 @@ namespace Jackal.Models
             #endregion
 
             Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles=2 });
-            Players[0].Pirates.Add(new Friday(Players[0]));
             Players.Add(new Player(1, "AETHNAETRN", Team.Red, true));
-            Players[1].Pirates.Add(new Missioner(Players[1]));
-
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
+            Map[0, 6].AddPirate(new Friday(Players[0], Players[0]));
             Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
+            Map[12, 6].AddPirate(new Missioner(Players[1], Players[1]));
             Map[2, 7] = new PitCell(2, 7);
             Map[1, 6].Gold = 1;
             foreach (Pirate pirate in Players[1].Pirates)

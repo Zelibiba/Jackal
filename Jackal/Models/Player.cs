@@ -51,9 +51,6 @@ namespace Jackal.Models
                    .ToCollection()
                    .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
                    .ToPropertyEx(this, p => p.IsEnoughtPirates);
-            Pirates.Add(new Pirate(this));
-            Pirates.Add(new Pirate(this));
-            Pirates.Add(new Pirate(this));
         }
 
         /// <summary>
@@ -119,8 +116,8 @@ namespace Jackal.Models
         public void SetShip(ShipCell ship)
         {
             Ship = ship;
-            foreach (Pirate pirate in Pirates)
-                Ship.AddPirate(pirate);
+            for (int i = 0; i < 3; i++)
+                ship.AddPirate(new Pirate(this));
         }
 
         /// <summary>

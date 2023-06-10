@@ -20,14 +20,15 @@ namespace Jackal.Models.Cells
         {
             base.Open();
             Player owner = Pirates[0].Owner;
+            Player manager = Pirates[0].Manager;
             switch (_type)
             {
                 case ResidentType.Ben:
-                    AddPirate(new Ben(owner)); break;
+                    AddPirate(new Ben(owner, manager)); break;
                 case ResidentType.Friday:
-                    AddPirate(new Friday(owner)); break;
+                    AddPirate(new Friday(owner, manager)); break;
                 case ResidentType.Missioner:
-                    AddPirate(new Missioner(owner)); break;
+                    AddPirate(new Missioner(owner, manager)); break;
             }
         }
     }

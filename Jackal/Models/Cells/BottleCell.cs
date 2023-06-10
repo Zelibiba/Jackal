@@ -32,7 +32,7 @@ namespace Jackal.Models.Cells
             {
                 bottles--;
                 pirate.Kill();
-                AddPirate(new Ben(pirate.Owner, image: "DrunkMissioner"));
+                AddPirate(new Ben(pirate.Owner, pirate.Manager, image: "DrunkMissioner"));
             }
 
             pirate.Owner.Bottles += bottles;
