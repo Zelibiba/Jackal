@@ -16,5 +16,13 @@ namespace Jackal.Models.Pirates
         public override bool CanGrabGold => false;
         public override bool CanGrabGaleon => false;
 
+        /// <summary>
+        /// Метод превращает миссионера в пирата.
+        /// </summary>
+        public void ConverToPirate()
+        {
+            Kill();
+            Cell.AddPirate(new Ben(Owner, Manager, image: "DrunkMissioner"));
+        }
     }
 }

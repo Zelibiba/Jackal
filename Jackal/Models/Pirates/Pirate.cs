@@ -45,6 +45,7 @@ namespace Jackal.Models.Pirates
 
             Image = image ?? Team.ToString();
             IsVisible = true;
+            IsEnabled = true;
 
             IsFighter = isFighter;
 
@@ -102,6 +103,11 @@ namespace Jackal.Models.Pirates
         public Team Alliance => Owner.Alliance;
 
         /// <summary>
+        /// Флаг того, что с пиратом можно взаимодействовать.
+        /// </summary>
+        /// <remarks>Используется в интерфейсе.</remarks>
+        [Reactive] public bool IsEnabled { get; set; }
+        /// <summary>
         /// Флаг того, что пират выбран.
         /// </summary>
         /// <remarks>
@@ -120,7 +126,6 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public string Image { get; }
 
-
         /// <summary>
         /// Клетка, на которой находится пират.
         /// </summary>
@@ -134,10 +139,9 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public int Column => Cell.Column;
         /// <summary>
-        /// Номер уровня лабиринта, на котором находится пират.
+        /// Клетка, куда движется пират.
         /// </summary>
-        public int MazeNodeNumber => _mazeNodeNumber?.Value ?? 0;
-        readonly ObservableAsPropertyHelper<int> _mazeNodeNumber;
+        public Cell TargetCell { get; set; }
         /// <summary>
         /// Клетка, с которой пират начинает движение.
         /// </summary>
@@ -146,10 +150,6 @@ namespace Jackal.Models.Pirates
         /// Метод задаёт <see cref="StartCell"/> как клетку, где сейчас находится пират.
         /// </summary>
         public void Set_StartCell() => StartCell = Cell;
-        /// <summary>
-        /// Клетка, куда движется пират.
-        /// </summary>
-        public Cell TargetCell { get; set; }
 
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
@@ -181,6 +181,11 @@ namespace Jackal.Models.Pirates
         /// Необходим для корректной работы озера.
         /// </remarks>
         [ObservableAsProperty] public bool AtAirplane { get; }
+        /// <summary>
+        /// Номер уровня лабиринта, на котором находится пират.
+        /// </summary>
+        public int MazeNodeNumber => _mazeNodeNumber?.Value ?? 0;
+        readonly ObservableAsPropertyHelper<int> _mazeNodeNumber;
 
         /// <summary>
         /// Флаг того, что пират перемещает монету.
@@ -231,6 +236,10 @@ namespace Jackal.Models.Pirates
         /// </summary>
         /// <remarks>Используется в интерфейсе.</remarks>
         [Reactive] public bool IsBlocked { get; set; }
+        /// <summary>
+        /// Счётчик ходов, которые осталось пропустить из-за бочки с ромом.
+        /// </summary>
+        public int RumCount { get; set; }
 
         /// <summary>
         /// Метод удаляет пирата с клетки, на которой он находится.

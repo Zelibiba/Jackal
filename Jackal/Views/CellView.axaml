@@ -129,7 +129,8 @@
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>
 								<Button Classes="Pirate"
-										Classes.IsSelected="{Binding IsSelected}"/>
+										Classes.IsSelected="{Binding IsSelected}"
+										Classes.IsEnabled="{Binding IsEnabled}"/>
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>

@@ -160,7 +160,8 @@ namespace Jackal.Models
             Map[0, 6].AddPirate(new Friday(Players[0], Players[0]));
             Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
             Map[12, 6].AddPirate(new Missioner(Players[1], Players[1]));
-            Map[2, 7] = new PitCell(2, 7);
+
+            Map[2, 7] = new RumCell(2, 7);
             Map[1, 6].Gold = 1;
             foreach (Pirate pirate in Players[1].Pirates)
             {
@@ -179,6 +180,17 @@ namespace Jackal.Models
         /// </summary>
         static void NextPlayer()
         {
+            foreach (Pirate pirate in CurrentPlayer.Pirates)
+            {
+                if (pirate.RumCount == 1)
+                {
+                    pirate.IsEnabled = true;
+                    pirate.IsBlocked = false;
+                }
+                if (pirate.RumCount > 0)
+                    pirate.RumCount--;
+            }
+
             CurrentPlayer.Turn = false;
             CurrentPlayerNumber++;
             CurrentPlayer.Turn = true;
