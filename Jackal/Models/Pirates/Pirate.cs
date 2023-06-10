@@ -229,8 +229,11 @@ namespace Jackal.Models.Pirates
             Manager.Pirates.Add(newPirate);
         }
 
-
-        public bool IsBlocked => false;
+        /// <summary>
+        /// Флаг того, что пират заблокирован в яме или пещере.
+        /// </summary>
+        /// <remarks>Используется в интерфейсе.</remarks>
+        [Reactive] public bool IsBlocked { get; set; }
 
         /// <summary>
         /// Метод удаляет пирата с клетки, на которой он находится.

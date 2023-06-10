@@ -20,7 +20,7 @@ namespace Jackal.Models.Cells
             if (mazeLevel < 2 || mazeLevel > 5)
                 throw new ArgumentException("Wrong mazeLevel!");
 
-            Nodes.Clear();
+            Nodes = new ObservableCollection<MazeNodeCell>();
             for (int i = 0; i < mazeLevel; i++)
                 Nodes.Add(new MazeNodeCell(Row, Column, this, i + 1));
 
@@ -61,6 +61,11 @@ namespace Jackal.Models.Cells
                         cell.CanBeSelected = false;
                 });
         }
+
+        /// <summary>
+        /// Список уровней лабиринта.
+        /// </summary>
+        public ObservableCollection<MazeNodeCell> Nodes { get; }
 
 
         public override Cell GetSelectedCell(Pirate pirate)

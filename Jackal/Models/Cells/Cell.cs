@@ -25,8 +25,10 @@ namespace Jackal.Models.Cells
         /// <param name="row">Строка клетки.</param>
         /// <param name="column">Колонка клетки.</param>
         /// <param name="image">Название изображения клетки.</param>
-        /// <param name="isStandable">Флаг того, что пират может стоять на клетке.</param>
-        public Cell(int row, int column, string image, bool isStandable = true, int angle = 0)
+        /// <param name="isStandable"><inheritdoc cref="IsStandable" path="/summary"/></param>
+        /// <param name="angle"><inheritdoc cref="Angle" path="/summary"/></param>
+        /// <param name="number"><inheritdoc cref="Number" path="/summary"/></param>
+        public Cell(int row, int column, string image, bool isStandable = true, int angle = 0, int number = 0)
         {
             Row = row;
             Column= column;
@@ -41,8 +43,7 @@ namespace Jackal.Models.Cells
 
             IsVisible = true;
             IsStandable = isStandable;
-            Nodes = new ObservableCollection<Cell>() { this };
-            Number = 0;
+            Number = number;
         }
         /// <summary>
         /// Метод создаёт поверхностную копию клетки.
@@ -141,19 +142,12 @@ namespace Jackal.Models.Cells
         }
 
         /// <summary>
-        /// Список уровней лабиринта.
-        /// </summary>
-        /// <remarks>
-        /// В нелабиринтной клетке имеет единственный элемент, ссылающийся на саму клетку.
-        /// </remarks>
-        public ObservableCollection<Cell> Nodes { get; }
-        /// <summary>
         /// Номер уровня лабиринта данной клетки.
         /// </summary>
         /// <remarks>
         /// В нелабиринтной клетке равняется 0.
         /// </remarks>
-        public int Number { get; protected set; }
+        public int Number { get; }
         /// <summary>
         /// Метод возвращает ту часть клетки, которая досягаема для выбранного пирата.
         /// </summary>
@@ -194,7 +188,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Флаг того, что на клетке может стоять пират.
         /// </summary>
-        public readonly bool IsStandable;
+        public bool IsStandable { get; }
 
         /// <summary>
         /// Флаг того, что клетка может быть выбрана.

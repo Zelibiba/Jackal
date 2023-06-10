@@ -161,7 +161,7 @@ namespace Jackal.Models
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
-            Map[2, 7] = new BottleCell(2, 7, 3);
+            Map[2, 7] = new PitCell(2, 7);
             Map[1, 6].Gold = 1;
             foreach (Pirate pirate in Players[1].Pirates)
             {
