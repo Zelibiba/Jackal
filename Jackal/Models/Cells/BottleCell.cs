@@ -28,6 +28,12 @@ namespace Jackal.Models.Cells
                 bottles--;
                 pirate.Kill();
             }
+            else if (pirate is Missioner)
+            {
+                bottles--;
+                pirate.Kill();
+                AddPirate(new Ben(pirate.Owner, image: "DrunkMissioner"));
+            }
 
             pirate.Owner.Bottles += bottles;
         }

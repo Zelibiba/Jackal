@@ -92,7 +92,7 @@ namespace Jackal.Models.Cells
             }
         }
 
-        protected override bool CanBeSelectedBy(Pirate pirate) => pirate.Cell is SeaCell || IsFriendlyTo(pirate);
+        public override bool CanBeSelectedBy(Pirate pirate) => pirate.Cell is SeaCell || IsFriendlyTo(pirate);
         public override MovementResult AddPirate(Pirate pirate)
         {
             if (IsFriendlyTo(pirate))

@@ -26,11 +26,11 @@ namespace Jackal.Models.Cells
                 _owner.Open();
         }
 
-        public override void RemovePirate(Pirate pirate)
+        public override void RemovePirate(Pirate pirate, bool withGold = true)
         {
             if(!_owner.Nodes.Contains(pirate.TargetCell))
                 _owner.Pirates.Remove(pirate);
-            base.RemovePirate(pirate);
+            base.RemovePirate(pirate, withGold);
         }
         public override MovementResult AddPirate(Pirate pirate)
         {

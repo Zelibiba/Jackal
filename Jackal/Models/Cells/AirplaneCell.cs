@@ -20,9 +20,9 @@ namespace Jackal.Models.Cells
         /// </summary>
         public bool IsActive { get; private set; }
 
-        public override void RemovePirate(Pirate pirate)
+        public override void RemovePirate(Pirate pirate, bool withGold = true)
         {
-            base.RemovePirate(pirate);
+            base.RemovePirate(pirate, withGold);
 
             if (pirate.TargetCell == this)
                 SelectableCoords.RemoveAll(coords => HasSameCoords(coords));

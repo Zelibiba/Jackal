@@ -153,13 +153,16 @@ namespace Jackal.Models
             }
             #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true });
+            Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles=2 });
+            Players[0].Pirates.Add(new Friday(Players[0]));
             Players.Add(new Player(1, "AETHNAETRN", Team.Red, true));
+            Players[1].Pirates.Add(new Missioner(Players[1]));
 
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
-            Map[2, 7] = new LightHouseCell(2, 7);
+            Map[2, 7] = new BottleCell(2, 7, 3);
+            Map[1, 6].Gold = 1;
             foreach (Pirate pirate in Players[1].Pirates)
             {
                 pirate.RemoveFromCell();
@@ -251,6 +254,10 @@ namespace Jackal.Models
                 NextPlayer();
             }
         }
+        /// <summary>
+        /// Метод выбора клетки во время хода маяка.
+        /// </summary>
+        /// <param name="cell">Выбираемая клетка.</param>
         static void SelectLightHouseCell(Cell cell)
         {
             if (lightHouse.SelectedCells.Count < lightHouse.SelectedCells.Capacity)
@@ -396,6 +403,11 @@ namespace Jackal.Models
             switch (MovePirate(cell))
             {
                 case MovementResult.End:
+                    if (SelectedPirate is Friday && cell.ContainsMissioner || SelectedPirate is Missioner && cell.ContainsFriday)
+                    {
+                        SelectedPirate.Kill();
+                        cell.Pirates.First(pirate => pirate is Friday || pirate is Missioner).Kill();
+                    }
                     SelectedPirate = null;
                     PirateInMotion = false;
                     NextPlayer();
@@ -422,16 +434,22 @@ namespace Jackal.Models
         static MovementResult ContinueMovePirate(int[] coords)
         {
             Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
-            
-            if(!cell.IsGoldFriendly(SelectedPirate))
+
+            OnStartPirateAnimation(cell);
+
+            if (!cell.IsGoldFriendly(SelectedPirate))
             {
                 if (SelectedPirate.Gold)
                     SelectedPirate.Gold = false;
                 if (SelectedPirate.Galeon)
                     SelectedPirate.Galeon = false;
             }
+            if(!cell.CanBeSelectedBy(SelectedPirate))
+            {
+                SelectedPirate.Kill();
+                return MovementResult.End;
+            }
 
-            OnStartPirateAnimation(cell);
             return MovePirate(cell);
         }
         /// <summary>
@@ -532,7 +550,13 @@ namespace Jackal.Models
                 OnStartCellAnimation(cell1, cell2);
         }
 
+        /// <summary>
+        /// Переменная для управления землетрясением.
+        /// </summary>
         static readonly EarthQuake earthQuake = new();
+        /// <summary>
+        /// Переменная для управления ходом маяка.
+        /// </summary>
         static readonly LightHouse lightHouse = new();
         /// <summary>
         /// Метод запуска землетрясения.

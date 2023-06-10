@@ -118,6 +118,27 @@ namespace Jackal.Models.Cells
             Column = column;
         }
 
+        /// <summary>
+        /// Список координат клеток, на которые можно переместиться с данной клетки.
+        /// </summary>
+        public List<int[]> SelectableCoords { get; }
+        /// <summary>
+        /// Метод определяет координаты клеток, куда пират может походить.
+        /// </summary>
+        /// <param name="map">Карта игры.</param>
+        public virtual void SetSelectableCoords(ObservableMap map)
+        {
+            SelectableCoords.Clear();
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    if ((i == 0 && j == 0) || map[Row + i, Column + j] is SeaCell)
+                        continue;
+                    SelectableCoords.Add(new int[2] { Row + i, Column + j });
+                }
+            }
+        }
 
         /// <summary>
         /// Список уровней лабиринта.
@@ -141,11 +162,6 @@ namespace Jackal.Models.Cells
         /// </remarks>
         public virtual Cell GetSelectedCell(Pirate pirate) => this;
 
-
-        /// <summary>
-        /// Флаг того, что на клетке может стоять пират.
-        /// </summary>
-        public readonly bool IsStandable;
         /// <summary>
         /// Флаг того, что клетка видима.
         /// </summary>
@@ -174,6 +190,12 @@ namespace Jackal.Models.Cells
             IsOpened = true;
             IsPreOpened = true;
         }
+
+        /// <summary>
+        /// Флаг того, что на клетке может стоять пират.
+        /// </summary>
+        public readonly bool IsStandable;
+
         /// <summary>
         /// Флаг того, что клетка может быть выбрана.
         /// </summary>
@@ -194,7 +216,14 @@ namespace Jackal.Models.Cells
         /// </summary>
         /// <param name="pirate"></param>
         /// <returns>True, если можно переместиться.</returns>
-        protected virtual bool CanBeSelectedBy(Pirate pirate) => pirate.IsFighter || IsFriendlyTo(pirate);
+        public virtual bool CanBeSelectedBy(Pirate pirate)
+        {
+            if (pirate.Cell.Pirates.Count == 1 && (pirate is Friday || pirate is Missioner)
+                && Pirates.Count == 1 && (Pirates[0] is Friday || Pirates[0] is Missioner))
+                return true;
+
+            return IsFriendlyTo(pirate) || pirate.IsFighter && !ContainsMissioner && !pirate.Cell.ContainsMissioner;
+        }
         /// <summary>
         /// Метод определения занчения <see cref="CanBeSelected"/>.
         /// </summary>
@@ -221,7 +250,7 @@ namespace Jackal.Models.Cells
         /// </summary>
         [ObservableAsProperty] public bool Treasure { get; }
         /// <summary>
-        /// Метод определяет, может ли пират зайти на данную клетку с сокровищем.
+        /// Метод определения возможности перемещения пирата с сокровищем.
         /// </summary>
         /// <param name="pirate">Пират, заходящий на клетку.</param>
         /// <returns>true, если пират может зайти с сокровищем.</returns>
@@ -242,29 +271,14 @@ namespace Jackal.Models.Cells
         /// <returns>True, если на клетке есть враги.</returns>
         public bool IsFriendlyTo(Pirate pirate) => (pirate.Alliance | Team.None).HasFlag(Team);
 
-
-
         /// <summary>
-        /// Список координат клеток, на которые можно переместиться с данной клетки.
+        /// Флаг того, что на клетке находится Миссионер.
         /// </summary>
-        public List<int[]> SelectableCoords { get; }
+        public bool ContainsMissioner => Pirates.Any(pirate => pirate is Missioner);
         /// <summary>
-        /// Метод определяет координаты клеток, куда пират может походить.
+        /// Флаг того, что на клетке находится Пятница.
         /// </summary>
-        /// <param name="map">Карта игры.</param>
-        public virtual void SetSelectableCoords(ObservableMap map)
-        {
-            SelectableCoords.Clear();
-            for (int i = -1; i < 2; i++)
-            {
-                for (int j = -1; j < 2; j++)
-                {
-                    if ((i == 0 && j == 0) || map[Row + i, Column + j] is SeaCell)
-                        continue;
-                    SelectableCoords.Add(new int[2] { Row + i, Column + j });
-                }
-            }
-        }
+        public bool ContainsFriday => Pirates.Any(pirate => pirate is Friday);
 
         /// <summary>
         /// Флаг того, что клетка является кораблём.
@@ -286,14 +300,18 @@ namespace Jackal.Models.Cells
         /// Метод убирает пирата с клетки.
         /// </summary>
         /// <param name="pirate">Пират, убираемый с клетки.</param>
-        public virtual void RemovePirate(Pirate pirate)
+        /// <param name="withGold">Флаг указывает, учитывать ли уносимое пиратом золото.</param>
+        public virtual void RemovePirate(Pirate pirate, bool withGold = true)
         {
             Pirates.Remove(pirate);
 
-            if (pirate.Gold)
-                Gold--;
-            else if (pirate.Galeon)
-                Galeon = false;
+            if (withGold)
+            {
+                if (pirate.Gold)
+                    Gold--;
+                else if (pirate.Galeon)
+                    Galeon = false;
+            }
         }
          /// <summary>
         /// Метод помещает пирата на клетку.

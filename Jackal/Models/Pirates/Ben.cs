@@ -8,7 +8,7 @@ namespace Jackal.Models.Pirates
 {
     public class Ben : Pirate
     {
-        public Ben(Player owner) : base(owner, image: "Green") { }
+        public Ben(Player owner, string image = "Green") : base(owner, image: image) { }
 
         public override bool CanHaveSex => false;
     }

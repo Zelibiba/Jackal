@@ -192,6 +192,14 @@ namespace Jackal.Models.Pirates
         /// Флаг того, что пират перемещает сокровище.
         /// </summary>
         public bool Treasure => Gold || Galeon;
+        /// <summary>
+        /// Флаг того, что пират может взять золото.
+        /// </summary>
+        public virtual bool CanGrabGold => Cell?.Gold > 0;
+        /// <summary>
+        /// Флаг того, что пират может взять Галеон.
+        /// </summary>
+        public virtual bool CanGrabGaleon => Cell?.Galeon ?? false;
 
         /// <summary>
         /// Флаг того, что пират может сражаться и управлять кораблём.
@@ -201,7 +209,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может выпить ром.
         /// </summary>
-        public bool CanDrinkRum => Cell is ITrapCell && Manager.Bottles > 0 && !Manager.RumIsBlocked;
+        public virtual bool CanDrinkRum => Cell is ITrapCell && Manager.Bottles > 0 && !Manager.RumIsBlocked;
         /// <summary>
         /// Флаг того, что пират выпил ром.
         /// </summary>
@@ -239,7 +247,8 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public void Kill()
         {
-            Cell.Pirates.Remove(this);
+            TargetCell = null;
+            Cell.RemovePirate(this, withGold: false);
             Manager.Pirates.Remove(this);
         }
     }
