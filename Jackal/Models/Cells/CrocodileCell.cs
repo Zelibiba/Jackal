@@ -20,6 +20,11 @@ namespace Jackal.Models.Cells
         {
             int[] coords = pirate.Cell.Coords;
             base.AddPirate(pirate);
+            if (pirate.IsInLoop)
+            {
+                pirate.LoopKill();
+                return MovementResult.End;
+            }
             return _continueMove(coords);
         }
     }

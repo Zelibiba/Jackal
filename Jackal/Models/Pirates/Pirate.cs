@@ -48,6 +48,7 @@ namespace Jackal.Models.Pirates
             IsEnabled = true;
 
             IsFighter = isFighter;
+            _loopDict = new Dictionary<Cell, int>();
 
             this.WhenAnyValue(p => p.Gold)
                 .Skip(1)
@@ -79,6 +80,23 @@ namespace Jackal.Models.Pirates
                 .Select(cell => cell is AirplaneCell airpane && airpane.IsActive
                                 || (cell is LakeCell && AtAirplane))
                 .ToPropertyEx(this, p => p.AtAirplane);
+
+            this.WhenAnyValue(p => p.Cell)
+                .Skip(1)
+                .Where(cell => cell is ArrowCell arrowCell
+                               && (arrowCell.ArrowType == ArrowType.Side1 || arrowCell.ArrowType == ArrowType.Angle1)
+                               || cell is CrocodileCell)
+                .Subscribe(cell =>
+                {
+                    if (_loopDict.ContainsKey(cell))
+                    {
+                        if (++_loopDict[cell] == 3)
+                            IsInLoop = true;
+                    }
+                    else
+                        _loopDict.Add(cell, 1);
+                });
+
             _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)
                                   .Skip(1)
                                   .Select(cell => cell.Number)
@@ -166,6 +184,15 @@ namespace Jackal.Models.Pirates
                 return Cell.SelectableCoords;
             }
         }
+
+        /// <summary>
+        /// Словарь с ячейками, которые могут потенциально ввести в петлю.
+        /// </summary>
+        readonly Dictionary<Cell, int> _loopDict;
+        /// <summary>
+        /// Флаг того, что пират попал в петлю.
+        /// </summary>
+        public bool IsInLoop { get; protected set; }
 
         /// <summary>
         /// Флаг того, что пират перемещается конём.
@@ -259,6 +286,20 @@ namespace Jackal.Models.Pirates
             TargetCell = null;
             Cell.RemovePirate(this, withGold: false);
             Manager.Pirates.Remove(this);
+        }
+        public void LoopKill()
+        {
+            Kill();
+            if (Cell.Gold > 0)
+            {
+                Game.LostGold++;
+                Cell.Gold = 0;
+            }
+            else if(Cell.Galeon)
+            {
+                Game.LostGold += 3;
+                Cell.Galeon = false;
+            }
         }
     }
 }

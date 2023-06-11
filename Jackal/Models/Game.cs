@@ -55,6 +55,10 @@ namespace Jackal.Models
             }
         }
         static int __currentPlayerNumber;
+        /// <summary>
+        /// Флаг того, что текущий игрок контролируется клиентом.
+        /// </summary>
+        public static bool IsPlayerControllable => CurrentPlayer.IsControllable;
 
         /// <summary>
         /// Пират, выбранный на текущий момент.
@@ -155,23 +159,25 @@ namespace Jackal.Models
 
             Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles=2 });
             Players.Add(new Player(1, "DD", Team.Black, true));
-            Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
-            Players.Add(new Player(3, "djk", Team.Yellow, true));
+            //Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
+            //Players.Add(new Player(3, "djk", Team.Yellow, true));
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             Map[0, 6].AddPirate(new Friday(Players[0], Players[0]));
             Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
-            Map[12, 6] = new ShipCell(12, 6, Players[2], ShipRegions[2]);
-            Map[12, 6].AddPirate(new Missioner(Players[2], Players[2]));
-            Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
+            //Map[12, 6] = new ShipCell(12, 6, Players[2], ShipRegions[2]);
+            //Map[12, 6].AddPirate(new Missioner(Players[2], Players[2]));
+            //Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
 
-            Map[2, 7] = new CannabisCell(2, 7);
+            Map[2, 7] = new ArrowCell(2, 7, ArrowType.Side1,3,ContinueMovePirate);
             Map[11, 6] = new CannabisCell(11, 6);
-            Map[1, 6] = new MazeCell(1, 6, 3);
+            Map[2, 6] = new CrocodileCell(2, 6, ContinueMovePirate);
+            Map[3, 7] = new ArrowCell(3, 7, ArrowType.Side1, 0, ContinueMovePirate);
+            Map[1, 6].Gold = 2;
             foreach (Pirate pirate in Players[1].Pirates)
             {
                 pirate.RemoveFromCell();
-                Map[2, 6].AddPirate(pirate);
+                Map[3, 6].AddPirate(pirate);
             }
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -212,48 +218,33 @@ namespace Jackal.Models
         }
 
         /// <summary>
-        /// Делегат для блокировки интерфейса.
-        /// </summary>
-        public static Action<bool>? SetInterfaceEnable;
-        /// <summary>
         /// Метод проверки возможности выбора клетки.
         /// </summary>
         /// <param name="cell">Выбираемая клетка.</param>
-        public static void PreSelectCell(Cell cell)
+        public static bool PreSelectCell(Cell cell)
         {
-            if (cell.CanBeSelected ||
-                cell is ShipCell ship && ship.CanMove && ship.Manager == CurrentPlayer && CanChangeSelection)
-                SelectCell(cell);
+            return cell.CanBeSelected ||
+                   cell is ShipCell ship && ship.CanMove && ship.Manager == CurrentPlayer && CanChangeSelection;
         }
         /// <summary>
         /// Метод выбора клетки.
         /// </summary>
         /// <param name="cell">Выбираемая клетка.</param>
-        static void SelectCell(Cell cell)
+        public static void SelectCell(Cell cell)
         {
-            Task.Run(() =>
+            if (IsPirateSelected && cell.CanBeSelected)
             {
-                //? Вероятно, чтоит перенести SetInterfaceEnable во ViewModel
-                if (CurrentPlayer.IsControllable)
-                    SetInterfaceEnable?.Invoke(false);
-
-                if (IsPirateSelected && cell.CanBeSelected)
-                {
-                    Deselect(false);
-                    StartMovePirate(cell.GetSelectedCell(SelectedPirate));
-                }
-                else if (cell is ShipCell)
-                    SelectShip(cell);
-                else if (IsShipSelected)
-                    MoveShip(cell);
-                else if (earthQuake.IsActive)
-                    SelectEarthQuakeCell(cell);
-                else if (lightHouse.IsActive)
-                    SelectLightHouseCell(cell);
-
-                if (CurrentPlayer.IsControllable)
-                    SetInterfaceEnable?.Invoke(true);
-            });
+                Deselect(false);
+                StartMovePirate(cell.GetSelectedCell(SelectedPirate));
+            }
+            else if (cell is ShipCell)
+                SelectShip(cell);
+            else if (IsShipSelected)
+                MoveShip(cell);
+            else if (earthQuake.IsActive)
+                SelectEarthQuakeCell(cell);
+            else if (lightHouse.IsActive)
+                SelectLightHouseCell(cell);
         }
         /// <summary>
         /// Метод выбора корабля.
@@ -606,10 +597,10 @@ namespace Jackal.Models
         static void StartEarthQuake()
         {
             earthQuake.IsActive = true;
-            foreach (Cell cell in Map)
-                cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
-                                     cell.Gold == 0 && !cell.Galeon &&
-                                     cell.Pirates.Count == 0;
+                foreach (Cell cell in Map)
+                    cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
+                                         cell.Gold == 0 && !cell.Galeon &&
+                                         cell.Pirates.Count == 0;
         }
         /// <summary>
         /// Метод запуска хода маяка.
@@ -621,8 +612,8 @@ namespace Jackal.Models
             lightHouse.Lighthouse = LightHouse;
             IEnumerable<Cell> closedCells = Map.Where(cell => !cell.IsOpened);
             lightHouse.SelectedCells = new(Math.Min(closedCells.Count(), 4));
-            foreach (Cell cell in closedCells)
-                cell.CanBeSelected = true;
+                foreach (Cell cell in closedCells)
+                    cell.CanBeSelected = true;
         }
         /// <summary>
         /// Метод запуска хода конопли.

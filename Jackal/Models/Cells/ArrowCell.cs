@@ -15,6 +15,7 @@ namespace Jackal.Models.Cells
         {
             _continueMove = continueMove;
             _orientations = new List<Orientation>();
+            ArrowType = arrowType;
             switch (arrowType)
             {
                 case ArrowType.Side1:
@@ -54,6 +55,7 @@ namespace Jackal.Models.Cells
         }
 
         readonly Func<int[], MovementResult> _continueMove;
+        public ArrowType ArrowType { get; }
 
         public override int Angle => _angle;
         readonly int _angle;
@@ -62,6 +64,11 @@ namespace Jackal.Models.Cells
         public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
+            if (pirate.IsInLoop)
+            {
+                pirate.LoopKill();
+                return MovementResult.End;
+            }
             if (SelectableCoords.Count == 1)
                 return _continueMove(SelectableCoords[0]);
             else
