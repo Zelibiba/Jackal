@@ -1,4 +1,5 @@
-﻿using Jackal.Models.Cells;
+﻿using Avalonia.Threading;
+using Jackal.Models.Cells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Jackal.Models.Pirates
 
         public void SetNewOwner(Player owner, Player manager)
         {
-            Owner = owner;
+            Dispatcher.UIThread.Post(() => Owner = owner);
             Manager = manager;
         }
     }

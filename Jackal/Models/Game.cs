@@ -128,7 +128,7 @@ namespace Jackal.Models
         {
             #region создание каркаса карты
             Map = new ObservableMap(MapSize);
-            for(int i = 0; i < MapSize; i++)
+            for (int i = 0; i < MapSize; i++)
             {
                 for (int j = 0; j < MapSize; j++)
                     Map.Add(new SeaCell(i, j));
@@ -157,7 +157,7 @@ namespace Jackal.Models
             }
             #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles=2 });
+            Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles = 2 });
             Players.Add(new Player(1, "DD", Team.Black, true));
             //Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
             //Players.Add(new Player(3, "djk", Team.Yellow, true));
@@ -169,16 +169,24 @@ namespace Jackal.Models
             //Map[12, 6].AddPirate(new Missioner(Players[2], Players[2]));
             //Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
 
-            Map[2, 7] = new ArrowCell(2, 7, ArrowType.Side1,3,ContinueMovePirate);
-            Map[11, 6] = new CannabisCell(11, 6);
-            Map[2, 6] = new CrocodileCell(2, 6, ContinueMovePirate);
-            Map[3, 7] = new ArrowCell(3, 7, ArrowType.Side1, 0, ContinueMovePirate);
-            Map[1, 6].Gold = 2;
-            foreach (Pirate pirate in Players[1].Pirates)
+            Map[1, 6] = new CaveCell(1, 6, ContinueMovePirate);
+            Map[6, 11] = new CaveCell(6, 11, ContinueMovePirate);
+            Map[11, 6] = new CaveCell(11, 6, ContinueMovePirate);
+            Map[6, 1] = new CaveCell(6, 1, ContinueMovePirate);
+            CaveCell[] caves = new CaveCell[]
             {
-                pirate.RemoveFromCell();
-                Map[3, 6].AddPirate(pirate);
-            }
+                Map[1, 6]  as CaveCell,
+                Map[6, 11] as CaveCell,
+                Map[11, 6] as CaveCell,
+                Map[6, 1]  as CaveCell,
+            };
+            foreach (CaveCell cave in caves)
+                cave.LinkCaves(caves);
+            //foreach (Pirate pirate in Players[1].Pirates)
+            //{
+            //    pirate.RemoveFromCell();
+            //    Map[3, 6].AddPirate(pirate);
+            //}
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
         }

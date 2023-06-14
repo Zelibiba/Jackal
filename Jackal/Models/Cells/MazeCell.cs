@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using Avalonia.Controls;
+using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models.Pirates;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,52 +21,13 @@ namespace Jackal.Models.Cells
             if (mazeLevel < 2 || mazeLevel > 5)
                 throw new ArgumentException("Wrong mazeLevel!");
 
-            Nodes = new ObservableCollection<MazeNodeCell>();
+            Nodes.Clear();
             for (int i = 0; i < mazeLevel; i++)
                 Nodes.Add(new MazeNodeCell(Row, Column, this, i + 1));
 
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.Gold)
-                 .Subscribe(_ =>
-                 {
-                     int summ = 0;
-                     foreach (Cell cell in Nodes)
-                         summ += cell.Gold;
-                     Gold = summ;
-                 });
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.Galeon)
-                 .Select(_ =>
-                 {
-                     foreach (Cell cell in Nodes)
-                     {
-                         if (cell.Galeon)
-                             return true;
-                     }
-                     return false;
-                 }).Subscribe(x => Galeon = x);
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.CanBeSelected)
-                 .Subscribe(_ =>
-                 {
-                     bool result = false;
-                     for (int i = 0; i < Nodes.Count && !result; i++)
-                         result |= Nodes[i].CanBeSelected;
-                     CanBeSelected = result;
-                 });
-            this.WhenAnyValue(cell => cell.CanBeSelected)
-                .Where(x => !x)
-                .Subscribe(_ =>
-                {
-                    foreach (Cell cell in Nodes)
-                        cell.CanBeSelected = false;
-                });
+            LinkCellWithNodes();
         }
 
-        /// <summary>
-        /// Список уровней лабиринта.
-        /// </summary>
-        public ObservableCollection<MazeNodeCell> Nodes { get; }
 
 
         public override Cell GetSelectedCell(Pirate pirate)

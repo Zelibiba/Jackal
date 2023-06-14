@@ -52,6 +52,7 @@ namespace Jackal.Models.Pirates
 
             this.WhenAnyValue(p => p.Gold)
                 .Skip(1)
+                .Where(x => !x)
                 .Subscribe(x =>
                 {
                     if (!Cell.IsStandable)
@@ -62,6 +63,7 @@ namespace Jackal.Models.Pirates
                 });
             this.WhenAnyValue(p => p.Galeon)
                 .Skip(1)
+                .Where(x => !x)
                 .Subscribe(x =>
                 {
                     if (!Cell.IsStandable)
@@ -165,9 +167,9 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public Cell StartCell { get; protected set; }
         /// <summary>
-        /// Метод задаёт <see cref="StartCell"/> как клетку, где сейчас находится пират.
+        /// Метод задаёт <see cref="StartCell"/>.
         /// </summary>
-        public void SetStartCell() => StartCell = Cell;
+        public void SetStartCell(Cell? cell = null) => StartCell = cell ?? Cell;
 
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.

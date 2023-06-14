@@ -1,4 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
+using DynamicData;
+using DynamicData.Binding;
 using Jackal.Models.Pirates;
 using Microsoft.CodeAnalysis;
 using ReactiveUI;
@@ -36,6 +38,7 @@ namespace Jackal.Models.Cells
             Angle = angle;
             Pirates = new ObservableCollection<Pirate>();
             SelectableCoords = new List<int[]>();
+            Nodes = new ObservableCollection<Cell> { this };
 
             this.WhenAnyValue(c => c.Gold, c => c.Galeon)
                 .Select(t => t.Item1 > 0 || t.Item2)
@@ -142,12 +145,35 @@ namespace Jackal.Models.Cells
         }
 
         /// <summary>
+        /// Список уровней лабиринта.
+        /// </summary>
+        public ObservableCollection<Cell> Nodes { get; }
+        /// <summary>
         /// Номер уровня лабиринта данной клетки.
         /// </summary>
         /// <remarks>
         /// В нелабиринтной клетке равняется 0.
         /// </remarks>
         public int Number { get; }
+        protected void LinkCellWithNodes()
+        {
+            Nodes.ToObservableChangeSet()
+                 .AutoRefresh(cell => cell.Gold)
+                 .Subscribe(_ => Gold = Nodes.Sum(x => x.Gold));
+            Nodes.ToObservableChangeSet()
+                 .AutoRefresh(cell => cell.Galeon)
+                 .Subscribe(_ => Galeon = Nodes.Any(x => x.Galeon));
+            Nodes.ToObservableChangeSet()
+                 .AutoRefresh(cell => cell.CanBeSelected)
+                 .Subscribe(_ => CanBeSelected = Nodes.Any(x => x.CanBeSelected));
+            this.WhenAnyValue(cell => cell.CanBeSelected)
+                .Where(x => !x)
+                .Subscribe(_ =>
+                {
+                    foreach (Cell cell in Nodes)
+                        cell.CanBeSelected = false;
+                });
+        }
         /// <summary>
         /// Метод возвращает ту часть клетки, которая досягаема для выбранного пирата.
         /// </summary>
@@ -263,7 +289,7 @@ namespace Jackal.Models.Cells
         /// </summary>
         /// <param name="pirate">Выбранный пират.</param>
         /// <returns>True, если на клетке есть враги.</returns>
-        public bool IsFriendlyTo(Pirate pirate) => (pirate.Alliance | Team.None).HasFlag(Team);
+        public virtual bool IsFriendlyTo(Pirate pirate) => (pirate.Alliance | Team.None).HasFlag(Team);
 
         /// <summary>
         /// Флаг того, что на клетке находится Миссионер.
@@ -306,6 +332,11 @@ namespace Jackal.Models.Cells
                 else if (pirate.Galeon)
                     Galeon = false;
             }
+            else
+            {
+                pirate.Gold = false;
+                pirate.Galeon = false;
+            }
         }
          /// <summary>
         /// Метод помещает пирата на клетку.
@@ -318,25 +349,7 @@ namespace Jackal.Models.Cells
             pirate.Cell = this;
 
             // Побить пиратов на клетке и забрать пятницу
-            if (!IsFriendlyTo(pirate))
-            {
-                List<Pirate> pirates = new();
-                foreach (Pirate pir in Pirates.Take(Pirates.Count - 1))
-                {
-                    if (pir is Friday friday)
-                        friday.SetNewOwner(pirate.Owner, pirate.Manager);
-                    else
-                        pirates.Add(pir);
-                }
-                foreach (Pirate pir in pirates)
-                {
-                    pir.Gold = false;
-                    pir.Galeon = false;
-                    pir.TargetCell = pir.Owner.Ship;
-                    RemovePirate(pir);
-                    pir.Owner.Ship.AddPirate(pir);
-                }
-            }
+            HitPirates(pirate);
 
             if (pirate.Gold)
                 Gold++;
@@ -347,6 +360,30 @@ namespace Jackal.Models.Cells
                 Open();
 
             return IsStandable ? MovementResult.End : MovementResult.Continue;
+        }
+        /// <summary>
+        /// Метод стукает вражеских пиратов на клетке и забирает пятницу, если это необходимо делать.
+        /// </summary>
+        /// <param name="pirate">Пират, который пришёл на данную клетку.</param>
+        public void HitPirates(Pirate pirate, bool allPirates = true)
+        {
+            if (!IsFriendlyTo(pirate))
+            {
+                List<Pirate> pirates = new();
+                foreach (Pirate pir in Pirates.Take(Pirates.Count - (allPirates ? 1 : 0)))
+                {
+                    if (pir is Friday friday)
+                        friday.SetNewOwner(pirate.Owner, pirate.Manager);
+                    else
+                        pirates.Add(pir);
+                }
+                foreach (Pirate pir in pirates)
+                {
+                    pir.TargetCell = pir.Owner.Ship;
+                    RemovePirate(pir, withGold: false);
+                    pir.Owner.Ship.AddPirate(pir);
+                }
+            }
         }
     }
 }
