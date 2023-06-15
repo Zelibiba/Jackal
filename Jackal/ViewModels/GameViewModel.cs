@@ -100,18 +100,7 @@ namespace Jackal.ViewModels
         }
 
         public void GrabTreasure(string param) => Game.ReselctPirate(param);
-        public void GetPirateDrunk(object param)
-        {
-            switch (param)
-            {
-                case "pirate":
-                    Game.GetPirateDrunk(); break;
-                case "friday":
-                    Game.GetFridayDrunk(); break;
-                case "missioner":
-                    Game.GetMissionerDrunk(); break;
-            }
-        }
+        public void GetPirateDrunk(object param) => Game.GetPirateDrunk();
         public void PirateBirth(object param) => Game.PirateBirth();
     }
 }

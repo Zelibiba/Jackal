@@ -47,18 +47,14 @@
 				<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
 					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
 						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.CanGrabGold}"
-									  Command="{Binding GrabTreasure}" CommandParameter="gold" HorizontalAlignment="Stretch"/>
+									  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
 						<ToggleButton Content="G" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" Margin="0,5"
-									  Command="{Binding GrabTreasure}" CommandParameter="galeon" HorizontalAlignment="Stretch"/>
+									  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
 						<Button Content="r" HorizontalContentAlignment="Center"
 								IsEnabled="{Binding SelectedPirate.CanDrinkRum}" HorizontalAlignment="Stretch"
-								Command="{Binding GetPirateDrunk}" CommandParameter="pirate"/>
+								Command="{Binding GetPirateDrunk}"/>
 						<Button Content="B" IsEnabled="{Binding SelectedPirate.CanHaveSex}" HorizontalAlignment="Stretch" Margin="0,5"
 								Command="{Binding PirateBirth}"/>
-						<Button Content="F" IsEnabled="{Binding SelectedPirate.CanGiveRumToFriday}" HorizontalAlignment="Stretch"
-								Command="{Binding GetPirateDrunk}" CommandParameter="friday"/>
-						<Button Content="M" IsEnabled="{Binding SelectedPirate.CanGiveRumToMissioner}" HorizontalAlignment="Stretch" Margin="0,5,0,0"
-								Command="{Binding GetPirateDrunk}" CommandParameter="missioner"/>
 					</WrapPanel>
 				</Border>
 				<ItemsControl Grid.Column="2" Items="{Binding Players}" BorderBrush="Black" BorderThickness="1">

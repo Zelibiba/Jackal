@@ -169,7 +169,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Метод задаёт <see cref="StartCell"/>.
         /// </summary>
-        public void SetStartCell() => StartCell = Cell;
+        public void SetStartCell(Cell? cell = null) => StartCell = cell ?? Cell;
 
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
@@ -250,36 +250,6 @@ namespace Jackal.Models.Pirates
         /// Флаг того, что пират выпил ром.
         /// </summary>
         public bool IsDrunk { get; set; }
-        /// <summary>
-        /// Флаг того, что пират может споить Пятницу.
-        /// </summary>
-        public bool CanGiveRumToFriday { get; protected set; }
-        /// <summary>
-        /// Флаг того, что пират может споить Миссионера.
-        /// </summary>
-        public bool CanGiveRumToMissioner { get; protected set; }
-        /// <summary>
-        /// Метод определяет параметры <see cref="CanGiveRumToFriday"/> и <see cref="CanGiveRumToMissioner"/>.
-        /// </summary>
-        /// <param name="map">Карта игры.</param>
-        public void DefineDrinkingOpportynities(ObservableMap map)
-        {
-            CanGiveRumToFriday = false;
-            CanGiveRumToMissioner = false;
-
-            if (this is Friday || this is Missioner || Manager.Bottles == 0 || Manager.IsRumBlocked)
-                return;
-            foreach (Cell cell in map.Cells(SelectableCoords.Concat(new[]{Cell.Coords})))
-            {
-                foreach(Pirate pirate in cell.GetSelectedCell(this).Pirates)
-                {
-                    if (pirate is Friday)
-                        CanGiveRumToFriday = true;
-                    else if (pirate is Missioner)
-                        CanGiveRumToMissioner = true;
-                }
-            }
-        }
 
         /// <summary>
         /// Флаг того, что пират может родить пирата.
