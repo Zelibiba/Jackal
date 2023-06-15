@@ -157,7 +157,7 @@ namespace Jackal.Models
             }
             #endregion
 
-            Players.Add(new Player(0, "TEST", Team.White, true) { Turn = true, Bottles = 2 });
+            Players.Add(new Player(0, "TEST", Team.White, true) { Bottles = 2 });
             Players.Add(new Player(1, "DD", Team.Black, true));
             //Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
             //Players.Add(new Player(3, "djk", Team.Yellow, true));
@@ -189,6 +189,9 @@ namespace Jackal.Models
             //}
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
+
+            CurrentPlayerNumber = Players.Count - 1;
+            NextPlayer();
         }
 
 
@@ -221,6 +224,10 @@ namespace Jackal.Models
                     CurrentPlayer.Turn = false;
                     CurrentPlayerNumber++;
                     CurrentPlayer.Turn = true;
+
+                    // проверка на возможность споить миссионера или пятницу
+                    foreach (Pirate pirate in CurrentPlayer.Pirates)
+                        pirate.DefineDrinkingOpportynities(Map);
                 }
             }
         }
@@ -262,8 +269,8 @@ namespace Jackal.Models
         {
             Deselect();
             SelectedShip = cell as ShipCell;
-            foreach (int[] coords in SelectedShip.MovableCoords)
-                Map[coords].CanBeSelected = true;
+            foreach (Cell _cell in Map.Cells(SelectedShip.MovableCoords))
+                _cell.CanBeSelected = true;
         }
         /// <summary>
         /// Метод выбора клетки во время землетрясения.
@@ -348,11 +355,8 @@ namespace Jackal.Models
         {
             Deselect(false);
             SelectedPirate = pirate;
-            foreach (int[] coords in pirate.SelectableCoords)
-            {
-                Cell cell = Map[coords].GetSelectedCell(pirate);
-                cell.DefineSelectability(pirate);
-            }
+            foreach (Cell cell in Map.Cells(pirate.SelectableCoords))
+                cell.GetSelectedCell(pirate).DefineSelectability(pirate);
         }
         /// <summary>
         /// Метод перевыделения пирата при изменении параметров перетаскивания сокровища.
@@ -374,16 +378,16 @@ namespace Jackal.Models
         {
             if (SelectedPirate != null)
             {
-                foreach (int[] coords in SelectedPirate.SelectableCoords)
-                    Map[coords].GetSelectedCell(SelectedPirate).CanBeSelected = false;
+                foreach (Cell cell in Map.Cells(SelectedPirate.SelectableCoords))
+                    cell.GetSelectedCell(SelectedPirate).CanBeSelected = false;
 
                 if (deselect)
                     SelectedPirate = null;
             }
             else if (SelectedShip != null)
             {
-                foreach (int[] coords in SelectedShip.MovableCoords)
-                    Map[coords].CanBeSelected = false;
+                foreach (Cell cell in Map.Cells(SelectedShip.MovableCoords))
+                    cell.CanBeSelected = false;
 
                 if (deselect)
                     SelectedShip = null;
@@ -605,10 +609,10 @@ namespace Jackal.Models
         static void StartEarthQuake()
         {
             earthQuake.IsActive = true;
-                foreach (Cell cell in Map)
-                    cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
-                                         cell.Gold == 0 && !cell.Galeon &&
-                                         cell.Pirates.Count == 0;
+            foreach (Cell cell in Map)
+                cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
+                                     cell.Gold == 0 && !cell.Galeon &&
+                                     cell.Pirates.Count == 0;
         }
         /// <summary>
         /// Метод запуска хода маяка.
@@ -620,8 +624,8 @@ namespace Jackal.Models
             lightHouse.Lighthouse = LightHouse;
             IEnumerable<Cell> closedCells = Map.Where(cell => !cell.IsOpened);
             lightHouse.SelectedCells = new(Math.Min(closedCells.Count(), 4));
-                foreach (Cell cell in closedCells)
-                    cell.CanBeSelected = true;
+            foreach (Cell cell in closedCells)
+                cell.CanBeSelected = true;
         }
         /// <summary>
         /// Метод запуска хода конопли.
@@ -670,6 +674,33 @@ namespace Jackal.Models
             SelectedPirate.IsDrunk = true;
             SelectPirate(SelectedPirate);
         }
+        /// <summary>
+        /// Метод спаивания Пятницы около выбранного пирата.
+        /// </summary>
+        public static void GetFridayDrunk()
+        {
+            CurrentPlayer.Bottles--;
+            foreach(Cell cell in Map.Cells(SelectedPirate.SelectableCoords))
+            {
+                Friday? friday = cell.Pirates.FirstOrDefault(p => p is Friday, null) as Friday;
+                friday?.Kill();
+                break;
+            }
+        }
+        /// <summary>
+        /// Метод спаивания Миссионера около выбранного пирата.
+        /// </summary>
+        public static void GetMissionerDrunk()
+        {
+            CurrentPlayer.Bottles--;
+            foreach (Cell cell in Map.Cells(SelectedPirate.SelectableCoords))
+            {
+                Missioner? missioner = cell.Pirates.FirstOrDefault(p => p is Missioner, null) as Missioner;
+                missioner?.ConverToPirate();
+                break;
+            }
+        }
+
         /// <summary>
         /// Метод рождения пирата.
         /// </summary>

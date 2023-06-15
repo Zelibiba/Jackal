@@ -54,6 +54,12 @@ namespace Jackal.Models
                 this[coords[0], coords[1]] = value;
             }
         }
+        /// <summary>
+        /// Метод возвращает список клеток, имеющих заданные координаты.
+        /// </summary>
+        /// <param name="coordinates">Список координат клеток.</param>
+        /// <returns></returns>
+        public IEnumerable<Cell> Cells(IEnumerable<int[]> coordinates) => coordinates.Select(coords => this[coords]);
 
         /// <summary>
         /// Метод проверяет, не вышли ли индексы за границы массива.
