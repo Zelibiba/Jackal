@@ -8,17 +8,17 @@ namespace Jackal.Models.Cells
 {
     public class GoldCell : Cell
     {
-        public GoldCell(int row, int column, Gold goldType) : base(row, column, goldType.ToString())
+        public GoldCell(int row, int column, GoldType goldType) : base(row, column, goldType.ToString())
         {
             _goldType = goldType;
         }
 
-        readonly Gold _goldType;
+        readonly GoldType _goldType;
 
         public override void Open()
         {
             base.Open();
-            if (_goldType == Models.Gold.Galeon)
+            if (_goldType == Models.GoldType.Galeon)
             {
                 Galeon = true;
                 Game.HiddenGold -= 3;

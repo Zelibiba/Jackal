@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -152,23 +153,92 @@ namespace Jackal.Models
         /// <summary>
         /// Метод инициализирует игру.
         /// </summary>
-        public static void CreateMap()
+        public static void CreateMap(int seed = -1)
         {
-            #region создание каркаса карты
+            #region создание паттерна клеток
+            List<string> pattern = new List<string>(117);
+            for (int i = 0; i < 18; i++)
+                pattern.Add("field");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("horse");
+            for (int i = 0; i < 4; i++)
+                pattern.Add("rum");
+            for (int i = 0; i < 6; i++)
+                pattern.Add("lake");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("pit");
+            for (int i = 0; i < 4; i++)
+                pattern.Add("crocodile");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("fortress");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("balloon");
+            for (int i = 0; i < 4; i++)
+                pattern.Add("cave");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("jungle");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("cannabis");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("gun");
+
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_1a");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_1s");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_2a");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_2s");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_3");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_4a");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("arrow_4s");
+
+            for (int i = 0; i < 5; i++)
+                pattern.Add("maze_2");
+            for (int i = 0; i < 4; i++)
+                pattern.Add("maze_3");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("maze_4");
+            pattern.Add("maze_5");
+
+            for (int i = 0; i < 5; i++)
+                pattern.Add("gold_1");
+            for (int i = 0; i < 5; i++)
+                pattern.Add("gold_2");
+            for (int i = 0; i < 3; i++)
+                pattern.Add("gold_3");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("gold_4");
+            pattern.Add("gold_5");
+            pattern.Add("galeon");
+
+            for (int i = 0; i < 3; i++)
+                pattern.Add("bottle_1");
+            for (int i = 0; i < 2; i++)
+                pattern.Add("bottle_2");
+            pattern.Add("bottle_3");
+
+            pattern.Add("cannibal");
+            pattern.Add("putana");
+            pattern.Add("airplane");
+            pattern.Add("friday");
+            pattern.Add("missioner");
+            pattern.Add("ben");
+            pattern.Add("earthquake");
+            pattern.Add("carramba");
+            pattern.Add("lighthouse");
+            #endregion
+
+            #region создание моря и регионов кораблей
             Map = new ObservableMap(MapSize);
             for (int i = 0; i < MapSize; i++)
             {
                 for (int j = 0; j < MapSize; j++)
                     Map.Add(new SeaCell(i, j));
-            }
-            for (int i = 1; i < MapSize - 1; i++)
-            {
-                for (int j = 1; j < MapSize - 1; j++)
-                {
-                    if ((i == 1 && j == 1) || (i == 1 && j == 11) || (i == 11 && j == 1) || (i == 11 && j == 11))
-                        continue;
-                    Map[i, j] = new Cell(i, j, "Field");
-                }
             }
 
             (Orientation, int[][])[] ShipRegions = new (Orientation, int[][])[4];
@@ -185,36 +255,181 @@ namespace Jackal.Models
             }
             #endregion
 
+            Random rand;
+            if (seed == -1)
+            {
+                rand = new Random();
+                seed = rand.Next();
+            }
+            rand = new Random(seed);
+
+            List<CaveCell> caveCells = new(4);
+            for (int i = 1; i < MapSize - 1; i++)
+            {
+                for (int j = 1; j < MapSize - 1; j++)
+                {
+                    if ((i == 1 && j == 1) || (i == 1 && j == 11) || (i == 11 && j == 1) || (i == 11 && j == 11))
+                        continue;
+
+                    int index = rand.Next(pattern.Count);
+                    string name = pattern[index];
+                    pattern.RemoveAt(index);
+                    switch (name.Split('_')[0])
+                    {
+                        case "field":
+                            Map[i, j] = new Cell(i, j, "Field");
+                            break;
+                        case "horse":
+                            Map[i, j] = new HorseCell(i, j);
+                            break;
+                        case "rum":
+                            Map[i, j] = new RumCell(i, j);
+                            break;
+                        case "lake":
+                            Map[i, j] = new LakeCell(i, j, ContinueMovePirate);
+                            break;
+                        case "pit":
+                            Map[i, j] = new PitCell(i, j);
+                            break;
+                        case "crocodile":
+                            Map[i, j] = new CrocodileCell(i, j, ContinueMovePirate);
+                            break;
+                        case "fortress":
+                            Map[i, j] = new FortressCell(i, j, false);
+                            break;
+                        case "balloon":
+                            Map[i, j] = new BalloonCell(i, j, ContinueMovePirate);
+                            break;
+                        case "cave":
+                            Map[i, j] = new CaveCell(i, j, ContinueMovePirate);
+                            caveCells.Add(Map[i, j] as CaveCell);
+                            break;
+                        case "jungle":
+                            Map[i, j] = new JungleCell(i, j);
+                            break;
+                        case "cannabis":
+                            Map[i, j] = new CannabisCell(i, j);
+                            break;
+                        case "gun":
+                            int rotation = rand.Next(4);
+                            Map[i, j] = new GunCell(i, j, rotation, ContinueMovePirate);
+                            break;
+                        case "arrow":
+                            rotation = rand.Next(4);
+                            ArrowType arrowType;
+                            switch (name.Split('_')[1])
+                            {
+                                case "1a":
+                                    arrowType = ArrowType.Angle1;
+                                    break;
+                                case "1s":
+                                    arrowType = ArrowType.Side1;
+                                    break;
+                                case "2a":
+                                    arrowType = ArrowType.Angle2;
+                                    break;
+                                case "2s":
+                                    arrowType = ArrowType.Side2;
+                                    break;
+                                case "3":
+                                    arrowType = ArrowType.Angle3;
+                                    break;
+                                case "4a":
+                                    arrowType = ArrowType.Angle4;
+                                    break;
+                                case "4s":
+                                    arrowType = ArrowType.Side4;
+                                    break;
+                                default:
+                                    throw new Exception("Wrong random ArrowType");
+                            }
+                            Map[i, j] = new ArrowCell(i, j, arrowType, rotation, ContinueMovePirate);
+                            break;
+                        case "maze":
+                            int size = int.Parse(name.Split('_')[1]);
+                            Map[i, j] = new MazeCell(i, j, size);
+                            break;
+                        case "gold":
+                            GoldType gold;
+                            switch (name.Split('_')[1])
+                            {
+                                case "1":
+                                    gold = GoldType.Gold1;
+                                    break;
+                                case "2":
+                                    gold = GoldType.Gold2;
+                                    break;
+                                case "3":
+                                    gold = GoldType.Gold3;
+                                    break;
+                                case "4":
+                                    gold = GoldType.Gold4;
+                                    break;
+                                case "5":
+                                    gold = GoldType.Gold5;
+                                    break;
+                                default:
+                                    throw new Exception("Wrong random Gold Type");
+                            }
+                            Map[i, j] = new GoldCell(i, j, gold);
+                            break;
+                        case "galeon":
+                            Map[i, j] = new GoldCell(i, j, GoldType.Galeon);
+                            break;
+                        case "bottle":
+                            int count = int.Parse(name.Split('_')[1]);
+                            Map[i, j] = new BottleCell(i, j, count);
+                            break;
+                        case "cannibal":
+                            Map[i, j] = new CannibalCell(i, j);
+                            break;
+                        case "putana":
+                            Map[i, j] = new FortressCell(i, j, true);
+                            break;
+                        case "airplane":
+                            Map[i, j] = new AirplaneCell(i, j);
+                            break;
+                        case "friday":
+                            Map[i, j] = new ResidentCell(i, j, ResidentType.Friday);
+                            break;
+                        case "missioner":
+                            Map[i, j] = new ResidentCell(i, j, ResidentType.Missioner);
+                            break;
+                        case "ben":
+                            Map[i, j] = new ResidentCell(i, j, ResidentType.Ben);
+                            break;
+                        case "earthquake":
+                            Map[i, j] = new EarthQuakeCell(i, j);
+                            break;
+                        case "carramba":
+                            Map[i, j] = new Cell(i, j, "Field");
+                            break;
+                        case "lighthouse":
+                            Map[i, j] = new LightHouseCell(i, j);
+                            break;
+                        default:
+                            throw new Exception("Wrong random cell");
+                    }
+                }
+            }
+            foreach (CaveCell cave in caveCells)
+                cave.LinkCaves(caveCells);
+
+
+
             Players.Add(new Player(0, "TEST", Team.White, true) { Bottles = 2 });
             Players.Add(new Player(1, "DD", Team.Black, true));
             //Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
             //Players.Add(new Player(3, "djk", Team.Yellow, true));
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
-            Map[0, 6].AddPirate(new Friday(Players[0], Players[0]));
-            Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
-            //Map[12, 6] = new ShipCell(12, 6, Players[2], ShipRegions[2]);
+            //Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
+            Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
             //Map[12, 6].AddPirate(new Missioner(Players[2], Players[2]));
             //Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
 
-            Map[1, 6] = new CaveCell(1, 6, ContinueMovePirate);
-            Map[6, 11] = new CaveCell(6, 11, ContinueMovePirate);
-            Map[11, 6] = new CaveCell(11, 6, ContinueMovePirate);
-            Map[6, 1] = new CaveCell(6, 1, ContinueMovePirate);
-            CaveCell[] caves = new CaveCell[]
-            {
-                Map[1, 6]  as CaveCell,
-                Map[6, 11] as CaveCell,
-                Map[11, 6] as CaveCell,
-                Map[6, 1]  as CaveCell,
-            };
-            foreach (CaveCell cave in caves)
-                cave.LinkCaves(caves);
-            //foreach (Pirate pirate in Players[1].Pirates)
-            //{
-            //    pirate.RemoveFromCell();
-            //    Map[3, 6].AddPirate(pirate);
-            //}
+            //Map[1, 6] = new LightHouseCell(1, 6);
+
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
@@ -494,8 +709,9 @@ namespace Jackal.Models
                     PirateInMotion = false;
                     break;
                 case MovementResult.LightHouse:
+                    LightHouseCell lightHouse = SelectedPirate.Cell as LightHouseCell;
                     SelectedPirate = null;
-                    StartLightHouse(cell as LightHouseCell);
+                    StartLightHouse(lightHouse);
                     PirateInMotion = false;
                     break;
                 case MovementResult.Cannabis:
@@ -768,7 +984,9 @@ namespace Jackal.Models
         }
 
 
-
+        /// <summary>
+        /// Метод приоткрывает закрытые клетки поля.
+        /// </summary>
         public static void ShowField()
         {
             foreach (Cell cell in Map.Where(cell => !cell.IsOpened))

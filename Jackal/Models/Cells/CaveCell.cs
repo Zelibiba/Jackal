@@ -29,7 +29,7 @@ namespace Jackal.Models.Cells
         public CaveExitCell Exit { get; }
         public CaveTreasureCell TreasureCell { get; }
         public CaveCell[] Caves { get; private set; }
-        public void LinkCaves(CaveCell[] caves) => Caves = caves.Where(cave => cave != this).ToArray();
+        public void LinkCaves(IEnumerable<CaveCell> caves) => Caves = caves.Where(cave => cave != this).ToArray();
 
         public override void SetCoordinates(int row, int column)
         {

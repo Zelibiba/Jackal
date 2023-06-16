@@ -48,13 +48,13 @@
 					</Grid.ColumnDefinitions>
 					<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
 						<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
-							<ToggleButton Content="g" Classes="PirBtn"
+							<ToggleButton Content="g" Classes="PirBtn" HotKey="g"
 										  IsEnabled="{Binding SelectedPirate.CanGrabGold}" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}"
 										  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
 							<ToggleButton Content="G" Classes="PirBtn" Margin="0,5"
 										  IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}"
 										  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
-							<Button Content="r" Classes="PirBtn"
+							<Button Content="r" Classes="PirBtn" HotKey="r"
 									IsEnabled="{Binding SelectedPirate.CanDrinkRum}"
 									Command="{Binding GetPirateDrunk}" CommandParameter="pirate"/>
 							<Button Content="B" Classes="PirBtn" Margin="0,5"
@@ -78,6 +78,11 @@
 				</Grid>
 				<Grid Margin="10"
 					  RowDefinitions="*,*,*" ColumnDefinitions="auto,auto">
+					<Grid.Styles>
+						<Style Selector="TextBlock">
+							<Setter Property="FontSize" Value="20"/>
+						</Style>
+					</Grid.Styles>
 					<TextBlock Grid.Row="0" Grid.Column="0" Text="Неоткрытое золото:" Margin="0,0,20,0"/>
 					<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding HiddenGold}" FontWeight="Bold"/>
 					<TextBlock Grid.Row="1" Grid.Column="0" Text="Золото на карте:"/>

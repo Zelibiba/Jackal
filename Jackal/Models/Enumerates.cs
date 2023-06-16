@@ -71,7 +71,7 @@ namespace Jackal.Models
     /// <summary>
     /// Перечисление типов клеток с сокровищем.
     /// </summary>
-    public enum Gold
+    public enum GoldType
     {
         Gold1 = 1,
         Gold2,
