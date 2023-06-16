@@ -1,4 +1,5 @@
 ﻿using Jackal.Models.Cells;
+using Jackal.Models.Pirates;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -60,6 +61,7 @@ namespace Jackal.Models
         /// <param name="coordinates">Список координат клеток.</param>
         /// <returns></returns>
         public IEnumerable<Cell> Cells(IEnumerable<int[]> coordinates) => coordinates.Select(coords => this[coords]);
+        public IEnumerable<Cell> Cells(Pirate pirate) => Cells(pirate.SelectableCoords);
 
         /// <summary>
         /// Метод проверяет, не вышли ли индексы за границы массива.
