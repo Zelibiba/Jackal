@@ -57,6 +57,8 @@ namespace Jackal.ViewModels
             _isPirateSelected = this.WhenAnyValue(vm => vm.SelectedPirate)
                                     .Select(pirate => pirate != Pirate.Empty)
                                     .ToProperty(this, vm => vm.IsPirateSelected);
+
+            HiddenGold = Game.HiddenGold;
         }
 
         [Reactive] public bool IsEnabled { get; set; }
@@ -71,6 +73,10 @@ namespace Jackal.ViewModels
         public bool IsPirateSelected => _isPirateSelected.Value;
         readonly ObservableAsPropertyHelper<bool> _isPirateSelected;
 
+        [Reactive] public int HiddenGold { get; private set; }
+        [Reactive] public int CurrentGold { get; private set; }
+        [Reactive] public int LostGold { get; private set; }
+
         public void SelectCell(Cell cell)
         {
             if (Game.PreSelectCell(cell))
@@ -82,6 +88,10 @@ namespace Jackal.ViewModels
                     Game.SelectCell(cell);
                     if (Game.IsPlayerControllable)
                         IsEnabled = true;
+
+                    HiddenGold = Game.HiddenGold;
+                    CurrentGold = Game.CurrentGold;
+                    LostGold = Game.LostGold;
                 });
             }
         }
@@ -113,5 +123,8 @@ namespace Jackal.ViewModels
             }
         }
         public void PirateBirth(object param) => Game.PirateBirth();
+
+
+        public void ShowField(object param) => Game.ShowField();
     }
 }

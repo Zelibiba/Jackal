@@ -19,9 +19,15 @@ namespace Jackal.Models.Cells
         {
             base.Open();
             if (_goldType == Models.Gold.Galeon)
+            {
                 Galeon = true;
+                Game.HiddenGold -= 3;
+            }
             else
+            {
                 Gold = (int)_goldType;
+                Game.HiddenGold -= Gold;
+            }
         }
     }
 }

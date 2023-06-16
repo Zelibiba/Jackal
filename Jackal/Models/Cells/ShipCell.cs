@@ -50,12 +50,20 @@ namespace Jackal.Models.Cells
         public override int Gold
         {
             get => 0;
-            set => _owner.Gold++;
+            set
+            {
+                _owner.Gold++;
+                Game.CurrentGold--;
+            }
         }
         public override bool Galeon
         {
             get => false;
-            set => _owner.Gold += 3;
+            set
+            {
+                _owner.Gold += 3;
+                Game.CurrentGold -= 3;
+            }
         }
 
         public override void SetSelectableCoords(ObservableMap map)

@@ -38,43 +38,58 @@
 				</ItemsControl>
 			</Panel>
 		</Viewbox>
-		<StackPanel Grid.Column="1" Background="AliceBlue">
-			<Grid Margin="10">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="auto"/>
-					<ColumnDefinition Width="10"/>
-					<ColumnDefinition Width="*" MinWidth="250"/>
-				</Grid.ColumnDefinitions>
-				<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
-					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
-						<ToggleButton Content="g" Classes="PirBtn"
-									  IsEnabled="{Binding SelectedPirate.CanGrabGold}" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}"
-									  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
-						<ToggleButton Content="G" Classes="PirBtn" Margin="0,5"
-									  IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}"
-									  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
-						<Button Content="r" Classes="PirBtn"
-								IsEnabled="{Binding SelectedPirate.CanDrinkRum}"
-								Command="{Binding GetPirateDrunk}" CommandParameter="pirate"/>
-						<Button Content="B" Classes="PirBtn" Margin="0,5"
-								IsEnabled="{Binding SelectedPirate.CanHaveSex}"
-								Command="{Binding PirateBirth}"/>
-						<Button Content="F" Classes="PirBtn"
-								IsEnabled="{Binding SelectedPirate.CanGiveRumToFriday}"
-								Command="{Binding GetPirateDrunk}" CommandParameter="friday"/>
-						<Button Content="M" Classes="PirBtn" Margin="0,5,0,0"
-								IsEnabled="{Binding SelectedPirate.CanGiveRumToMissioner}"
-								Command="{Binding GetPirateDrunk}" CommandParameter="missioner"/>
-					</WrapPanel>
-				</Border>
-				<ItemsControl Grid.Column="2" Items="{Binding Players}" BorderBrush="Black" BorderThickness="1">
-					<ItemsControl.ItemTemplate>
-						<DataTemplate>
-							<v:PlayerView/>
-						</DataTemplate>
-					</ItemsControl.ItemTemplate>
-				</ItemsControl>
-			</Grid>
-		</StackPanel>
+		<DockPanel Grid.Column="1" Background="AliceBlue">
+			<StackPanel DockPanel.Dock="Top">
+				<Grid Margin="10">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="auto"/>
+						<ColumnDefinition Width="10"/>
+						<ColumnDefinition Width="*" MinWidth="250"/>
+					</Grid.ColumnDefinitions>
+					<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
+						<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
+							<ToggleButton Content="g" Classes="PirBtn"
+										  IsEnabled="{Binding SelectedPirate.CanGrabGold}" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}"
+										  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
+							<ToggleButton Content="G" Classes="PirBtn" Margin="0,5"
+										  IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}"
+										  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
+							<Button Content="r" Classes="PirBtn"
+									IsEnabled="{Binding SelectedPirate.CanDrinkRum}"
+									Command="{Binding GetPirateDrunk}" CommandParameter="pirate"/>
+							<Button Content="B" Classes="PirBtn" Margin="0,5"
+									IsEnabled="{Binding SelectedPirate.CanHaveSex}"
+									Command="{Binding PirateBirth}"/>
+							<Button Content="F" Classes="PirBtn"
+									IsEnabled="{Binding SelectedPirate.CanGiveRumToFriday}"
+									Command="{Binding GetPirateDrunk}" CommandParameter="friday"/>
+							<Button Content="M" Classes="PirBtn" Margin="0,5,0,0"
+									IsEnabled="{Binding SelectedPirate.CanGiveRumToMissioner}"
+									Command="{Binding GetPirateDrunk}" CommandParameter="missioner"/>
+						</WrapPanel>
+					</Border>
+					<ItemsControl Grid.Column="2" Items="{Binding Players}" BorderBrush="Black" BorderThickness="1">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<v:PlayerView/>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</Grid>
+				<Grid Margin="10"
+					  RowDefinitions="*,*,*" ColumnDefinitions="auto,auto">
+					<TextBlock Grid.Row="0" Grid.Column="0" Text="Неоткрытое золото:" Margin="0,0,20,0"/>
+					<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding HiddenGold}" FontWeight="Bold"/>
+					<TextBlock Grid.Row="1" Grid.Column="0" Text="Золото на карте:"/>
+					<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentGold}" FontWeight="Bold"/>
+					<TextBlock Grid.Row="2" Grid.Column="0" Text="Потерянное золото:"/>
+					<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LostGold}" FontWeight="Bold"/>
+				</Grid>
+			</StackPanel>
+			<Button DockPanel.Dock="Bottom" Margin="10"
+					HorizontalAlignment="Left" VerticalAlignment="Bottom"
+					Content="Показать поле"
+					Command="{Binding ShowField}"/>
+		</DockPanel>
 	</Grid>
 </UserControl>

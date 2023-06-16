@@ -117,9 +117,37 @@ namespace Jackal.Models
         public static bool CanChangeSelection => !(PirateInMotion || PirateIsDrunk || earthQuake.IsActive || lightHouse.IsActive);
 
         /// <summary>
+        /// Счётчик спрятанного золота.
+        /// </summary>
+        /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
+        public static int HiddenGold
+        {
+            get => __hiddenGold;
+            set
+            {
+                CurrentGold += __hiddenGold - value;
+                __hiddenGold = value;
+            }
+        }
+        static int __hiddenGold = 40;
+        /// <summary>
+        /// Счётчик видимого золота на карте.
+        /// </summary>
+        public static int CurrentGold { get; set; }
+        /// <summary>
         /// Счётчик потерянного золота.
         /// </summary>
-        public static int LostGold { get; set; }
+        /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
+        public static int LostGold
+        {
+            get => __lostGold;
+            set
+            {
+                CurrentGold += __lostGold - value;
+                __lostGold = value;
+            }
+        }
+        static int __lostGold;
 
         /// <summary>
         /// Метод инициализирует игру.
@@ -365,9 +393,15 @@ namespace Jackal.Models
         public static void ReselctPirate(string param)
         {
             if (param == "gold")
+            {
                 SelectedPirate.Gold = !SelectedPirate.Gold;
+                SelectedPirate.Galeon = false;
+            }
             else if (param == "galeon")
+            {
                 SelectedPirate.Galeon = !SelectedPirate.Galeon;
+                SelectedPirate.Gold = false;
+            }
             SelectPirate(SelectedPirate);
         }
         /// <summary>
@@ -731,6 +765,17 @@ namespace Jackal.Models
             SelectedPirate.GiveBirth();
             Deselect();
             NextPlayer();
+        }
+
+
+
+        public static void ShowField()
+        {
+            foreach (Cell cell in Map.Where(cell => !cell.IsOpened))
+            {
+                cell.IsPreOpened = !cell.IsPreOpened;
+                cell.ChangeGrayStatus();
+            }
         }
     }
 }
