@@ -1,0 +1,36 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+			<StackPanel>
+				<Button Height="50" Width="50" Content="NE"
+						Classes="PirBtn" IsEnabled="False"/>
+				<Button Height="50" Width="50" Content="B"
+						Classes="PirBtn"/>
+				<ToggleButton Height="50" Width="50" Content="NE"
+							  Classes="PirBtn" IsEnabled="False"/>
+				<ToggleButton Height="50" Width="50" Content="TB"
+							  Classes="PirBtn"/>
+			</StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+	<Style Selector="Button.PirBtn, ToggleButton.PirBtn">
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>	
+	</Style>
+	<Style Selector="Button.PirBtn /template/ ContentPresenter,
+					 ToggleButton.PirBtn /template/ ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Black"/>
+	</Style>
+	<Style Selector="Button[IsEnabled=true].PirBtn /template/ ContentPresenter,
+					 ToggleButton[IsEnabled=true].PirBtn /template/ ContentPresenter">
+		<Setter Property="Background" Value="#FFE2D80E"/>
+	</Style>
+	<Style Selector="Button:pressed.PirBtn /template/ ContentPresenter,
+					 ToggleButton:checked.PirBtn /template/ ContentPresenter">
+		<Setter Property="Background" Value="#FF07B21E"/>
+	</Style>
+</Styles>

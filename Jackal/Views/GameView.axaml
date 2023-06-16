@@ -10,6 +10,7 @@
 			 IsEnabled="{Binding IsEnabled}">
 	<UserControl.Styles>
 		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
+		<StyleInclude Source="/Styles/PirateButtonStyle.axaml"/>
 	</UserControl.Styles>
 	<Grid ColumnDefinitions="auto,*">
 		<Viewbox Grid.Column="0">
@@ -46,18 +47,23 @@
 				</Grid.ColumnDefinitions>
 				<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5">
 					<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
-						<ToggleButton Content="g" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.CanGrabGold}"
-									  Command="{Binding GrabTreasure}" CommandParameter="gold" HorizontalAlignment="Stretch"/>
-						<ToggleButton Content="G" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}" IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" Margin="0,5"
-									  Command="{Binding GrabTreasure}" CommandParameter="galeon" HorizontalAlignment="Stretch"/>
-						<Button Content="r" HorizontalContentAlignment="Center"
-								IsEnabled="{Binding SelectedPirate.CanDrinkRum}" HorizontalAlignment="Stretch"
+						<ToggleButton Content="g" Classes="PirBtn"
+									  IsEnabled="{Binding SelectedPirate.CanGrabGold}" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}"
+									  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
+						<ToggleButton Content="G" Classes="PirBtn" Margin="0,5"
+									  IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}"
+									  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
+						<Button Content="r" Classes="PirBtn"
+								IsEnabled="{Binding SelectedPirate.CanDrinkRum}"
 								Command="{Binding GetPirateDrunk}" CommandParameter="pirate"/>
-						<Button Content="B" IsEnabled="{Binding SelectedPirate.CanHaveSex}" HorizontalAlignment="Stretch" Margin="0,5"
+						<Button Content="B" Classes="PirBtn" Margin="0,5"
+								IsEnabled="{Binding SelectedPirate.CanHaveSex}"
 								Command="{Binding PirateBirth}"/>
-						<Button Content="F" IsEnabled="{Binding SelectedPirate.CanGiveRumToFriday}" HorizontalAlignment="Stretch"
+						<Button Content="F" Classes="PirBtn"
+								IsEnabled="{Binding SelectedPirate.CanGiveRumToFriday}"
 								Command="{Binding GetPirateDrunk}" CommandParameter="friday"/>
-						<Button Content="M" IsEnabled="{Binding SelectedPirate.CanGiveRumToMissioner}" HorizontalAlignment="Stretch" Margin="0,5,0,0"
+						<Button Content="M" Classes="PirBtn" Margin="0,5,0,0"
+								IsEnabled="{Binding SelectedPirate.CanGiveRumToMissioner}"
 								Command="{Binding GetPirateDrunk}" CommandParameter="missioner"/>
 					</WrapPanel>
 				</Border>
