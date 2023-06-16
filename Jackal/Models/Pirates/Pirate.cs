@@ -253,11 +253,11 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может споить Пятницу.
         /// </summary>
-        public bool CanGiveRumToFriday { get; protected set; }
+        public bool CanGiveRumToFriday { get; set; }
         /// <summary>
         /// Флаг того, что пират может споить Миссионера.
         /// </summary>
-        public bool CanGiveRumToMissioner { get; protected set; }
+        public bool CanGiveRumToMissioner { get; set; }
         /// <summary>
         /// Метод определяет параметры <see cref="CanGiveRumToFriday"/> и <see cref="CanGiveRumToMissioner"/>.
         /// </summary>
@@ -269,7 +269,15 @@ namespace Jackal.Models.Pirates
 
             if (this is Friday || this is Missioner || Manager.Bottles == 0 || Manager.IsRumBlocked)
                 return;
-            foreach (Cell cell in map.Cells(SelectableCoords.Concat(new[]{Cell.Coords})))
+
+            foreach (Pirate pirate in Cell.Pirates)
+            {
+                if (pirate is Friday)
+                    CanGiveRumToFriday = true;
+                else if (pirate is Missioner)
+                    CanGiveRumToMissioner = true;
+            }
+            foreach (Cell cell in map.Cells(SelectableCoords))
             {
                 foreach(Pirate pirate in cell.GetSelectedCell(this).Pirates)
                 {

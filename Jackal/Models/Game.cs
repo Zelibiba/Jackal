@@ -355,7 +355,7 @@ namespace Jackal.Models
         {
             Deselect(false);
             SelectedPirate = pirate;
-            foreach (Cell cell in Map.Cells(pirate.SelectableCoords))
+            foreach (Cell cell in Map.Cells(pirate))
                 cell.GetSelectedCell(pirate).DefineSelectability(pirate);
         }
         /// <summary>
@@ -378,7 +378,7 @@ namespace Jackal.Models
         {
             if (SelectedPirate != null)
             {
-                foreach (Cell cell in Map.Cells(SelectedPirate.SelectableCoords))
+                foreach (Cell cell in Map.Cells(SelectedPirate))
                     cell.GetSelectedCell(SelectedPirate).CanBeSelected = false;
 
                 if (deselect)
@@ -680,12 +680,23 @@ namespace Jackal.Models
         public static void GetFridayDrunk()
         {
             CurrentPlayer.Bottles--;
-            foreach(Cell cell in Map.Cells(SelectedPirate.SelectableCoords))
+            foreach (Pirate pirate in CurrentPlayer.Pirates)
+                pirate.CanGiveRumToFriday = false;
+
+            if (SelectedPirate.Cell.Pirates.First(p => p is Friday) is Friday friday)
+                friday.Kill();
+            else
             {
-                Friday? friday = cell.Pirates.FirstOrDefault(p => p is Friday, null) as Friday;
-                friday?.Kill();
-                break;
+                foreach (Cell cell in Map.Cells(SelectedPirate))
+                {
+                    if (cell.Pirates.FirstOrDefault(p => p is Friday) is Friday _friday)
+                    {
+                        _friday.Kill();
+                        break;
+                    }
+                }
             }
+            Deselect();
         }
         /// <summary>
         /// Метод спаивания Миссионера около выбранного пирата.
@@ -693,12 +704,23 @@ namespace Jackal.Models
         public static void GetMissionerDrunk()
         {
             CurrentPlayer.Bottles--;
-            foreach (Cell cell in Map.Cells(SelectedPirate.SelectableCoords))
+            foreach (Pirate pirate in CurrentPlayer.Pirates)
+                pirate.CanGiveRumToMissioner = false;
+
+            if (SelectedPirate.Cell.Pirates.First(p => p is Missioner) is Missioner missioner)
+                missioner.ConverToPirate();
+            else
             {
-                Missioner? missioner = cell.Pirates.FirstOrDefault(p => p is Missioner, null) as Missioner;
-                missioner?.ConverToPirate();
-                break;
+                foreach (Cell cell in Map.Cells(SelectedPirate))
+                {
+                    if (cell.Pirates.FirstOrDefault(p => p is Missioner) is Missioner _missioner)
+                    {
+                        _missioner.ConverToPirate();
+                        break;
+                    }
+                }
             }
+            Deselect();
         }
 
         /// <summary>

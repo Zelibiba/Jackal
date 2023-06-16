@@ -56,11 +56,16 @@ namespace Jackal.Models
             }
         }
         /// <summary>
-        /// Метод возвращает список клеток, имеющих заданные координаты.
+        /// Метод возвращает перечисление клеток, имеющих заданные координаты.
         /// </summary>
         /// <param name="coordinates">Список координат клеток.</param>
         /// <returns></returns>
         public IEnumerable<Cell> Cells(IEnumerable<int[]> coordinates) => coordinates.Select(coords => this[coords]);
+        /// <summary>
+        /// Метод возвращает перечисление клеток, координаты которых перечислены в <see cref="Pirate.SelectableCoords"/>.
+        /// </summary>
+        /// <param name="pirate"></param>
+        /// <returns></returns>
         public IEnumerable<Cell> Cells(Pirate pirate) => Cells(pirate.SelectableCoords);
 
         /// <summary>
