@@ -10,15 +10,15 @@
 				<Setter Property="Margin" Value="5"/>
 			</Style>
 		</StackPanel.Styles>
-		<Button Content="Подключиться к серверу" HorizontalAlignment="Stretch"
-				Command="{Binding $parent[Window].DataContext.ConnectToServer}"
-				CommandParameter="{Binding $parent[Window]}"/>
-		<Button Content="Создать сервер" 
+		<Button Content="Создать сервер"
 				HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-				Command="{Binding $parent[Window].DataContext.CreateServer}"/>
+				Command="{Binding CreateServer}"/>
+		<Button Content="Подключиться к серверу" HorizontalAlignment="Stretch"
+				Command="{Binding ConnectToServer}"
+				CommandParameter="{Binding $parent[Window]}"/>
 		<Button Content="Загрузить игру"
 				HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-				Command="{Binding $parent[Window].DataContext.LoadGame}"
+				Command="{Binding LoadGame}"
 				CommandParameter="{Binding $parent[Window]}"/>
 	</StackPanel>
 </UserControl>

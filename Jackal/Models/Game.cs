@@ -66,7 +66,7 @@ namespace Jackal.Models
         public static Pirate? SelectedPirate
         {
             get => __selectedPirate;
-            set
+            private set
             {
                 if (__selectedPirate != value)
                 {
@@ -149,7 +149,10 @@ namespace Jackal.Models
         /// <summary>
         /// Метод инициализирует игру.
         /// </summary>
-        public static void CreateMap(IEnumerable<Player> players, int seed = -1)
+        /// <param name="players">Упорядоченный список игроков.</param>
+        /// <param name="seed">Сид для генерации карты.</param>
+        /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
+        public static void CreateMap(IEnumerable<Player> players, int seed = -1, bool autosave = true)
         {
             #region создание паттерна клеток
             List<string> pattern = new List<string>(117);
@@ -413,7 +416,6 @@ namespace Jackal.Models
                 cave.LinkCaves(caveCells);
             #endregion
 
-
             foreach (Player player in players)
                 Players.Add(player);
 
@@ -435,7 +437,8 @@ namespace Jackal.Models
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
-            FileHandler.StartAutosave(Players, seed);
+            if (autosave)
+                FileHandler.StartAutosave(Players, seed);
 
             CurrentPlayerNumber = Players.Count - 1;
             NextPlayer();
@@ -508,6 +511,12 @@ namespace Jackal.Models
             else if (lightHouse.IsActive)
                 SelectLightHouseCell(cell);
         }
+        /// <summary>
+        /// <inheritdoc cref="SelectCell(Cell)" path="/summary"/>
+        /// </summary>
+        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/>.</remarks>
+        /// <param name="coordinates">Координаты выбранной ячейки.</param>
+        public static void SelectCell(int[] coordinates) => SelectCell(Map[coordinates]);
         /// <summary>
         /// Метод выбора корабля.
         /// </summary>
@@ -610,10 +619,23 @@ namespace Jackal.Models
                 cell.GetSelectedCell(pirate).DefineSelectability(pirate);
         }
         /// <summary>
+        /// Метод тихой выборки пирата без обработки интерфейса и достижимых координат.
+        /// </summary>
+        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/>.</remarks>
+        /// <param name="pirateIndex">Индекс пирата в списке пиратов у игрока.</param>
+        /// <param name="gold">Флаг того, что пират понесёт золото.</param>
+        /// <param name="galeon">Флаг того, что пират понесёт Галеон.</param>
+        public static void SelectPirate(int pirateIndex, bool gold = false ,bool galeon = false)
+        {
+            SelectPirate(CurrentPlayer.Pirates[pirateIndex]);
+            SelectedPirate.Gold = gold;
+            SelectedPirate.Galeon = galeon;
+        }
+        /// <summary>
         /// Метод перевыделения пирата при изменении параметров перетаскивания сокровища.
         /// </summary>
         /// <param name="param">Тип перетаскиваемого сокровища.</param>
-        public static void ReselctPirate(string param)
+        public static void GrabGold(string param)
         {
             if (param == "gold")
             {

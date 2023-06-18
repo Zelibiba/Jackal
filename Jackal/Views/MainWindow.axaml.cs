@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Jackal.Models;
 using Jackal.Network;
+using Jackal.ViewModels;
 using System;
 
 namespace Jackal.Views
@@ -10,7 +11,7 @@ namespace Jackal.Views
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new ViewModels.MainWindowViewModel();
+            DataContext = new MainMenuViewModel();
 
             Closed += ServerStop;
         }

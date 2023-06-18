@@ -25,7 +25,7 @@ namespace Jackal.ViewModels
         public ViewModelActivator Activator { get; }
         readonly IDisposable _disCells;
         readonly IDisposable _disPlayers;
-        static bool _falshStart = true;
+        //static bool _falshStart = true;
 
 
         public GameViewModel(string? filename = null)
@@ -37,11 +37,11 @@ namespace Jackal.ViewModels
                 _disPlayers.DisposeWith(disposable);
             });
 
-            if (_falshStart)
-            {
-                _falshStart = false;
-                return;
-            }
+            //if (_falshStart)
+            //{
+            //    _falshStart = false;
+            //    return;
+            //}
 
             if (filename == null)
                 Game.CreateMap(new Player[]{new Player(0, "TEST", Team.White, true),
@@ -115,7 +115,12 @@ namespace Jackal.ViewModels
                 Game.Deselect();
         }
 
-        public void GrabTreasure(string param) => Game.ReselctPirate(param);
+        public void GrabTreasure(string param)
+        {
+            SelectedPirate = Pirate.Empty;
+            Game.GrabGold(param);
+            SelectedPirate = Game.SelectedPirate;
+        }
         public void GetPirateDrunk(object param)
         {
             switch (param)

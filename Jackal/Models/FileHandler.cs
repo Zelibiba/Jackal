@@ -40,6 +40,15 @@ namespace Jackal.Models
 
         static void WritePlayer(Player player) => _writer?.Write(string.Format("{0}:", player.Team).PadRight(9));
         static string Coordinates(int[] coords) => string.Format("({0},{1})", coords[0], coords[1]);
+        static int[] Coordinates(string str)
+        {
+            string[] words = str.Split(',');
+            return new int[2]
+            {
+                int.Parse(words[0][1..]),
+                int.Parse(words[1][..^1])
+            };
+        }
         static int PirateIndex(Pirate pirate) => Game.CurrentPlayer.Pirates.IndexOf(pirate);
 
         public static void MovePirate(Pirate pirate, Cell targetCell)
@@ -83,7 +92,77 @@ namespace Jackal.Models
 
         public static void ReadSave(string filename)
         {
+            _file = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            StreamReader reader = new StreamReader(_file);
+            if (reader == null)
+                throw new FileLoadException("Не удалось прочесть " + filename);
 
+            int playersCount = int.Parse(reader.ReadLine().Trim().Split(' ')[^1]);
+            Player[] players = new Player[playersCount];
+            string[] words;
+            for (int i=0;i<playersCount; i++)
+            {
+                words = reader.ReadLine().Trim().Split(' ');
+                players[i] = new Player(i, words[0][..^1],
+                                        (Team)int.Parse(words[1][..words[1].IndexOf('(')]),
+                                        isControllable: true)
+                                        { IntAlliance = int.Parse(words[2]) };
+            }
+
+            reader.ReadLine();
+            words = reader.ReadLine().Trim().Split(' ');
+            int seed = int.Parse(words[1]);
+            Game.CreateMap(players, seed, autosave: false);
+
+            reader.ReadLine();
+            while(true)
+            {
+                if(reader.EndOfStream)
+                    break;
+                string line = reader.ReadLine().Trim();
+                if (string.IsNullOrEmpty(line))
+                    break;
+                words = line[9..].Split(' ');
+                if (words[0] == "move" && words[1].StartsWith("pirate"))
+                {
+                    int index = int.Parse(words[1].Split('=')[1]);
+                    bool gold = int.Parse(words[2].Split('=')[1]) == 1;
+                    bool galeon = int.Parse(words[3].Split('=')[1][..^1]) == 1;
+                    int[] coords = Coordinates(words[9]);
+                    Game.SelectPirate(index, gold, galeon);
+                    Game.SelectCell(coords);
+                }
+                else if (words[0] == "move" && words[1] == "ship")
+                {
+                    Game.SelectCell(Game.CurrentPlayer.ManagedShip);
+                    Game.SelectCell(Coordinates(words[3]));
+                }
+                else if (words[0] == "earthQuake" || words[0] == "lightHouse")
+                    Game.SelectCell(Coordinates(words[1]));
+                else if (words[0] == "drinkRum")
+                {
+                    int index = int.Parse(words[1].Split('=')[1]);
+                    ResidentType type = (ResidentType)int.Parse(words[2].Split('=')[1]);
+                    Game.SelectPirate(index);
+                    switch (type)
+                    {
+                        case ResidentType.Ben:
+                            Game.GetPirateDrunk(); break;
+                        case ResidentType.Friday:
+                            Game.GetFridayDrunk(); break;
+                        case ResidentType.Missioner:
+                            Game.GetMissionerDrunk(); break;
+                    }
+                }
+                else if (words[0] == "getBirth")
+                {
+                    int index = int.Parse(words[1].Split('=')[1]);
+                    Game.SelectPirate(index);
+                    Game.PirateBirth();
+                }
+                else
+                    throw new Exception("Неверная строка: " + line);
+            }
         }
     }
 }
