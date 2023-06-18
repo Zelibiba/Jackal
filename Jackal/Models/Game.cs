@@ -38,7 +38,7 @@ namespace Jackal.Models
         /// <summary>
         /// Игрок, активный в текущий момент.
         /// </summary>
-        static Player CurrentPlayer => Players[CurrentPlayerNumber];
+        public static Player CurrentPlayer => Players[CurrentPlayerNumber];
         /// <summary>
         /// Номер текущего игрока в списке.
         /// </summary>
@@ -56,10 +56,6 @@ namespace Jackal.Models
             }
         }
         static int __currentPlayerNumber;
-        /// <summary>
-        /// Флаг того, что текущий игрок контролируется клиентом.
-        /// </summary>
-        public static bool IsPlayerControllable => CurrentPlayer.IsControllable;
 
         /// <summary>
         /// Пират, выбранный на текущий момент.
@@ -153,7 +149,7 @@ namespace Jackal.Models
         /// <summary>
         /// Метод инициализирует игру.
         /// </summary>
-        public static void CreateMap(int seed = -1)
+        public static void CreateMap(IEnumerable<Player> players, int seed = -1)
         {
             #region создание паттерна клеток
             List<string> pattern = new List<string>(117);
@@ -255,6 +251,7 @@ namespace Jackal.Models
             }
             #endregion
 
+            #region создание карты
             Random rand;
             if (seed == -1)
             {
@@ -414,24 +411,31 @@ namespace Jackal.Models
             }
             foreach (CaveCell cave in caveCells)
                 cave.LinkCaves(caveCells);
+            #endregion
 
 
-
-            Players.Add(new Player(0, "TEST", Team.White, true) { Bottles = 2 });
-            Players.Add(new Player(1, "DD", Team.Black, true));
-            //Players.Add(new Player(2, "AETHNAETRN", Team.Red, true));
-            //Players.Add(new Player(3, "djk", Team.Yellow, true));
+            foreach (Player player in players)
+                Players.Add(player);
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
-            //Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
-            Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]);
-            //Map[12, 6].AddPirate(new Missioner(Players[2], Players[2]));
-            //Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
-
-            //Map[1, 6] = new LightHouseCell(1, 6);
-
+            switch (Players.Count)
+            {
+                case 2:
+                    Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]); break;
+                case 3:
+                    Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
+                    Map[6, 0] = new ShipCell(6, 0, Players[2], ShipRegions[3]);
+                    break;
+                case 4:
+                    Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
+                    Map[12, 6] = new ShipCell(12, 6, Players[2], ShipRegions[2]);
+                    Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
+                    break;
+            }
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
+
+            FileHandler.StartAutosave(Players, seed);
 
             CurrentPlayerNumber = Players.Count - 1;
             NextPlayer();
@@ -521,6 +525,8 @@ namespace Jackal.Models
         /// <param name="cell">Выбираемая клетка.</param>
         static void SelectEarthQuakeCell(Cell cell)
         {
+            FileHandler.EarthQuake(cell);
+
             if (earthQuake.SelectedCell == null)
                 earthQuake.SelectCell(cell);
             else if (cell.IsSelected)
@@ -540,6 +546,8 @@ namespace Jackal.Models
         /// <param name="cell">Выбираемая клетка.</param>
         static void SelectLightHouseCell(Cell cell)
         {
+            FileHandler.LightHouse(cell);
+
             if (lightHouse.SelectedCells.Count < lightHouse.SelectedCells.Capacity)
             {
                 cell.CanBeSelected = false;
@@ -676,6 +684,8 @@ namespace Jackal.Models
         /// <param name="cell">Клетка, куда перемещается пират.</param>
         static void StartMovePirate(Cell cell)
         {
+            FileHandler.MovePirate(SelectedPirate, cell);
+
             SelectedPirate.TargetCell = cell;
             if (!PirateInMotion)
             {
@@ -779,6 +789,8 @@ namespace Jackal.Models
         /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
         static void MoveShip(Cell cell)
         {
+            FileHandler.MoveShip(cell);
+
             Deselect(false);
             SwapCells(SelectedShip, cell);
 
@@ -918,6 +930,8 @@ namespace Jackal.Models
         /// </summary>
         public static void GetPirateDrunk()
         {
+            FileHandler.DrinkRum(SelectedPirate, ResidentType.Ben);
+
             PirateIsDrunk = true;
             CurrentPlayer.Bottles--;
             Deselect(false);
@@ -929,6 +943,8 @@ namespace Jackal.Models
         /// </summary>
         public static void GetFridayDrunk()
         {
+            FileHandler.DrinkRum(SelectedPirate, ResidentType.Friday);
+
             CurrentPlayer.Bottles--;
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToFriday = false;
@@ -953,6 +969,8 @@ namespace Jackal.Models
         /// </summary>
         public static void GetMissionerDrunk()
         {
+            FileHandler.DrinkRum(SelectedPirate, ResidentType.Missioner);
+
             CurrentPlayer.Bottles--;
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToMissioner = false;
@@ -978,6 +996,8 @@ namespace Jackal.Models
         /// </summary>
         public static void PirateBirth()
         {
+            FileHandler.GetBirth(SelectedPirate);
+
             SelectedPirate.GiveBirth();
             Deselect();
             NextPlayer();

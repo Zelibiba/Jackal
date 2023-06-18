@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Jackal.Models;
 using Jackal.Network;
 using System;
 
@@ -11,7 +12,7 @@ namespace Jackal.Views
             InitializeComponent();
             DataContext = new ViewModels.MainWindowViewModel();
 
-            Closing += ServerStop;
+            Closed += ServerStop;
         }
 
         void ServerStop(object? sender, EventArgs e)
@@ -20,6 +21,9 @@ namespace Jackal.Views
                 Server.Stop();
             else
                 Client.Stop();
+            
+            FileHandler.Close();
+
             Closed -= ServerStop;
         }
     }

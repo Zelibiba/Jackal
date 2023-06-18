@@ -302,7 +302,7 @@ namespace Jackal.Models.Pirates
         /// Флаг того, что пират заблокирован в яме или пещере.
         /// </summary>
         /// <remarks>Используется в интерфейсе.</remarks>
-        [Reactive] public bool IsBlocked { get; set; }
+        [Reactive] public virtual bool IsBlocked { get; set; }
         /// <summary>
         /// Счётчик ходов, которые осталось пропустить из-за бочки с ромом.
         /// </summary>

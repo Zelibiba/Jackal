@@ -3,13 +3,13 @@
     <Design.PreviewWith>
         <Border Padding="20">
 			<StackPanel>
-				<Button Height="50" Width="50" Content="NE"
+				<Button Content="NE"
 						Classes="PirBtn" IsEnabled="False"/>
-				<Button Height="50" Width="50" Content="B"
+				<Button Content="B"
 						Classes="PirBtn"/>
-				<ToggleButton Height="50" Width="50" Content="NE"
+				<ToggleButton Content="NE"
 							  Classes="PirBtn" IsEnabled="False"/>
-				<ToggleButton Height="50" Width="50" Content="TB"
+				<ToggleButton Content="TB"
 							  Classes="PirBtn"/>
 			</StackPanel>
         </Border>
@@ -18,7 +18,9 @@
 	<Style Selector="Button.PirBtn, ToggleButton.PirBtn">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
-		<Setter Property="VerticalContentAlignment" Value="Center"/>	
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+		<Setter Property="Height" Value="40"/>
+		<Setter Property="Width" Value="40"/>
 	</Style>
 	<Style Selector="Button.PirBtn /template/ ContentPresenter,
 					 ToggleButton.PirBtn /template/ ContentPresenter">

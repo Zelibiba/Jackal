@@ -108,12 +108,15 @@ namespace Jackal.Models.Cells
         public override MovementResult AddPirate(Pirate pirate)
         {
             if (IsFriendlyTo(pirate))
-                return base.AddPirate(pirate);
-            else
             {
+                base.AddPirate(pirate);
+                pirate.Gold = false;
+                pirate.Galeon = false;
+            }
+            else
                 pirate.Kill();
-                return MovementResult.End;
-            }    
+
+            return MovementResult.End;
         }
     }
 }

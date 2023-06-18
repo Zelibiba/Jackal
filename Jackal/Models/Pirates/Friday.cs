@@ -14,6 +14,15 @@ namespace Jackal.Models.Pirates
 
         public override bool CanDrinkRum => false;
         public override bool CanHaveSex => false;
+        public override bool IsBlocked 
+        { 
+            get => base.IsBlocked;
+            set
+            {
+                if (Cell is not PitCell)
+                    base.IsBlocked = value;
+            }
+        }
 
         public override List<int[]> SelectableCoords
         {

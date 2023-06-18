@@ -28,7 +28,7 @@ namespace Jackal.ViewModels
         static bool _falshStart = true;
 
 
-        public GameViewModel()
+        public GameViewModel(string? filename = null)
         {
             Activator = new ViewModelActivator();
             this.WhenActivated(disposable =>
@@ -43,8 +43,13 @@ namespace Jackal.ViewModels
                 return;
             }
 
-            IsEnabled = true;
-            Game.CreateMap();
+            if (filename == null)
+                Game.CreateMap(new Player[]{new Player(0, "TEST", Team.White, true),
+                                            new Player(1, "DD", Team.Black, true),
+                                            new Player(2, "AETHNAETRN", Team.Red, true),
+                                            new Player(3, "djk", Team.Yellow, true) });
+            else
+                FileHandler.ReadSave(filename);
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
             SelectedPirate = Pirate.Empty;
 
@@ -59,6 +64,7 @@ namespace Jackal.ViewModels
                                     .ToProperty(this, vm => vm.IsPirateSelected);
 
             HiddenGold = Game.HiddenGold;
+            IsEnabled = true;
         }
 
         [Reactive] public bool IsEnabled { get; set; }
@@ -83,10 +89,10 @@ namespace Jackal.ViewModels
             {
                 Task.Run(() =>
                 {
-                    if (Game.IsPlayerControllable)
+                    if (Game.CurrentPlayer.IsControllable)
                         IsEnabled = false;
                     Game.SelectCell(cell);
-                    if (Game.IsPlayerControllable)
+                    if (Game.CurrentPlayer.IsControllable)
                         IsEnabled = true;
 
                     HiddenGold = Game.HiddenGold;
