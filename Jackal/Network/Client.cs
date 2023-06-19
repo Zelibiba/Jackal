@@ -97,6 +97,26 @@ namespace Jackal.Network
                             Game.SelectPirate(index, gold, galeon);
                             Game.SelectCell(coords);
                             break;
+                        case NetMode.MoveShip:
+                            coords = _reader.ReadCoords();
+                            Game.SelectCell(Game.CurrentPlayer.ManagedShip);
+                            Game.SelectCell(coords);
+                            break;
+                        case NetMode.EathQuake:
+                        case NetMode.LightHouse:
+                            coords = _reader.ReadCoords();
+                            Game.SelectCell(coords); break;
+                        case NetMode.DrinkRum:
+                            index = _reader.ReadInt32();
+                            ResidentType type = (ResidentType)_reader.ReadInt32();
+                            Game.SelectPirate(index);
+                            Game.GetDrunk(type);
+                            break;
+                        case NetMode.PirateBirth:
+                            index = _reader.ReadInt32();
+                            Game.SelectPirate(index);
+                            Game.PirateBirth();
+                            break;
                     }
                     _netAction = false;
                 }
@@ -129,15 +149,43 @@ namespace Jackal.Network
 
         public static void MovePirate(Pirate pirate, Cell targetCell)
         {
-            if (_client == null || !_client.Connected)
+            if (_client == null || !_client.Connected || _netAction)
                 return;
-            if (_netAction)
-                return;
+
             _writer.Write(NetMode.MovePirate);
             _writer.Write(Game.CurrentPlayer.Pirates.IndexOf(pirate));
             _writer.Write(pirate.Gold);
             _writer.Write(pirate.Galeon);
             _writer.Write(targetCell.Coords);
+            _writer.Flush();
+        }
+        public static void SelectCell(NetMode netMode, Cell cell)
+        {
+            if (_client == null || !_client.Connected || _netAction)
+                return;
+
+            _writer.Write(netMode);
+            _writer.Write(cell.Coords);
+            _writer.Flush();
+        }
+        public static void DrinkRum(Pirate pirate, ResidentType type)
+        {
+            if (_client == null || !_client.Connected || _netAction)
+                return;
+
+            _writer.Write(NetMode.DrinkRum);
+            _writer.Write(Game.CurrentPlayer.Pirates.IndexOf(pirate));
+            _writer.Write((int)type);
+            _writer.Flush();
+        }
+        public static void PirateBirth(Pirate pirate)
+        {
+            if (_client == null || !_client.Connected || _netAction)
+                return;
+
+            _writer.Write(NetMode.PirateBirth);
+            _writer.Write(Game.CurrentPlayer.Pirates.IndexOf(pirate));
+            _writer.Flush();
         }
 
         static void Close()

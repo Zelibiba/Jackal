@@ -128,11 +128,11 @@ namespace Jackal.ViewModels
             switch (param)
             {
                 case "pirate":
-                    Game.GetPirateDrunk(); break;
+                    Game.GetDrunk(ResidentType.Ben); break;
                 case "friday":
-                    Game.GetFridayDrunk(); break;
+                    Game.GetDrunk(ResidentType.Friday); break;
                 case "missioner":
-                    Game.GetMissionerDrunk(); break;
+                    Game.GetDrunk(ResidentType.Missioner); break;
             }
         }
         public void PirateBirth(object param) => Game.PirateBirth();

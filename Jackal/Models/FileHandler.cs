@@ -148,15 +148,7 @@ namespace Jackal.Models
                     int index = int.Parse(words[1].Split('=')[1]);
                     ResidentType type = (ResidentType)int.Parse(words[2].Split('=')[1]);
                     Game.SelectPirate(index);
-                    switch (type)
-                    {
-                        case ResidentType.Ben:
-                            Game.GetPirateDrunk(); break;
-                        case ResidentType.Friday:
-                            Game.GetFridayDrunk(); break;
-                        case ResidentType.Missioner:
-                            Game.GetMissionerDrunk(); break;
-                    }
+                    Game.GetDrunk(type);
                 }
                 else if (words[0] == "getBirth")
                 {

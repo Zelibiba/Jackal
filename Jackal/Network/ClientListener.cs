@@ -100,6 +100,21 @@ namespace Jackal.Network
                                 writer.Write(coords);
                             });
                             break;
+                        case NetMode.MoveShip:
+                        case NetMode.EathQuake:
+                        case NetMode.LightHouse:
+                            coords = _reader.ReadCoords();
+                            SendToOther(_lastMode, writer =>
+                                        writer.Write(coords)); break;
+                        case NetMode.DrinkRum:
+                            index = _reader.ReadInt32();
+                            int type = _reader.ReadInt32();
+                            SendToOther(NetMode.DrinkRum, writer =>
+                                       { writer.Write(index); writer.Write(type); }); break;
+                        case NetMode.PirateBirth:
+                            index = _reader.ReadInt32();
+                            SendToOther(NetMode.PirateBirth, writer =>
+                                        writer.Write(index)); break;
                     }
                 }
             }

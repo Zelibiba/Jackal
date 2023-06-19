@@ -546,6 +546,7 @@ namespace Jackal.Models
         static void SelectEarthQuakeCell(Cell cell)
         {
             FileHandler.EarthQuake(cell);
+            Client.SelectCell(NetMode.EathQuake, cell);
 
             if (earthQuake.SelectedCell == null)
                 earthQuake.SelectCell(cell);
@@ -567,6 +568,7 @@ namespace Jackal.Models
         static void SelectLightHouseCell(Cell cell)
         {
             FileHandler.LightHouse(cell);
+            Client.SelectCell(NetMode.LightHouse, cell);
 
             if (lightHouse.SelectedCells.Count < lightHouse.SelectedCells.Capacity)
             {
@@ -824,6 +826,7 @@ namespace Jackal.Models
         static void MoveShip(Cell cell)
         {
             FileHandler.MoveShip(cell);
+            Client.SelectCell(NetMode.MoveShip, cell);
 
             Deselect(false);
             SwapCells(SelectedShip, cell);
@@ -960,12 +963,29 @@ namespace Jackal.Models
         }
 
         /// <summary>
+        /// Метод спаивания какого-либо юнита.
+        /// </summary>
+        /// <param name="type">Тип спаиваемого юнита. Для обычного пирата равен <see cref="ResidentType.Ben"/>.</param>
+        public static void GetDrunk(ResidentType type)
+        {
+            FileHandler.DrinkRum(SelectedPirate, type);
+            Client.DrinkRum(SelectedPirate, type);
+
+            switch(type)
+            {
+                case ResidentType.Ben:
+                    GetPirateDrunk(); break;
+                case ResidentType.Friday:
+                    GetFridayDrunk(); break;
+                case ResidentType.Missioner:
+                    GetMissionerDrunk(); break;
+            }
+        }
+        /// <summary>
         /// Метод спаивания выбранного пирата.
         /// </summary>
-        public static void GetPirateDrunk()
+        static void GetPirateDrunk()
         {
-            FileHandler.DrinkRum(SelectedPirate, ResidentType.Ben);
-
             PirateIsDrunk = true;
             CurrentPlayer.Bottles--;
             Deselect(false);
@@ -975,10 +995,8 @@ namespace Jackal.Models
         /// <summary>
         /// Метод спаивания Пятницы около выбранного пирата.
         /// </summary>
-        public static void GetFridayDrunk()
+        static void GetFridayDrunk()
         {
-            FileHandler.DrinkRum(SelectedPirate, ResidentType.Friday);
-
             CurrentPlayer.Bottles--;
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToFriday = false;
@@ -1001,10 +1019,8 @@ namespace Jackal.Models
         /// <summary>
         /// Метод спаивания Миссионера около выбранного пирата.
         /// </summary>
-        public static void GetMissionerDrunk()
+        static void GetMissionerDrunk()
         {
-            FileHandler.DrinkRum(SelectedPirate, ResidentType.Missioner);
-
             CurrentPlayer.Bottles--;
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToMissioner = false;
@@ -1031,6 +1047,7 @@ namespace Jackal.Models
         public static void PirateBirth()
         {
             FileHandler.GetBirth(SelectedPirate);
+            Client.PirateBirth(SelectedPirate);
 
             SelectedPirate.GiveBirth();
             Deselect();

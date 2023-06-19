@@ -29,7 +29,12 @@ namespace Jackal.Models
         UpdatePlayer,
         DeletePlayer,
         StartGame,
-        MovePirate
+        MovePirate,
+        MoveShip,
+        EathQuake,
+        LightHouse,
+        DrinkRum,
+        PirateBirth
     }
     /// <summary>
     /// Перечисление результатов перемещения пирата.
