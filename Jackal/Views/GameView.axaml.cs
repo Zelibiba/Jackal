@@ -97,8 +97,11 @@ namespace Jackal.Views
             _pirateAnimation.Children[1].Setters[0].Value = new Thickness(x[1], y[1], 0, 0);
 
             PirateAnimator.Margin = new Thickness(x[0], y[0], 0, 0);
+            PirateAnimator.DataContext = Game.SelectedPirate;
+            PirateAnimator.IsVisible = true;
             Game.SelectedPirate.IsVisible = false;
             await _pirateAnimation.RunAsync(PirateAnimator, null);
+            PirateAnimator.IsVisible = false;
         }
 
 

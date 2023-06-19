@@ -14,9 +14,8 @@
 	<Grid ColumnDefinitions="auto,*">
 		<Viewbox Grid.Column="0" IsEnabled="{Binding IsEnabled}">
 			<Panel Name="MapControl">
-				<Button Name="PirateAnimator" Classes="Pirate" DataContext="{Binding SelectedPirate}"
-						HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="20" ZIndex="2"
-						IsEnabled="False" IsVisible="{Binding !IsVisible}"/>
+				<Button Name="PirateAnimator" Classes="Pirate" IsEnabled="False" IsVisible="False"
+						HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="20" ZIndex="2"/>
 				<v:CellView Name="CellAnimator1"
 							HorizontalAlignment="Left" VerticalAlignment="Top" Height="64" Width="64" ZIndex="4"
 							IsEnabled="False" IsVisible="False"/>

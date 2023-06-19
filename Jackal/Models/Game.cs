@@ -483,6 +483,9 @@ namespace Jackal.Models
             }
         }
 
+        /// <summary>
+        /// Делегат для влючения и отключения интерфеса.
+        /// </summary>
         public static Action<bool>? EnableInterface;
         /// <summary>
         /// Метод проверки возможности выбора клетки.
