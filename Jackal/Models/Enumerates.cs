@@ -27,7 +27,8 @@ namespace Jackal.Models
         Disconnect,
         NewPlayer,
         UpdatePlayer,
-        DeletePlayer
+        DeletePlayer,
+        StartGame
     }
     /// <summary>
     /// Перечисление результатов перемещения пирата.

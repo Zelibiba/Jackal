@@ -44,7 +44,7 @@ namespace Jackal.Models
             Team = team;
             IsControllable = isControllable;
 
-            Alliance = team;
+            //Alliance = team;
 
             Pirates = new ObservableCollection<Pirate>();
             Pirates.ToObservableChangeSet()
@@ -80,7 +80,7 @@ namespace Jackal.Models
         /// <summary>
         /// Объединение команд альянса игрока.
         /// </summary>
-        public Team Alliance { get;private set; }
+        public Team Alliance => Team;
 
         /// <summary>
         /// Флаг того, что игрок готов к запуску игры.
@@ -94,6 +94,7 @@ namespace Jackal.Models
         {
             Name = player.Name;
             IntAlliance = player.IntAlliance;
+            //Alliance = player.Alliance;
             Team = player.Team;
             IsReady = player.IsReady;
         }

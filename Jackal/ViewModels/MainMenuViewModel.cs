@@ -21,15 +21,15 @@ namespace Jackal.ViewModels
 
         public void CreateServer(object param)
         {
-            Content = new WaitingRoomViewModel(true, string.Empty);
+            Content = new WaitingRoomViewModel(SetContent);
         }
         public async Task ConnectToServer(object param)
         {
-            IPWindow dialog = new IPWindow();
-            string ip = await dialog.ShowDialog<string>(param as Window);
-            if (!string.IsNullOrEmpty(ip))
-                Content = new WaitingRoomViewModel(false, ip);
-            Content = new WaitingRoomViewModel(false, Network.Server.IP);
+            //IPWindow dialog = new IPWindow();
+            //string ip = await dialog.ShowDialog<string>(param as Window);
+            //if (!string.IsNullOrEmpty(ip))
+            //    Content = new WaitingRoomViewModel(false, ip);
+            Content = new WaitingRoomViewModel(SetContent, ip: Network.Server.IP);
         }
         public async void LoadGame(object param)
         {
@@ -46,6 +46,11 @@ namespace Jackal.ViewModels
         public void Cansel()
         {
             Content = new MainMenuViewModel();
+        }
+
+        void SetContent(ViewModelBase viewModel)
+        {
+            Content = viewModel;
         }
     }
 }

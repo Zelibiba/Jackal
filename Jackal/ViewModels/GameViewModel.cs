@@ -28,7 +28,7 @@ namespace Jackal.ViewModels
         //static bool _falshStart = true;
 
 
-        public GameViewModel(string? filename = null)
+        public GameViewModel(string? filename = null, IEnumerable<Player>? players = null, int seed = -1)
         {
             Activator = new ViewModelActivator();
             this.WhenActivated(disposable =>
@@ -44,10 +44,15 @@ namespace Jackal.ViewModels
             //}
 
             if (filename == null)
-                Game.CreateMap(new Player[]{new Player(0, "TEST", Team.White, true),
-                                            new Player(1, "DD", Team.Black, true),
-                                            new Player(2, "AETHNAETRN", Team.Red, true),
-                                            new Player(3, "djk", Team.Yellow, true) });
+            {
+                if (players != null)
+                    Game.CreateMap(players, seed);
+                else
+                    Game.CreateMap(new Player[]{new Player(0, "TEST", Team.White, true),
+                                                new Player(1, "DD", Team.Black, true),
+                                                new Player(2, "AETHNAETRN", Team.Red, true),
+                                                new Player(3, "djk", Team.Yellow, true) });
+            }
             else
                 FileHandler.ReadSave(filename);
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;

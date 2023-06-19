@@ -16,12 +16,13 @@ using System.Reactive.Disposables;
 using Jackal.Network;
 using Avalonia.Threading;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Jackal.ViewModels
 {
     public class WaitingRoomViewModel : ViewModelBase
     {
-        public WaitingRoomViewModel(bool isServerHolder, string ip)
+        public WaitingRoomViewModel(Action<ViewModelBase> setViewModel, string? ip = null)
         {
             Players = new ObservableCollection<PlayerAdderViewModel>();
             IObservable<bool> canStartServer = Players.ToObservableChangeSet()
@@ -30,18 +31,25 @@ namespace Jackal.ViewModels
                                                       .ToCollection()
                                                       .Select(players => CheckPlayers(players));
 
-            StartServerCommand = ReactiveCommand.Create(() => Views.MessageBox.Show("Сервер запущен"), canStartServer);
+            StartServerCommand = ReactiveCommand.Create(MixPlayers, canStartServer);
 
-            IsServerHolder = isServerHolder;
+            SetViewModel = setViewModel;
+
+            IsServerHolder = ip == null;
             if (IsServerHolder)
             {
                 Server.Start();
-                ip = Server.IP;
+                IP = Server.IP;
             }
-            Client.Start(ip, this);
+            else
+                IP = ip;
+            Client.Start(IP, this);
         }
         public ObservableCollection<PlayerAdderViewModel> Players { get; }
         public bool IsServerHolder { get; }
+        public string IP { get; }
+
+        readonly Action<ViewModelBase> SetViewModel;
 
         public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
 
@@ -78,6 +86,32 @@ namespace Jackal.ViewModels
                     Players.Remove(playerVM);
                     break;
                 }
+        }
+
+        void MixPlayers()
+        {
+            Random rand = new Random();
+            List<Team> teams = Players.Select(vm => vm.Player.Team).ToList();
+            Team[] mixedTeams = new Team[teams.Count];
+            for (int i = 0; i < mixedTeams.Length; i++)
+            {
+                int index = teams.IndexOf(Team.White);
+                index = (index >= 0) ? index : rand.Next(teams.Count);
+                mixedTeams[i] = teams[index];
+                teams.RemoveAt(index);
+            }
+            int seed = rand.Next();
+
+            Client.StartGame(mixedTeams, seed);
+            StartGame(mixedTeams, seed);
+        }
+        public void StartGame(Team[] mixedTeam, int mapSeed)
+        {
+            Player[] players = new Player[Players.Count];
+            for (int i = 0; i < players.Length; i++)
+                players[i] = Players.First(vm => vm.Player.Team == mixedTeam[i]).Player;
+
+            SetViewModel(new GameViewModel(players: players, seed: mapSeed));
         }
     }
 }

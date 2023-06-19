@@ -9,7 +9,7 @@ namespace Jackal.Models.Cells
 {
     public class MazeNodeCell : Cell, ITrapCell
     {
-        public MazeNodeCell(int row, int column, MazeCell owner, int step) : base(row, column, string.Empty, number: step)
+        public MazeNodeCell(int row, int column, MazeCell owner, int step) : base(row, column, owner.Image[..5], number: step)
         {
             _owner = owner;
             AltSelectableCoords = new List<int[]>();

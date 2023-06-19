@@ -68,13 +68,24 @@ namespace Jackal.Network
                             Server.Clients.Remove(this);
                             continueListening = false;
                             SendToOther(NetMode.DeletePlayer, writer =>
-                                        writer.Write(_player.Index));
-                            break;
+                                        writer.Write(_player.Index)); break;
                         case NetMode.UpdatePlayer:
                             _player.Copy(_reader.ReadPlayer());
                             SendToOther(NetMode.UpdatePlayer, writer =>
-                                        writer.Write(_player));
-                            break;
+                                        writer.Write(_player)); break;
+                        case NetMode.StartGame:
+                            int count = _reader.ReadInt32();
+                            Team[] mixedTeams = new Team[count];
+                            for (int i = 0; i < count; i++)
+                                mixedTeams[i] = (Team)_reader.ReadInt32();
+                            int mapSeed = _reader.ReadInt32();
+                            SendToOther(NetMode.StartGame, writer =>
+                                        {
+                                            writer.Write(count);
+                                            foreach (Team team in mixedTeams)
+                                                writer.Write((int)team);
+                                            writer.Write(mapSeed);
+                                        }); break;
                     }
                 }
             }

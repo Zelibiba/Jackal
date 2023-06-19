@@ -11,6 +11,7 @@ using Jackal.Models;
 using Avalonia.Threading;
 using Jackal.ViewModels;
 using System.Threading;
+using System.Reflection;
 
 namespace Jackal.Network
 {
@@ -41,7 +42,7 @@ namespace Jackal.Network
             }
             catch (Exception ex)
             {
-                Views.MessageBox.Show("Client.Start: " + ex.Message);
+                Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Start: " + ex.Message));
                 Close();
             }
         }
@@ -49,7 +50,7 @@ namespace Jackal.Network
         {
             try
             {
-                RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
+                RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true)));
                 int playerCount = _reader.ReadInt32();
                 for (int i = 0; i < playerCount; i++)
                     RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
@@ -58,7 +59,7 @@ namespace Jackal.Network
                 byte[] buffer = new byte[1];
                 while (continueListening)
                 {
-                    _ = await _stream.ReadAsync(buffer, 0, 1, _cancellationTokenSource.Token);
+                    _ = await _stream.ReadAsync(buffer.AsMemory(0, 1), _cancellationTokenSource.Token);
                     _lastMode = _reader.ReadNetMode();
                     switch (_lastMode)
                     {
@@ -75,6 +76,14 @@ namespace Jackal.Network
                             break;
                         case NetMode.DeletePlayer:
                             RunInUIThread(() => _viewModel.DeletePlasyer(_reader.ReadInt32()));
+                            break;
+                        case NetMode.StartGame:
+                            int count = _reader.ReadInt32();
+                            Team[] mixedTeams = new Team[count];
+                            for (int i = 0; i < count; i++)
+                                mixedTeams[i] = (Team)_reader.ReadInt32();
+                            int mapSeed = _reader.ReadInt32();
+                            RunInUIThread(() => _viewModel.StartGame(mixedTeams, mapSeed));
                             break;
                     }
                 }
@@ -93,6 +102,15 @@ namespace Jackal.Network
         {
             _writer.Write(NetMode.UpdatePlayer);
             _writer.Write(player);
+            _writer.Flush();
+        }
+        public static void StartGame(Team[] mixedteams, int seed)
+        {
+            _writer.Write(NetMode.StartGame);
+            _writer.Write(mixedteams.Length);
+            foreach (Team team in mixedteams)
+                _writer.Write((int)team);
+            _writer.Write(seed);
             _writer.Flush();
         }
 

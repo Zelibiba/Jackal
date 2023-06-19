@@ -19,9 +19,7 @@ namespace Jackal.ViewModels
         public PlayerAdderViewModel(Player player)
         {
             Player = player;
-            //? необходимо изменить
-            IsControllable = player.IsControllable;
-            if (IsControllable)
+            if (player.IsControllable)
             {
                 this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.IntAlliance, vm => vm.Player.IsReady)
                     .Skip(1)
@@ -30,7 +28,7 @@ namespace Jackal.ViewModels
         }
 
         public Player Player { get; }
-        public bool IsControllable { get; }
+        public bool IsControllable => Player.IsControllable;
 
         public void ChangeAlliance()
         {

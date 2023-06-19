@@ -452,9 +452,9 @@ namespace Jackal.Models
         /// </summary>
         static void NextPlayer(bool checkOnly = false)
         {
+            #region Обработка бочки рома
             foreach (Pirate pirate in CurrentPlayer.Pirates)
             {
-                #region Обработка бочки рома
                 if (pirate.RumCount == 1)
                 {
                     pirate.IsEnabled = true;
@@ -462,8 +462,8 @@ namespace Jackal.Models
                 }
                 if (pirate.RumCount > 0)
                     pirate.RumCount--;
-                #endregion
             }
+            #endregion
 
             if (!checkOnly)
             {

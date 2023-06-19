@@ -270,14 +270,17 @@ namespace Jackal.Models.Pirates
             if (this is Friday || this is Missioner || Manager.Bottles == 0 || Manager.IsRumBlocked)
                 return;
 
-            foreach (Pirate pirate in Cell.Pirates)
+            if (Cell is not JungleCell)
             {
-                if (pirate is Friday)
-                    CanGiveRumToFriday = true;
-                else if (pirate is Missioner)
-                    CanGiveRumToMissioner = true;
+                foreach (Pirate pirate in Cell.Pirates)
+                {
+                    if (pirate is Friday)
+                        CanGiveRumToFriday = true;
+                    else if (pirate is Missioner)
+                        CanGiveRumToMissioner = true;
+                }
             }
-            foreach (Cell cell in map.Cells(SelectableCoords))
+            foreach (Cell cell in map.Cells(SelectableCoords).Where(cell => cell is not JungleCell))
             {
                 foreach(Pirate pirate in cell.GetSelectedCell(this).Pirates)
                 {

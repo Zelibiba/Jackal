@@ -20,8 +20,12 @@ namespace Jackal.Models
 
         public static void StartAutosave(IEnumerable<Player> players, int seed)
         {
-            _file = new FileStream("..//..//..//saves//autosave.txt", FileMode.Create, FileAccess.Write);
-            _writer = new StreamWriter(_file);
+            try
+            {
+                _file = new FileStream("..//..//..//saves//autosave.txt", FileMode.Create, FileAccess.Write);
+                _writer = new StreamWriter(_file);
+            }
+            catch (IOException ex) { return; }
 
             _writer?.WriteLine("players: " + players.Count());
             foreach (Player player in players)
@@ -163,6 +167,9 @@ namespace Jackal.Models
                 else
                     throw new Exception("Неверная строка: " + line);
             }
+
+            reader.Close();
+            _file.Close();
         }
     }
 }

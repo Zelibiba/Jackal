@@ -10,16 +10,22 @@
 			<ColumnDefinition Width="*" MinWidth="300" MaxWidth="600"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
-		<Border Grid.Column="0" Margin="10" Height="300" VerticalAlignment="Top"
-				BorderBrush="Black" BorderThickness="2">
-			<ItemsControl Items="{Binding Players}">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<views:PlayerAdderView Margin="5"/>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</Border>
+		<Grid Grid.Column="0" RowDefinitions="300,10,*" Margin="10">
+			<Border Grid.Row="0" 
+					BorderBrush="Black" BorderThickness="2">
+				<ItemsControl Items="{Binding Players}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<views:PlayerAdderView Margin="5"/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</Border>
+			<WrapPanel Grid.Row="2">
+				<TextBlock Text="Адресс сервера: " FontSize="20"/>
+				<TextBlock Text="{Binding IP}" FontSize="20"/>
+			</WrapPanel>
+		</Grid>
 		<Button Grid.Column="1" Margin="10" Padding="10,5"
 				VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="25"
 				IsVisible="{Binding IsServerHolder}"

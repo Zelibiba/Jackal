@@ -9,7 +9,7 @@ namespace Jackal.Models.Cells.Cave
 {
     public class CaveEnterCell : Cell
     {
-        public CaveEnterCell(CaveCell cave, Func<int[], MovementResult> continueMove) : base(cave.Row, cave.Column, string.Empty, number: 0)
+        public CaveEnterCell(CaveCell cave, Func<int[], MovementResult> continueMove) : base(cave.Row, cave.Column, "Cave", number: 0)
         {
             _cave = cave;
             _continueMove = continueMove;

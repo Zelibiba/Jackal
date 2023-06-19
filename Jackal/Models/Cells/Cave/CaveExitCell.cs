@@ -9,7 +9,7 @@ namespace Jackal.Models.Cells.Cave
 {
     public class CaveExitCell : Cell
     {
-        public CaveExitCell(CaveCell cave) : base(cave.Row, cave.Column, string.Empty, number: 0)
+        public CaveExitCell(CaveCell cave) : base(cave.Row, cave.Column, "Cave", number: 0)
         {
             _cave = cave;
         }
