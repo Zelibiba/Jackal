@@ -12,6 +12,8 @@ using Avalonia.Threading;
 using Jackal.ViewModels;
 using System.Threading;
 using System.Reflection;
+using Jackal.Models.Pirates;
+using Jackal.Models.Cells;
 
 namespace Jackal.Network
 {
@@ -25,6 +27,7 @@ namespace Jackal.Network
         static WaitingRoomViewModel _viewModel;
         static Task _listening;
         static NetMode _lastMode;
+        static bool _netAction;
 
         public static void Start(string ip, WaitingRoomViewModel viewModel)
         {
@@ -61,6 +64,7 @@ namespace Jackal.Network
                 {
                     _ = await _stream.ReadAsync(buffer.AsMemory(0, 1), _cancellationTokenSource.Token);
                     _lastMode = _reader.ReadNetMode();
+                    _netAction = true;
                     switch (_lastMode)
                     {
                         case NetMode.Disconnect:
@@ -81,11 +85,20 @@ namespace Jackal.Network
                             int count = _reader.ReadInt32();
                             Team[] mixedTeams = new Team[count];
                             for (int i = 0; i < count; i++)
-                                mixedTeams[i] = (Team)_reader.ReadInt32();
+                                mixedTeams[i] = _reader.ReadTeam();
                             int mapSeed = _reader.ReadInt32();
                             RunInUIThread(() => _viewModel.StartGame(mixedTeams, mapSeed));
                             break;
+                        case NetMode.MovePirate:
+                            int index = _reader.ReadInt32();
+                            bool gold = _reader.ReadBoolean();
+                            bool galeon = _reader.ReadBoolean();
+                            int[] coords = _reader.ReadCoords();
+                            Game.SelectPirate(index, gold, galeon);
+                            Game.SelectCell(coords);
+                            break;
                     }
+                    _netAction = false;
                 }
 
             }
@@ -109,9 +122,22 @@ namespace Jackal.Network
             _writer.Write(NetMode.StartGame);
             _writer.Write(mixedteams.Length);
             foreach (Team team in mixedteams)
-                _writer.Write((int)team);
+                _writer.Write(team);
             _writer.Write(seed);
             _writer.Flush();
+        }
+
+        public static void MovePirate(Pirate pirate, Cell targetCell)
+        {
+            if (_client == null || !_client.Connected)
+                return;
+            if (_netAction)
+                return;
+            _writer.Write(NetMode.MovePirate);
+            _writer.Write(Game.CurrentPlayer.Pirates.IndexOf(pirate));
+            _writer.Write(pirate.Gold);
+            _writer.Write(pirate.Galeon);
+            _writer.Write(targetCell.Coords);
         }
 
         static void Close()

@@ -103,7 +103,7 @@ namespace Jackal.ViewModels
             int seed = rand.Next();
 
             Client.StartGame(mixedTeams, seed);
-            StartGame(mixedTeams, seed);
+            Dispatcher.UIThread.InvokeAsync(() => StartGame(mixedTeams, seed));
         }
         public void StartGame(Team[] mixedTeam, int mapSeed)
         {
@@ -111,7 +111,9 @@ namespace Jackal.ViewModels
             for (int i = 0; i < players.Length; i++)
                 players[i] = Players.First(vm => vm.Player.Team == mixedTeam[i]).Player;
 
-            SetViewModel(new GameViewModel(players: players, seed: mapSeed));
+            bool isEnabled = Players[0].Player.Team == players[0].Team;
+
+            SetViewModel(new GameViewModel(players: players, seed: mapSeed, isEnabled: isEnabled));
         }
     }
 }

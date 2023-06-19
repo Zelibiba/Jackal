@@ -6,14 +6,13 @@
              xmlns:vm="using:Jackal.ViewModels"
 			 xmlns:v="using:Jackal.Views"
 			 x:Class="Jackal.Views.GameView"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 IsEnabled="{Binding IsEnabled}">
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450">
 	<UserControl.Styles>
 		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
 		<StyleInclude Source="/Styles/PirateButtonStyle.axaml"/>
 	</UserControl.Styles>
 	<Grid ColumnDefinitions="auto,*">
-		<Viewbox Grid.Column="0">
+		<Viewbox Grid.Column="0" IsEnabled="{Binding IsEnabled}">
 			<Panel Name="MapControl">
 				<Button Name="PirateAnimator" Classes="Pirate" DataContext="{Binding SelectedPirate}"
 						HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="20" ZIndex="2"

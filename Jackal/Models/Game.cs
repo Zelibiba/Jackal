@@ -10,6 +10,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models.Cells;
 using Jackal.Models.Pirates;
+using Jackal.Network;
 using ReactiveUI;
 
 namespace Jackal.Models
@@ -482,6 +483,7 @@ namespace Jackal.Models
             }
         }
 
+        public static Action<bool>? EnableInterface;
         /// <summary>
         /// Метод проверки возможности выбора клетки.
         /// </summary>
@@ -497,6 +499,9 @@ namespace Jackal.Models
         /// <param name="cell">Выбираемая клетка.</param>
         public static void SelectCell(Cell cell)
         {
+            if (CurrentPlayer.IsControllable)
+                EnableInterface?.Invoke(false);
+
             if (IsPirateSelected && cell.CanBeSelected)
             {
                 Deselect(false);
@@ -510,11 +515,14 @@ namespace Jackal.Models
                 SelectEarthQuakeCell(cell);
             else if (lightHouse.IsActive)
                 SelectLightHouseCell(cell);
+
+            if (CurrentPlayer.IsControllable)
+                EnableInterface?.Invoke(true);
         }
         /// <summary>
         /// <inheritdoc cref="SelectCell(Cell)" path="/summary"/>
         /// </summary>
-        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/>.</remarks>
+        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/> и <see cref="Client"/>.</remarks>
         /// <param name="coordinates">Координаты выбранной ячейки.</param>
         public static void SelectCell(int[] coordinates) => SelectCell(Map[coordinates]);
         /// <summary>
@@ -621,7 +629,7 @@ namespace Jackal.Models
         /// <summary>
         /// Метод тихой выборки пирата без обработки интерфейса и достижимых координат.
         /// </summary>
-        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/>.</remarks>
+        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/> и <see cref="Client"/>.</remarks>
         /// <param name="pirateIndex">Индекс пирата в списке пиратов у игрока.</param>
         /// <param name="gold">Флаг того, что пират понесёт золото.</param>
         /// <param name="galeon">Флаг того, что пират понесёт Галеон.</param>
@@ -707,6 +715,7 @@ namespace Jackal.Models
         static void StartMovePirate(Cell cell)
         {
             FileHandler.MovePirate(SelectedPirate, cell);
+            Client.MovePirate(SelectedPirate, cell);
 
             SelectedPirate.TargetCell = cell;
             if (!PirateInMotion)

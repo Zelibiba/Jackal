@@ -51,5 +51,16 @@ namespace Jackal
             writer.Write((byte)10);
             writer.Write((int)mode);
         }
+
+
+        public static int[] ReadCoords(this BinaryReader reader)
+        {
+            return new int[] { reader.ReadInt32(), reader.ReadInt32() };
+        }
+        public static void Write(this BinaryWriter writer, int[] coords)
+        {
+            writer.Write(coords[0]);
+            writer.Write(coords[1]);
+        }
     }
 }

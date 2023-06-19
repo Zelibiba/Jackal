@@ -77,15 +77,29 @@ namespace Jackal.Network
                             int count = _reader.ReadInt32();
                             Team[] mixedTeams = new Team[count];
                             for (int i = 0; i < count; i++)
-                                mixedTeams[i] = (Team)_reader.ReadInt32();
+                                mixedTeams[i] = _reader.ReadTeam();
                             int mapSeed = _reader.ReadInt32();
                             SendToOther(NetMode.StartGame, writer =>
-                                        {
-                                            writer.Write(count);
-                                            foreach (Team team in mixedTeams)
-                                                writer.Write((int)team);
-                                            writer.Write(mapSeed);
-                                        }); break;
+                            {
+                                writer.Write(count);
+                                foreach (Team team in mixedTeams)
+                                    writer.Write(team);
+                                writer.Write(mapSeed);
+                            });
+                            break;
+                        case NetMode.MovePirate:
+                            int index = _reader.ReadInt32();
+                            bool gold = _reader.ReadBoolean();
+                            bool galeon = _reader.ReadBoolean();
+                            int[] coords = _reader.ReadCoords();
+                            SendToOther(NetMode.MovePirate, writer =>
+                            {
+                                writer.Write(index);
+                                writer.Write(gold);
+                                writer.Write(galeon);
+                                writer.Write(coords);
+                            });
+                            break;
                     }
                 }
             }
