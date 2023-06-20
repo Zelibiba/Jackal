@@ -43,6 +43,10 @@ namespace Jackal.Models.Cells
             this.WhenAnyValue(c => c.Gold, c => c.Galeon)
                 .Select(t => t.Item1 > 0 || t.Item2)
                 .ToPropertyEx(this, c => c.Treasure);
+            this.WhenAnyValue(c => c.IsPreOpened)
+                .Where(x => x && IsGray)
+                .Subscribe(_ => ChangeGrayStatus());
+
 
             IsVisible = true;
             IsStandable = isStandable;
@@ -205,8 +209,6 @@ namespace Jackal.Models.Cells
         /// </summary>
         public virtual void Open()
         {
-            if (IsGray)
-                ChangeGrayStatus();
             IsOpened = true;
             IsPreOpened = true;
         }

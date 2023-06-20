@@ -94,7 +94,7 @@ namespace Jackal.Network
                             bool gold = _reader.ReadBoolean();
                             bool galeon = _reader.ReadBoolean();
                             int[] coords = _reader.ReadCoords();
-                            Game.SelectPirate(index, gold, galeon);
+                            Game.SelectPirate(index, gold, galeon, coords);
                             Game.SelectCell(coords);
                             break;
                         case NetMode.MoveShip:

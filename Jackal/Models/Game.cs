@@ -435,6 +435,7 @@ namespace Jackal.Models
                     Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
                     break;
             }
+            Map[1, 6] = new LightHouseCell(1, 6);
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
@@ -482,6 +483,7 @@ namespace Jackal.Models
                 }
             }
         }
+
 
         /// <summary>
         /// Делегат для влючения и отключения интерфеса.
@@ -574,18 +576,23 @@ namespace Jackal.Models
             {
                 cell.CanBeSelected = false;
                 cell.IsSelected = true;
-                cell.IsLightHousePicked = true;
-                cell.IsPreOpened = true;
+                if (CurrentPlayer.IsControllable)
+                    cell.IsPreOpened = true;
+                else
+                    cell.IsLightHousePicked = true;
                 lightHouse.SelectedCells.Add(cell);
                 if (lightHouse.SelectedCells.Count == lightHouse.SelectedCells.Capacity)
                 {
                     Deselect();
                     foreach (Cell c in lightHouse.SelectedCells)
                     {
-                        c.CanBeSelected = true;
+                        if (CurrentPlayer.IsControllable)
+                            c.CanBeSelected = true;
                         c.IsSelected = false;
                     }
-                    lightHouse.Lighthouse.CanBeSelected = true;
+                    if (CurrentPlayer.IsControllable)
+                        lightHouse.Lighthouse.CanBeSelected = true;
+
                 }
             }
             else
@@ -628,8 +635,11 @@ namespace Jackal.Models
         {
             Deselect(false);
             SelectedPirate = pirate;
-            foreach (Cell cell in Map.Cells(pirate))
-                cell.GetSelectedCell(pirate).DefineSelectability(pirate);
+            if (CurrentPlayer.IsControllable)
+            {
+                foreach (Cell cell in Map.Cells(pirate))
+                    cell.GetSelectedCell(pirate).DefineSelectability(pirate);
+            }
         }
         /// <summary>
         /// Метод тихой выборки пирата без обработки интерфейса и достижимых координат.
@@ -638,11 +648,14 @@ namespace Jackal.Models
         /// <param name="pirateIndex">Индекс пирата в списке пиратов у игрока.</param>
         /// <param name="gold">Флаг того, что пират понесёт золото.</param>
         /// <param name="galeon">Флаг того, что пират понесёт Галеон.</param>
-        public static void SelectPirate(int pirateIndex, bool gold = false ,bool galeon = false)
+        /// <param name="targetCoords">Координаты ячейки, куда направляется пират.</param>
+        public static void SelectPirate(int pirateIndex, bool gold = false ,bool galeon = false, int[]? targetCoords = null)
         {
-            SelectPirate(CurrentPlayer.Pirates[pirateIndex]);
+            SelectedPirate = CurrentPlayer.Pirates[pirateIndex];
             SelectedPirate.Gold = gold;
             SelectedPirate.Galeon = galeon;
+            if (targetCoords != null)
+                Map[targetCoords].GetSelectedCell(SelectedPirate).CanBeSelected = true;
         }
         /// <summary>
         /// Метод перевыделения пирата при изменении параметров перетаскивания сокровища.
@@ -828,9 +841,6 @@ namespace Jackal.Models
             FileHandler.MoveShip(cell);
             Client.SelectCell(NetMode.MoveShip, cell);
 
-            Deselect(false);
-            SwapCells(SelectedShip, cell);
-
             // Подобрать или убить пиратов в море
             if (cell.Pirates.Count > 0)
             {
@@ -847,6 +857,9 @@ namespace Jackal.Models
                         cell.Pirates[0].Kill();
                 }
             }
+
+            Deselect(false);
+            SwapCells(SelectedShip, cell);
 
             // обновить достигаемые координаты для побережья
             if (SelectedShip.Orientation == Orientation.Up || SelectedShip.Orientation == Orientation.Down)
@@ -908,10 +921,13 @@ namespace Jackal.Models
         static void StartEarthQuake()
         {
             earthQuake.IsActive = true;
-            foreach (Cell cell in Map)
-                cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
-                                     cell.Gold == 0 && !cell.Galeon &&
-                                     cell.Pirates.Count == 0;
+            if (CurrentPlayer.IsControllable)
+            {
+                foreach (Cell cell in Map)
+                    cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
+                                         cell.Gold == 0 && !cell.Galeon &&
+                                         cell.Pirates.Count == 0;
+            }
         }
         /// <summary>
         /// Метод запуска хода маяка.
@@ -923,8 +939,11 @@ namespace Jackal.Models
             lightHouse.Lighthouse = LightHouse;
             IEnumerable<Cell> closedCells = Map.Where(cell => !cell.IsOpened);
             lightHouse.SelectedCells = new(Math.Min(closedCells.Count(), 4));
-            foreach (Cell cell in closedCells)
-                cell.CanBeSelected = true;
+            if (CurrentPlayer.IsControllable)
+            {
+                foreach (Cell cell in closedCells)
+                    cell.CanBeSelected = true;
+            }
         }
         /// <summary>
         /// Метод запуска хода конопли.
@@ -990,7 +1009,8 @@ namespace Jackal.Models
             CurrentPlayer.Bottles--;
             Deselect(false);
             SelectedPirate.IsDrunk = true;
-            SelectPirate(SelectedPirate);
+            if (CurrentPlayer.IsControllable)
+                SelectPirate(SelectedPirate);
         }
         /// <summary>
         /// Метод спаивания Пятницы около выбранного пирата.
@@ -1001,13 +1021,13 @@ namespace Jackal.Models
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToFriday = false;
 
-            if (SelectedPirate.Cell.Pirates.First(p => p is Friday) is Friday friday)
+            if (SelectedPirate.Cell.Pirates.FirstOrDefault(p => p is Friday, Pirate.Empty) is Friday friday)
                 friday.Kill();
             else
             {
                 foreach (Cell cell in Map.Cells(SelectedPirate))
                 {
-                    if (cell.Pirates.FirstOrDefault(p => p is Friday) is Friday _friday)
+                    if (cell.Pirates.FirstOrDefault(p => p is Friday, Pirate.Empty) is Friday _friday)
                     {
                         _friday.Kill();
                         break;
@@ -1025,13 +1045,13 @@ namespace Jackal.Models
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToMissioner = false;
 
-            if (SelectedPirate.Cell.Pirates.First(p => p is Missioner) is Missioner missioner)
+            if (SelectedPirate.Cell.Pirates.FirstOrDefault(p => p is Missioner, Pirate.Empty) is Missioner missioner)
                 missioner.ConverToPirate();
             else
             {
                 foreach (Cell cell in Map.Cells(SelectedPirate))
                 {
-                    if (cell.Pirates.FirstOrDefault(p => p is Missioner) is Missioner _missioner)
+                    if (cell.Pirates.FirstOrDefault(p => p is Missioner, Pirate.Empty) is Missioner _missioner)
                     {
                         _missioner.ConverToPirate();
                         break;

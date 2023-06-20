@@ -133,11 +133,10 @@
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>
-					<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-						<TextBlock Text="{Binding Row}" Margin="5,0"/>
-						<TextBlock Text="{Binding Column}" Margin="5,0"/>
-					</WrapPanel>
-
+					<!--<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">-->
+						<!--<TextBlock Text="{Binding Row}" Margin="5,0"/>-->
+						<!--<TextBlock Text="{Binding Column}" Margin="5,0"/>-->
+					<!--</WrapPanel>-->
 				</Panel>
 			</Border>
 		</ControlTemplate>

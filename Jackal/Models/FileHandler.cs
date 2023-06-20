@@ -106,11 +106,12 @@ namespace Jackal.Models
             string[] words;
             for (int i=0;i<playersCount; i++)
             {
-                words = reader.ReadLine().Trim().Split(' ');
-                players[i] = new Player(i, words[0][..^1],
-                                        (Team)int.Parse(words[1][..words[1].IndexOf('(')]),
+                string line = reader.ReadLine().Trim();
+                words = line.Split(' ');
+                players[i] = new Player(i, line.Split(',')[0],
+                                        (Team)int.Parse(words[^2][..words[^2].IndexOf('(')]),
                                         isControllable: true)
-                                        { IntAlliance = int.Parse(words[2]) };
+                                        { IntAlliance = int.Parse(words[^1]) };
             }
 
             reader.ReadLine();
@@ -133,7 +134,7 @@ namespace Jackal.Models
                     bool gold = int.Parse(words[2].Split('=')[1]) == 1;
                     bool galeon = int.Parse(words[3].Split('=')[1][..^1]) == 1;
                     int[] coords = Coordinates(words[9]);
-                    Game.SelectPirate(index, gold, galeon);
+                    Game.SelectPirate(index, gold, galeon, coords);
                     Game.SelectCell(coords);
                 }
                 else if (words[0] == "move" && words[1] == "ship")
