@@ -2,7 +2,6 @@
 using DynamicData;
 using DynamicData.Binding;
 using Jackal.Models.Pirates;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;

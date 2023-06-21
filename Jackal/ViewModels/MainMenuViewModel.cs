@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Jackal.Network;
 using Jackal.Views;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -28,7 +29,7 @@ namespace Jackal.ViewModels
             //IPWindow dialog = new IPWindow();
             //string ip = await dialog.ShowDialog<string>(param as Window);
             //if (!string.IsNullOrEmpty(ip))
-            //    Content = new WaitingRoomViewModel(false, ip);
+            //    Content = new WaitingRoomViewModel(SetContent, ip: ip);
             Content = new WaitingRoomViewModel(SetContent, ip: Network.Server.IP);
         }
         public async void LoadGame(object param)
@@ -45,7 +46,11 @@ namespace Jackal.ViewModels
         }
         public void Cansel()
         {
-            Content = new MainMenuViewModel();
+            Content = this;
+            if (Server.IsServerHolder)
+                Server.Stop();
+            else
+                Client.Stop();
         }
 
         void SetContent(ViewModelBase viewModel)

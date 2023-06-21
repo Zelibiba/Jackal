@@ -85,18 +85,20 @@ namespace Jackal.Models.Pirates
 
             this.WhenAnyValue(p => p.Cell)
                 .Skip(1)
-                .Where(cell => cell is ArrowCell arrowCell
-                               && (arrowCell.ArrowType == ArrowType.Side1 || arrowCell.ArrowType == ArrowType.Angle1)
-                               || cell is CrocodileCell)
                 .Subscribe(cell =>
                 {
-                    if (_loopDict.ContainsKey(cell))
+                    if (cell is ArrowCell || cell is CrocodileCell)
                     {
-                        if (++_loopDict[cell] == 3)
-                            IsInLoop = true;
+                        if (_loopDict.ContainsKey(cell))
+                        {
+                            if (++_loopDict[cell] == 4)
+                                IsInLoop = true;
+                        }
+                        else
+                            _loopDict.Add(cell, 1);
                     }
                     else
-                        _loopDict.Add(cell, 1);
+                        _loopDict.Clear();
                 });
 
             _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)

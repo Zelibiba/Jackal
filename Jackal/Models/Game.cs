@@ -602,9 +602,12 @@ namespace Jackal.Models
                     cell.CanBeSelected = false;
                     foreach (Cell c in lightHouse.SelectedCells)
                     {
-                        c.CanBeSelected = false;
                         c.IsSelected = false;
-                        c.ChangeGrayStatus();
+                        if (CurrentPlayer.IsControllable)
+                        {
+                            c.CanBeSelected = false;
+                            c.ChangeGrayStatus();
+                        }
                     }
                     lightHouse.IsActive = false;
                     NextPlayer();

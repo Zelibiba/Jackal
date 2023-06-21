@@ -71,6 +71,8 @@ namespace Jackal.Network
                 return;
             _server?.Stop();
             _listening.Wait();
+            _server = null;
+            Clients.Clear();
         }
     }
 }

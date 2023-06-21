@@ -43,9 +43,9 @@ namespace Jackal.Models.Cells
             this.WhenAnyValue(c => c.Gold, c => c.Galeon)
                 .Select(t => t.Item1 > 0 || t.Item2)
                 .ToPropertyEx(this, c => c.Treasure);
-            this.WhenAnyValue(c => c.IsPreOpened)
-                .Where(x => x && IsGray)
-                .Subscribe(_ => ChangeGrayStatus());
+            //this.WhenAnyValue(c => c.IsPreOpened)
+            //    .Where(x => x && IsGray)
+            //    .Subscribe(_ => ChangeGrayStatus());
 
 
             IsVisible = true;
@@ -63,7 +63,8 @@ namespace Jackal.Models.Cells
             {
                 Pirates = cell.Pirates,
                 IsPreOpened = cell.IsPreOpened,
-                IsVisible = cell.IsVisible
+                IsVisible = cell.IsVisible,
+                IsLightHousePicked = cell.IsLightHousePicked
             };
         }
 
@@ -167,6 +168,11 @@ namespace Jackal.Models.Cells
             Nodes.ToObservableChangeSet()
                  .AutoRefresh(cell => cell.Galeon)
                  .Subscribe(_ => Galeon = Nodes.Any(x => x.Galeon));
+
+            Nodes.ToObservableChangeSet()
+                 .AutoRefresh(cell => cell.IsPreOpened)
+                 .Subscribe(_ => IsPreOpened = Nodes.Any(x => x.IsPreOpened));
+
             Nodes.ToObservableChangeSet()
                  .AutoRefresh(cell => cell.CanBeSelected)
                  .Subscribe(_ => CanBeSelected = Nodes.Any(x => x.CanBeSelected));
@@ -209,6 +215,8 @@ namespace Jackal.Models.Cells
         /// </summary>
         public virtual void Open()
         {
+            if (IsGray)
+                ChangeGrayStatus();
             IsOpened = true;
             IsPreOpened = true;
         }
