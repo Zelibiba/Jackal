@@ -39,13 +39,14 @@ namespace Jackal.Views
             {
                 Duration = TimeSpan.FromSeconds(0.3),
                 IterationCount = new IterationCount(1),
-                FillMode = FillMode.None,
+                FillMode = FillMode.Forward
             };
             _pirateAnimation.Children.Add(new KeyFrame { KeyTime = TimeSpan.FromSeconds(0) });
             _pirateAnimation.Children[0].Setters.Add(new Setter() { Property = MarginProperty });
             _pirateAnimation.Children.Add(new KeyFrame { KeyTime = _pirateAnimation.Duration });
             _pirateAnimation.Children[1].Setters.Add(new Setter() { Property = MarginProperty });
             Game.StartPirateAnimation = StartPirateAnimation;
+            Game.EndPirateMove = () => PirateAnimator.IsVisible = false;
             #endregion
 
             #region »нициализаци€ анимации перемещени€ клеток
@@ -101,7 +102,6 @@ namespace Jackal.Views
             PirateAnimator.IsVisible = true;
             Game.SelectedPirate.IsVisible = false;
             await _pirateAnimation.RunAsync(PirateAnimator, null);
-            PirateAnimator.IsVisible = false;
         }
 
 

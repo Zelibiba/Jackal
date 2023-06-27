@@ -62,11 +62,11 @@ namespace Jackal.Models
         /// <returns></returns>
         public IEnumerable<Cell> Cells(IEnumerable<int[]> coordinates) => coordinates.Select(coords => this[coords]);
         /// <summary>
-        /// Метод возвращает перечисление клеток, координаты которых перечислены в <see cref="Pirate.SelectableCoords"/>.
+        /// Метод возвращает перечисление клеток, достижимых пиратом.
         /// </summary>
         /// <param name="pirate"></param>
         /// <returns></returns>
-        public IEnumerable<Cell> Cells(Pirate pirate) => Cells(pirate.SelectableCoords);
+        public IEnumerable<Cell> Cells(Pirate pirate) => pirate.SelectableCoords.Select(coords => this[coords].GetSelectedCell(pirate));
 
         /// <summary>
         /// Метод проверяет, не вышли ли индексы за границы массива.

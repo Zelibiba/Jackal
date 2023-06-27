@@ -7,6 +7,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Jackal.Models.Cells;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Jackal.Models.Pirates
 {
@@ -49,6 +50,12 @@ namespace Jackal.Models.Pirates
 
             IsFighter = isFighter;
             _loopDict = new Dictionary<Cell, int>();
+
+            this.WhenAnyValue(p => p.Cell.Gold)
+                .Select(gold => gold > 0)
+                .ToPropertyEx(this, p => p.CanGrabGold);
+            this.WhenAnyValue(p => p.Cell.Galeon)
+                .ToPropertyEx(this, p => p.CanGrabGaleon);
 
             this.WhenAnyValue(p => p.Gold)
                 .Skip(1)
@@ -101,6 +108,10 @@ namespace Jackal.Models.Pirates
                         _loopDict.Clear();
                 });
 
+            this.WhenAnyValue(p => p.Cell, p => p.Manager.Bottles, p => p.Manager.IsRumBlocked, p => p.IsDrunk,
+                (cell, bottles, isRumBlocked, isDrunk) => cell is ITrapCell && bottles > 0 && !isRumBlocked && !isDrunk)
+                .ToPropertyEx(this, p => p.CanDrinkRum);
+
             _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)
                                   .Skip(1)
                                   .Select(cell => cell.Number)
@@ -152,14 +163,6 @@ namespace Jackal.Models.Pirates
         /// Клетка, на которой находится пират.
         /// </summary>
         [Reactive] public Cell Cell { get; set; }
-        /// <summary>
-        /// Строка клетки с пиратом.
-        /// </summary>
-        public int Row => Cell.Row;
-        /// <summary>
-        /// Колонка клетки с пиратом.
-        /// </summary>
-        public int Column => Cell.Column;
         /// <summary>
         /// Клетка, куда движется пират.
         /// </summary>
@@ -233,11 +236,11 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может взять золото.
         /// </summary>
-        public virtual bool CanGrabGold => Cell?.Gold > 0;
+        [ObservableAsProperty] public virtual bool CanGrabGold { get; }
         /// <summary>
         /// Флаг того, что пират может взять Галеон.
         /// </summary>
-        public virtual bool CanGrabGaleon => Cell?.Galeon ?? false;
+        [ObservableAsProperty] public virtual bool CanGrabGaleon { get; }
 
         /// <summary>
         /// Флаг того, что пират может сражаться и управлять кораблём.
@@ -247,19 +250,19 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Флаг того, что пират может выпить ром.
         /// </summary>
-        public virtual bool CanDrinkRum => Cell is ITrapCell && Manager.Bottles > 0 && !Manager.IsRumBlocked;
+        [ObservableAsProperty] public virtual bool CanDrinkRum { get; }
         /// <summary>
         /// Флаг того, что пират выпил ром.
         /// </summary>
-        public bool IsDrunk { get; set; }
+        [Reactive] public bool IsDrunk { get; set; }
         /// <summary>
         /// Флаг того, что пират может споить Пятницу.
         /// </summary>
-        public bool CanGiveRumToFriday { get; set; }
+        [Reactive] public bool CanGiveRumToFriday { get; set; }
         /// <summary>
         /// Флаг того, что пират может споить Миссионера.
         /// </summary>
-        public bool CanGiveRumToMissioner { get; set; }
+        [Reactive] public bool CanGiveRumToMissioner { get; set; }
         /// <summary>
         /// Метод определяет параметры <see cref="CanGiveRumToFriday"/> и <see cref="CanGiveRumToMissioner"/>.
         /// </summary>
@@ -274,23 +277,13 @@ namespace Jackal.Models.Pirates
 
             if (Cell is not JungleCell)
             {
-                foreach (Pirate pirate in Cell.Pirates)
-                {
-                    if (pirate is Friday)
-                        CanGiveRumToFriday = true;
-                    else if (pirate is Missioner)
-                        CanGiveRumToMissioner = true;
-                }
+                CanGiveRumToFriday = Cell.Pirates.Any(p => p is Friday);
+                CanGiveRumToMissioner = Cell.Pirates.Any(p => p is Missioner);
             }
-            foreach (Cell cell in map.Cells(SelectableCoords).Where(cell => cell is not JungleCell))
+            foreach (Cell cell in map.Cells(this).Where(cell => cell is not JungleCell))
             {
-                foreach(Pirate pirate in cell.GetSelectedCell(this).Pirates)
-                {
-                    if (pirate is Friday)
-                        CanGiveRumToFriday = true;
-                    else if (pirate is Missioner)
-                        CanGiveRumToMissioner = true;
-                }
+                CanGiveRumToFriday |= cell.Pirates.Any(p => p is Friday);
+                CanGiveRumToMissioner |= cell.Pirates.Any(p => p is Missioner);
             }
         }
 

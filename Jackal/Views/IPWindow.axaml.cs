@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -14,6 +15,13 @@ namespace Jackal.Views
         }
 
         readonly TextBox _textBox;
+
+        public void TextBoxAttachedToVisualTree(object sender, VisualTreeAttachmentEventArgs e)
+        {
+            _textBox.SelectionStart = _textBox.Text.Length;
+            _textBox.SelectionEnd = _textBox.Text.Length;
+            _textBox.Focus();
+        }
 
         public void TextBoxFocused(object sender, GotFocusEventArgs e)
         {

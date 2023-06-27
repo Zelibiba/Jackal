@@ -33,7 +33,7 @@ namespace Jackal.Models.Cells
         }
         public override MovementResult AddPirate(Pirate pirate)
         {
-            if(Number == 1)
+            if (!_owner.Pirates.Contains(pirate))
                 _owner.Pirates.Add(pirate);
             return base.AddPirate(pirate);
         }

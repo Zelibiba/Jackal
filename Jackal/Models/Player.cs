@@ -143,11 +143,16 @@ namespace Jackal.Models
         /// </summary>
         [Reactive] public int Bottles { get; set; }
         
+        /// <summary>
+        /// Флаг того, что с этого игрока начался ход конопли.
+        /// </summary>
         public bool CannabisStarter { get; set; }
         /// <summary>
         /// Флаг того, что игрок может пользоваться ромом.
         /// </summary>
-        public bool IsRumBlocked { get; set; }
+        [Reactive] public bool IsRumBlocked { get; set; }
+
+
         /// <summary>
         /// Метод копирует список пиратов и управляемый корабль, а также изменяет блокировку рома.
         /// </summary>

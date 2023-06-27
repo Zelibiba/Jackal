@@ -435,7 +435,10 @@ namespace Jackal.Models
                     Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
                     break;
             }
-            Map[1, 6] = new LightHouseCell(1, 6);
+            //Map[1, 6] = new MazeCell(1, 6, 3);
+            Players[0].Bottles = 2;
+            Map[12, 6].AddPirate(new Missioner(Players[1], Players[1]));
+
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
@@ -452,6 +455,7 @@ namespace Jackal.Models
         /// <summary>
         /// Метод передаёт ход следующему игроку.
         /// </summary>
+        /// <param name="checkOnly">Флаг того, что необходима только проверка на бочку рома.</param>
         static void NextPlayer(bool checkOnly = false)
         {
             #region Обработка бочки рома
@@ -470,19 +474,45 @@ namespace Jackal.Models
             if (!checkOnly)
             {
                 if (CurrentPlayer.CannabisStarter)
-                    EndCannabis();
-                else
                 {
-                    CurrentPlayer.Turn = false;
-                    CurrentPlayerNumber++;
-                    CurrentPlayer.Turn = true;
-
-                    // проверка на возможность споить миссионера или пятницу
-                    foreach (Pirate pirate in CurrentPlayer.Pirates)
-                        pirate.DefineDrinkingOpportynities(Map);
+                    EndCannabis();
+                    return;
                 }
+
+                CurrentPlayer.Turn = false;
+                CurrentPlayerNumber++;
+                CurrentPlayer.Turn = true;
+
+                // проверка на возможность споить миссионера или пятницу
+                foreach (Pirate pirate in CurrentPlayer.Pirates)
+                    pirate.DefineDrinkingOpportynities(Map);
+
+                #region Проверка на победителя
+                if (!_hasWinner)
+                {
+                    Player[] orderedPlayers = Players.OrderByDescending(player => player.Gold).ToArray();
+                    if (orderedPlayers[0].Gold > orderedPlayers[1].Gold + CurrentGold + HiddenGold)
+                    {
+                        _hasWinner = true;
+                        Dispatcher.UIThread.InvokeAsync(() => SetWinner?.Invoke(orderedPlayers[0])).Wait();
+                    }
+                }
+                #endregion
             }
+
+            // если нет доступных ходов - переход к другому игроку
+            if (!CurrentPlayer.Pirates.Any(pirate => !pirate.IsBlocked ||
+                                                     pirate.IsBlocked && pirate.CanDrinkRum))
+                NextPlayer();
         }
+        /// <summary>
+        /// Делегат для оповещения о назначении победителя.
+        /// </summary>
+        public static Action<Player>? SetWinner;
+        /// <summary>
+        /// Флаг того, что победитель уже есть.
+        /// </summary>
+        static bool _hasWinner;
 
 
         /// <summary>
@@ -557,6 +587,7 @@ namespace Jackal.Models
             else
             {
                 Deselect();
+                LogWriter.EarthQuake(earthQuake.SelectedCell, cell);
                 SwapCells(earthQuake.SelectedCell, cell);
                 earthQuake.DeselectCell();
                 earthQuake.IsActive = false;
@@ -641,7 +672,7 @@ namespace Jackal.Models
             if (CurrentPlayer.IsControllable)
             {
                 foreach (Cell cell in Map.Cells(pirate))
-                    cell.GetSelectedCell(pirate).DefineSelectability(pirate);
+                    cell.DefineSelectability(pirate);
             }
         }
         /// <summary>
@@ -687,7 +718,7 @@ namespace Jackal.Models
             if (SelectedPirate != null)
             {
                 foreach (Cell cell in Map.Cells(SelectedPirate))
-                    cell.GetSelectedCell(SelectedPirate).CanBeSelected = false;
+                    cell.CanBeSelected = false;
 
                 if (deselect)
                     SelectedPirate = null;
@@ -717,6 +748,10 @@ namespace Jackal.Models
         /// </summary>
         public static Func<Cell,Task>? StartPirateAnimation;
         /// <summary>
+        /// Делегат скрытия кнопки пирата для анимации.
+        /// </summary>
+        public static Action? EndPirateMove;
+        /// <summary>
         /// Метод запуска анимации перемещения пирата.
         /// </summary>
         /// <param name="cell">Клетка, куда перемещается пират.</param>
@@ -730,11 +765,20 @@ namespace Jackal.Models
             }
         }
         /// <summary>
+        /// Метод скрытия кнопки для анимации пирата после перемещения пирата.
+        /// </summary>
+        static void OnEndPirateMove()
+        {
+            if(EndPirateMove != null)
+                Dispatcher.UIThread.InvokeAsync(EndPirateMove).Wait();
+        }
+        /// <summary>
         /// Метод обработки перемещения пирата.
         /// </summary>
         /// <param name="cell">Клетка, куда перемещается пират.</param>
         static void StartMovePirate(Cell cell)
         {
+            LogWriter.MovePirate(SelectedPirate, cell);
             FileHandler.MovePirate(SelectedPirate, cell);
             Client.MovePirate(SelectedPirate, cell);
 
@@ -749,9 +793,8 @@ namespace Jackal.Models
 
             OnStartPirateAnimation(cell);
 
-            MovementResult result = MovePirate(cell);
-            SelectedPirate.IsVisible = true;
-            switch (result)
+            Pirate selectedPirate = SelectedPirate;
+            switch (MovePirate(cell))
             {
                 case MovementResult.End:
                     if (SelectedPirate is Friday && cell.ContainsMissioner || SelectedPirate is Missioner && cell.ContainsFriday)
@@ -782,6 +825,8 @@ namespace Jackal.Models
                     StartCannabis();
                     break;
             }
+            selectedPirate.IsVisible = true;
+            OnEndPirateMove();
         }
         /// <summary>
         /// Метод безусловного продолжения перемещения пирата.
@@ -841,6 +886,7 @@ namespace Jackal.Models
         /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
         static void MoveShip(Cell cell)
         {
+            LogWriter.MoveShip(cell);
             FileHandler.MoveShip(cell);
             Client.SelectCell(NetMode.MoveShip, cell);
 
@@ -990,6 +1036,7 @@ namespace Jackal.Models
         /// <param name="type">Тип спаиваемого юнита. Для обычного пирата равен <see cref="ResidentType.Ben"/>.</param>
         public static void GetDrunk(ResidentType type)
         {
+            LogWriter.DrinkRum(type);
             FileHandler.DrinkRum(SelectedPirate, type);
             Client.DrinkRum(SelectedPirate, type);
 
@@ -1037,7 +1084,10 @@ namespace Jackal.Models
                     }
                 }
             }
-            Deselect();
+
+            Deselect(false);
+            if (CurrentPlayer.IsControllable)
+                SelectPirate(SelectedPirate);
         }
         /// <summary>
         /// Метод спаивания Миссионера около выбранного пирата.
@@ -1061,7 +1111,10 @@ namespace Jackal.Models
                     }
                 }
             }
-            Deselect();
+
+            Deselect(false);
+            if (CurrentPlayer.IsControllable)
+                SelectPirate(SelectedPirate);
         }
 
         /// <summary>
@@ -1069,12 +1122,19 @@ namespace Jackal.Models
         /// </summary>
         public static void PirateBirth()
         {
+            if (CurrentPlayer.IsControllable)
+                EnableInterface?.Invoke(false);
+
+            LogWriter.GetBirth();
             FileHandler.GetBirth(SelectedPirate);
             Client.PirateBirth(SelectedPirate);
 
             SelectedPirate.GiveBirth();
             Deselect();
             NextPlayer();
+
+            if (CurrentPlayer.IsControllable)
+                EnableInterface?.Invoke(true);
         }
 
 
@@ -1089,5 +1149,10 @@ namespace Jackal.Models
                 cell.ChangeGrayStatus();
             }
         }
+
+        /// <summary>
+        /// Делегат для написания лога о ходе.
+        /// </summary>
+        public static Action<string>? WriteLog;
     }
 }

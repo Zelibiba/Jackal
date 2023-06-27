@@ -67,17 +67,25 @@ namespace Jackal.Models.Cells.Cave
             // если пират пришёл со стороны
             else
             {
+                bool goToTreasureCell = Treasure && !pirate.Treasure;
+
                 if (!IsOpened)
                     Open();
                 else
                     HitPirates(pirate, allPirates: false);
 
                 // если есть возможность взять монетку
-                if (Treasure && !pirate.Treasure)
+                if (goToTreasureCell)
                     return TreasureCell.AddPirate(pirate);
 
                 return Enter.AddPirate(pirate);
             }
+        }
+        public void AddDrunkMissioner(Pirate pirate)
+        {
+            _cave.Pirates.Add(pirate);
+            Pirates.Add(pirate);
+            pirate.Cell = this;
         }
     }
 }

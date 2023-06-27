@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Jackal.Models.Cells.Cave;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,8 +23,12 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public void ConverToPirate()
         {
+            Ben ben = new(Owner, Manager, image: "DrunkMissioner");
+            if (Cell is CaveExitCell exit)
+                exit.AddDrunkMissioner(ben);
+            else
+                Cell.AddPirate(ben);
             Kill();
-            Cell.AddPirate(new Ben(Owner, Manager, image: "DrunkMissioner"));
         }
     }
 }

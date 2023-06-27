@@ -6,7 +6,6 @@ using DynamicData.Binding;
 using Jackal.Models;
 using Jackal.Models.Cells;
 using Jackal.Models.Pirates;
-using Jackal.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -57,6 +56,7 @@ namespace Jackal.ViewModels
                 FileHandler.ReadSave(filename);
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
+            Game.SetWinner = (player) => Views.MessageBox.Show("Ура победителю: " + player.Name + "!");
             SelectedPirate = Pirate.Empty;
 
             _disCells = Game.Map.ToObservableChangeSet()
@@ -65,9 +65,9 @@ namespace Jackal.ViewModels
             _disPlayers = Game.Players.ToObservableChangeSet()
                                       .Bind(out _players)
                                       .Subscribe();
-            _isPirateSelected = this.WhenAnyValue(vm => vm.SelectedPirate)
-                                    .Select(pirate => pirate != Pirate.Empty)
-                                    .ToProperty(this, vm => vm.IsPirateSelected);
+            this.WhenAnyValue(vm => vm.SelectedPirate)
+                .Select(pirate => pirate != Pirate.Empty)
+                .ToPropertyEx(this, vm => vm.IsPirateSelected);
 
             HiddenGold = Game.HiddenGold;
             IsEnabled = isEnabled;
@@ -82,8 +82,7 @@ namespace Jackal.ViewModels
         readonly ReadOnlyObservableCollection<Player> _players;
 
         [Reactive] public Pirate SelectedPirate { get; set; }
-        public bool IsPirateSelected => _isPirateSelected.Value;
-        readonly ObservableAsPropertyHelper<bool> _isPirateSelected;
+        [ObservableAsProperty] public bool IsPirateSelected { get; }
 
         [Reactive] public int HiddenGold { get; private set; }
         [Reactive] public int CurrentGold { get; private set; }

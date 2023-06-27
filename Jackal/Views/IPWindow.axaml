@@ -10,7 +10,7 @@
 	<Grid RowDefinitions="*,*,*" Margin="15">
 		<TextBlock Grid.Row="0" Text="Введите IP адресс:"/>
 		<TextBox Name="TextBox" Grid.Row="1" HorizontalAlignment="Stretch" Margin="0,5"
-				 Text="192.168.103." MaxLength="15" FontSize="20" GotFocus="TextBoxFocused"/>
+				 Text="192.168.103." MaxLength="15" FontSize="20" GotFocus="TextBoxFocused" AttachedToVisualTree="TextBoxAttachedToVisualTree"/>
 		<WrapPanel Grid.Row="2" Height="40" HorizontalAlignment="Right" Margin="0,5">
 			<Button Content="Хорошо" IsDefault="True" Margin="10,0" Click="OkClick"/>
 			<Button Content="Отмена" IsCancel="True" Click="CanselClick"/>

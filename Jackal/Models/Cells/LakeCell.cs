@@ -54,7 +54,7 @@ namespace Jackal.Models.Cells
             }
             else
             {
-                int[] coords = new int[2] { Row + (Row - pirate.Row), Column + (Column - pirate.Column) };
+                int[] coords = new int[2] { Row + (Row - pirate.Cell.Row), Column + (Column - pirate.Cell.Column) };
                 base.AddPirate(pirate);
                 return _continueMove(coords);
             }

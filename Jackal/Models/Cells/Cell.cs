@@ -40,13 +40,9 @@ namespace Jackal.Models.Cells
             SelectableCoords = new List<int[]>();
             Nodes = new ObservableCollection<Cell> { this };
 
-            this.WhenAnyValue(c => c.Gold, c => c.Galeon)
-                .Select(t => t.Item1 > 0 || t.Item2)
+            this.WhenAnyValue(c => c.Gold, c => c.Galeon,
+                (gold, galeon) => gold > 0 || galeon)
                 .ToPropertyEx(this, c => c.Treasure);
-            //this.WhenAnyValue(c => c.IsPreOpened)
-            //    .Where(x => x && IsGray)
-            //    .Subscribe(_ => ChangeGrayStatus());
-
 
             IsVisible = true;
             IsStandable = isStandable;
@@ -248,7 +244,7 @@ namespace Jackal.Models.Cells
         /// <returns>True, если можно переместиться.</returns>
         public virtual bool CanBeSelectedBy(Pirate pirate)
         {
-            if (pirate.Cell.Pirates.Count == 1 && (pirate is Friday || pirate is Missioner)
+            if ((pirate is Friday || pirate is Missioner)
                 && Pirates.Count == 1 && (Pirates[0] is Friday || Pirates[0] is Missioner))
                 return true;
 
