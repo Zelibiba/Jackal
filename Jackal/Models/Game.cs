@@ -93,10 +93,6 @@ namespace Jackal.Models
         /// Корабль, выбранный на текущий момент.
         /// </summary>
         static ShipCell? SelectedShip { get; set; }
-        /// <summary>
-        /// Флаг того, что какой-то корабль выбран.
-        /// </summary>
-        static bool IsShipSelected => SelectedShip != null;
 
         /// <summary>
         /// Флаг того, что некоторый пират начал ходить.
@@ -435,9 +431,7 @@ namespace Jackal.Models
                     Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
                     break;
             }
-            //Map[1, 6] = new MazeCell(1, 6, 3);
-            Players[0].Bottles = 2;
-            Map[12, 6].AddPirate(new Missioner(Players[1], Players[1]));
+            //Map[1, 6] = new GoldCell(1, 6, GoldType.Gold1);
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -482,6 +476,9 @@ namespace Jackal.Models
                 CurrentPlayer.Turn = false;
                 CurrentPlayerNumber++;
                 CurrentPlayer.Turn = true;
+
+                SelectedPirate = null;
+                SelectedShip = null;
 
                 // проверка на возможность споить миссионера или пятницу
                 foreach (Pirate pirate in CurrentPlayer.Pirates)
@@ -544,7 +541,7 @@ namespace Jackal.Models
             }
             else if (cell is ShipCell)
                 SelectShip(cell);
-            else if (IsShipSelected)
+            else if (SelectedShip != null)
                 MoveShip(cell);
             else if (earthQuake.IsActive)
                 SelectEarthQuakeCell(cell);

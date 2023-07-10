@@ -104,26 +104,33 @@ namespace Jackal.ViewModels
         }
         public void SelectPirate(Pirate pirate)
         {
+            IsEnabled = false;
             if (Game.CanChangeSelection && Game.PreSelectPirate(pirate))
             {
                 Game.SelectPirate(pirate);
                 SelectedPirate = pirate;
             }
+            IsEnabled = true;
         }
         public void Deselect()
         {
+            IsEnabled = false;
             if (Game.CanChangeSelection)
                 Game.Deselect();
+            IsEnabled = true;
         }
 
         public void GrabTreasure(string param)
         {
+            IsEnabled = false;
             SelectedPirate = Pirate.Empty;
             Game.GrabGold(param);
             SelectedPirate = Game.SelectedPirate;
+            IsEnabled = true;
         }
         public void GetPirateDrunk(object param)
         {
+            IsEnabled = false;
             switch (param)
             {
                 case "pirate":
@@ -133,8 +140,13 @@ namespace Jackal.ViewModels
                 case "missioner":
                     Game.GetDrunk(ResidentType.Missioner); break;
             }
+            IsEnabled = true;
         }
-        public void PirateBirth(object param) => Game.PirateBirth();
+        public void PirateBirth(object param)
+        {
+            IsEnabled = false;
+            Game.PirateBirth();
+        }
 
 
         public void ShowField(object param) => Game.ShowField();

@@ -334,9 +334,20 @@ namespace Jackal.Models.Cells
             if (withGold)
             {
                 if (pirate.Gold)
+                {
                     Gold--;
+                    if (Gold == 0)
+                    {
+                        foreach (Pirate p in Pirates)
+                            p.Gold = false;
+                    }
+                }
                 else if (pirate.Galeon)
+                {
                     Galeon = false;
+                    foreach (Pirate p in Pirates)
+                        p.Galeon = false;
+                }
             }
             else
             {

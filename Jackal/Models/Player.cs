@@ -49,7 +49,9 @@ namespace Jackal.Models
             Pirates = new ObservableCollection<Pirate>();
             Pirates.ToObservableChangeSet()
                    .ToCollection()
-                   .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
+                   .Select(pirates =>
+                   { bool b= pirates.Count(pirate => pirate.IsFighter) >= 3;
+                       return b; })
                    .ToPropertyEx(this, p => p.IsEnoughtPirates);
         }
 

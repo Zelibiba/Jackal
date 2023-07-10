@@ -41,15 +41,20 @@ namespace Jackal.Models.Cells
         }
         public override void SetSelectableCoords(ObservableMap map)
         {
-            SelectableCoords.Clear();
-            for (int i = 0; i < map.MapSize; i++)
+            if (IsActive)
             {
-                for (int j = 0; j < map.MapSize; j++)
+                SelectableCoords.Clear();
+                for (int i = 0; i < map.MapSize; i++)
                 {
-                    if (map[i, j] is not SeaCell && map[i, j] is not ShipCell)
-                        SelectableCoords.Add(new int[2] { i, j });
+                    for (int j = 0; j < map.MapSize; j++)
+                    {
+                        if (map[i, j] is not SeaCell && map[i, j] is not ShipCell)
+                            SelectableCoords.Add(new int[2] { i, j });
+                    }
                 }
             }
+            else
+                base.SetSelectableCoords(map);
         }
     }
 }

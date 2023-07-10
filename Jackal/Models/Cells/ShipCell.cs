@@ -41,6 +41,7 @@ namespace Jackal.Models.Cells
         /// </summary>
         public Player Manager { get; set; }
 
+        protected override Team Team => _owner.Team;
         public override Team ShipTeam => _owner.Team;
         /// <summary>
         /// Флаг того, что корабль может перемещаться.

@@ -36,6 +36,7 @@ namespace Jackal.Models.Pirates
         /// <param name="isFighter">Флаг того, что пират может сражаться и управлять кораблём.</param>
         public Pirate(Player owner, Player? manager = null, string? image = null, bool isFighter = true)
         {
+            IsFighter = isFighter;
             Owner = owner;
             Manager = manager ?? owner;
             Manager.Pirates.Add(this);
@@ -48,7 +49,6 @@ namespace Jackal.Models.Pirates
             IsVisible = true;
             IsEnabled = true;
 
-            IsFighter = isFighter;
             _loopDict = new Dictionary<Cell, int>();
 
             this.WhenAnyValue(p => p.Cell.Gold)
@@ -125,7 +125,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Игрок, управляющий пиратом.
         /// </summary>
-        public Player Manager { get; set; }
+        [Reactive] public Player Manager { get; set; }
         /// <summary>
         /// Команда пирата.
         /// </summary>

@@ -36,8 +36,10 @@ namespace Jackal.Models.Pirates
 
         public void SetNewOwner(Player owner, Player manager)
         {
+            Manager.Pirates.Remove(this);
             Dispatcher.UIThread.Post(() => Owner = owner);
             Manager = manager;
+            Manager.Pirates.Add(this);
         }
     }
 }
