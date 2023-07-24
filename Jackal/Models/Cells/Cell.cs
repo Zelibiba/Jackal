@@ -391,6 +391,8 @@ namespace Jackal.Models.Cells
                 {
                     if (pir is Friday friday)
                         friday.SetNewOwner(pirate.Owner, pirate.Manager);
+                    else if (pir is Missioner)
+                        continue;
                     else
                         pirates.Add(pir);
                 }

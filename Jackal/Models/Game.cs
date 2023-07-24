@@ -20,6 +20,8 @@ namespace Jackal.Models
     /// </summary>
     public static class Game
     {
+        public static bool IsGoing { get; private set; }
+
         /// <summary>
         /// Размер карты.
         /// </summary>
@@ -151,6 +153,8 @@ namespace Jackal.Models
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
         public static void CreateMap(IEnumerable<Player> players, int seed = -1, bool autosave = true)
         {
+            IsGoing = true;
+
             #region создание паттерна клеток
             List<string> pattern = new List<string>(117);
             for (int i = 0; i < 18; i++)
@@ -431,7 +435,9 @@ namespace Jackal.Models
                     Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
                     break;
             }
-            //Map[1, 6] = new GoldCell(1, 6, GoldType.Gold1);
+            //Map[1, 6] = new Cell(1, 6,"Field");
+            //Map[0, 6].AddPirate(new Missioner(Players[0], Players[0]));
+            //Map[1, 6].AddPirate(new Friday(Players[1], Players[1]));
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -1145,6 +1151,7 @@ namespace Jackal.Models
                 cell.IsPreOpened = !cell.IsPreOpened;
                 cell.ChangeGrayStatus();
             }
+            //FileHandler.ReadAutosave();
         }
 
         /// <summary>
