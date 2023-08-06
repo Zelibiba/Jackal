@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using DynamicData;
 using Jackal.Models.Cells;
 using Jackal.Models.Pirates;
 using System;
@@ -47,71 +48,77 @@ namespace Jackal.Models
             _file?.Close();
         }
 
-        static void WritePlayer(Player player) => _writer?.Write(string.Format("{0}:", player.Team).PadRight(9));
-        static string Coordinates(int[] coords) => string.Format("({0},{1})", coords[0], coords[1]);
-        static int[] Coordinates(string str)
+        static void WriteOperation(IEnumerable<int> operation)
         {
-            string[] words = str.Split(',');
-            return new int[2]
-            {
-                int.Parse(words[0][1..]),
-                int.Parse(words[1][..^1])
-            };
+            string str = "";
+            foreach (int i in operation)
+                str += i.ToString() + "  ";
+            _writer?.Write(str.PadRight(30) + "|  ");
         }
+        static void WritePlayer() => _writer?.Write(string.Format("{0}:", Game.CurrentPlayer.Team).PadRight(9));
         static int PirateIndex(Pirate pirate) => Game.CurrentPlayer.Pirates.IndexOf(pirate);
 
         public static void MovePirate(Pirate pirate, Cell targetCell)
         {
+            int index = PirateIndex(pirate);
             int gold = Convert.ToInt16(pirate.Gold);
             int galeon = Convert.ToInt16(pirate.Galeon);
-            WritePlayer(Game.CurrentPlayer);
-            _writer?.WriteLine(
-                string.Format("move pirate={0} (gold={1} galeon={2}) ", PirateIndex(pirate), gold, galeon) +
-                string.Format("from {0} {1} to {2} {3}", pirate.Cell.Image, Coordinates(pirate.Cell.Coords), targetCell.Image, Coordinates(targetCell.Coords)));
-            _writer?.Flush();
+            int[] operation = new int[] { (int)Actions.MovePirate, index, gold, galeon, targetCell.Row, targetCell.Column };
+            Operations?.Add(operation);
 
-            Operations?.Add(new int[] { (int)Actions.MovePirate, PirateIndex(pirate), gold, galeon,
-                                        targetCell.Row, targetCell.Column });
+            WriteOperation(operation);
+            WritePlayer();
+            _writer?.WriteLine(string.Format("move pirate={0} (gold={1} galeon={2}) from {3} to {4}",
+                                             index, gold, galeon, pirate.Cell.Image, targetCell.Image));
+            _writer?.Flush();
         }
         public static void MoveShip(Cell Cell)
         {
-            WritePlayer(Game.CurrentPlayer);
-            _writer?.WriteLine("move ship to " + Coordinates(Cell.Coords));
-            _writer?.Flush();
+            int[] operation = new int[] { (int)Actions.MoveShip, Cell.Row, Cell.Column };
+            Operations?.Add(operation);
 
-            Operations?.Add(new int[] { (int)Actions.MoveShip, Cell.Row, Cell.Column });
+            WriteOperation(operation);
+            WritePlayer();
+            _writer?.WriteLine(string.Format("move ship to ({0},{1})", Cell.Row, Cell.Column));
+            _writer?.Flush();
         }
         public static void EarthQuake(Cell cell)
         {
-            WritePlayer(Game.CurrentPlayer);
-            _writer?.WriteLine("earthQuake " + Coordinates(cell.Coords));
-            _writer?.Flush();
+            int[] operation = new int[] { (int)Actions.CellSelection, cell.Row, cell.Column };
+            Operations?.Add(operation);
 
-            Operations?.Add(new int[] { (int)Actions.CellSelection, cell.Row, cell.Column });
+            WriteOperation(operation);
+            _writer?.WriteLine(string.Format("earthQuake ({0},{1})", cell.Row, cell.Column));
+            _writer?.Flush();
         }
         public static void LightHouse(Cell cell)
         {
-            WritePlayer(Game.CurrentPlayer);
-            _writer?.WriteLine("lightHouse " + Coordinates(cell.Coords));
-            _writer?.Flush();
+            int[] operation = new int[] { (int)Actions.CellSelection, cell.Row, cell.Column };
+            Operations?.Add(operation);
 
-            Operations?.Add(new int[] { (int)Actions.CellSelection, cell.Row, cell.Column });
+            WriteOperation(operation);
+            _writer?.WriteLine(string.Format("lighthouse ({0},{1})", cell.Row, cell.Column));
+            _writer?.Flush();
         }
         public static void DrinkRum(Pirate pirate, ResidentType residentType)
         {
-            WritePlayer(Game.CurrentPlayer);
-            _writer?.WriteLine(string.Format("drinkRum pirate={0} type={1}", PirateIndex(pirate), (int)residentType));
-            _writer?.Flush();
+            int index = PirateIndex(pirate);
+            int[] operation = new int[] { (int)Actions.DrinkRum, index, (int)residentType };
+            Operations?.Add(operation);
 
-            Operations?.Add(new int[] { (int)Actions.DrinkRum, PirateIndex(pirate), (int)residentType });
+            WriteOperation(operation);
+            _writer?.WriteLine(string.Format("drink rum pirate={0} type={1}", index, (int)residentType));
+            _writer?.Flush();
         }
         public static void GetBirth(Pirate pirate)
         {
-            WritePlayer(Game.CurrentPlayer);
-            _writer?.WriteLine("getBirth pirate=" + PirateIndex(pirate));
-            _writer?.Flush();
+            int index = PirateIndex(pirate);
+            int[] operation = new int[] { (int)Actions.DrinkRum, index };
+            Operations?.Add(operation);
 
-            Operations?.Add(new int[] { (int)Models.Actions.GetBirth, PirateIndex(pirate) });
+            WriteOperation(operation);
+            _writer?.WriteLine(string.Format("get birth pirate={0}", index));
+            _writer?.Flush();
         }
 
         public static (Player[], int, List<int[]>) ReadSave(string filename)
@@ -144,41 +151,11 @@ namespace Jackal.Models
             {
                 if(reader.EndOfStream)
                     break;
-                string line = reader.ReadLine().Trim();
+                string line = reader.ReadLine().Split('|')[0].Trim();
                 if (string.IsNullOrEmpty(line))
                     break;
-                words = line[9..].Split(' ');
-                if (words[0] == "move" && words[1].StartsWith("pirate"))
-                {
-                    int index = int.Parse(words[1].Split('=')[1]);
-                    int gold = int.Parse(words[2].Split('=')[1]);
-                    int galeon = int.Parse(words[3].Split('=')[1][..^1]);
-                    int[] coords = Coordinates(words[9]);
-                    operations.Add(new int[] { (int)Actions.MovePirate, index, gold, galeon, coords[0], coords[1] });
-                }
-                else if (words[0] == "move" && words[1] == "ship")
-                {
-                    int[] coords = Coordinates(words[3]);
-                    operations.Add(new int[] { (int)Actions.MoveShip, coords[0], coords[1] });
-                }
-                else if (words[0] == "earthQuake" || words[0] == "lightHouse")
-                {
-                    int[] coords = Coordinates(words[1]);
-                    operations.Add(new int[] { (int)Actions.CellSelection, coords[0], coords[1] });
-                }
-                else if (words[0] == "drinkRum")
-                {
-                    int index = int.Parse(words[1].Split('=')[1]);
-                    int type = int.Parse(words[2].Split('=')[1]);
-                    operations.Add(new int[] { (int)Actions.DrinkRum, index, type });
-                }
-                else if (words[0] == "getBirth")
-                {
-                    int index = int.Parse(words[1].Split('=')[1]);
-                    operations.Add(new int[] { (int)Actions.GetBirth, index });
-                }
-                else
-                    throw new Exception("Неверная строка: " + line);
+
+                operations.Add(line.Split("  ").Select(str => int.Parse(str)).ToArray());
             }
 
             reader.Close();

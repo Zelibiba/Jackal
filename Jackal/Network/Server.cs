@@ -25,8 +25,6 @@ namespace Jackal.Network
         internal static List<ClientListener> Clients;
         static int _playerIndex;
 
-        public static Task SendingSaves;
-
         public static void Start()
         {
             if (_server != null) return;

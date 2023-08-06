@@ -29,6 +29,8 @@ namespace Jackal.Network
         Task _listening;
         NetMode _lastMode;
 
+        Task _sendingSaves;
+
         internal ClientListener(TcpClient tcpClient, int index)
         {
             _client = tcpClient;
@@ -42,6 +44,7 @@ namespace Jackal.Network
             _cancellationTokenSource = new CancellationTokenSource();
 
             _listening = Task.Run(ReceiveMessages);
+            _sendingSaves = new Task(SendSaves);
         }
 
         async Task ReceiveMessages()
@@ -68,19 +71,14 @@ namespace Jackal.Network
                 {
                     _isWatcher = true;
                     _writer.Write(Game.Players.Count);
-                    foreach(Player player in Game.Players)
+                    foreach (Player player in Game.Players)
                         _writer.Write(player);
 
                     _writer.Write(Game.Map.Seed);
-
-                    _writer.Write(SaveOperator.Operations.Count);
-                    foreach (int[] operation in SaveOperator.Operations)
-                    {
-                        _writer.Write(operation.Length);
-                        foreach (int op in operation)
-                            _writer.Write(op);
-                    }
                     _writer.Flush();
+
+                    _sendingSaves.Start();
+                    _sendingSaves.Wait();
                 }
 
                 bool continueListening = true;
@@ -190,10 +188,26 @@ namespace Jackal.Network
                 if (client == this)
                     continue;
 
+                if (client._sendingSaves.Status == TaskStatus.Running)
+                    client._sendingSaves.Wait();
+
                 client._writer.Write(netMode);
                 messageFunc(client._writer);
                 client._writer.Flush();
             }
+        }
+
+        void SendSaves()
+        {
+            int[][] operations = SaveOperator.Operations.ToArray();
+            _writer.Write(operations.Length);
+            foreach (int[] operation in operations)
+            {
+                _writer.Write(operation.Length);
+                foreach (int op in operation)
+                    _writer.Write(op);
+            }
+            _writer.Flush();
         }
     }
 }
