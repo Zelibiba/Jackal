@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using System.Threading;
 
 namespace Jackal.Network
 {
@@ -19,10 +20,12 @@ namespace Jackal.Network
         public static string IP => ip.ToString();
         static Task _listening;
         public static bool IsServerHolder;
+        public static bool PreapreToGame;
 
         internal static List<ClientListener> Clients;
         static int _playerIndex;
 
+        public static Task SendingSaves;
 
         public static void Start()
         {
@@ -33,6 +36,8 @@ namespace Jackal.Network
             _server = new TcpListener(ip, 10001);
             _canselListening = false;
             IsServerHolder = true;
+            PreapreToGame = true;
+
 
 
             _listening = Task.Run(ListenAsync);

@@ -19,27 +19,33 @@ namespace Jackal.Network
 {
     public static class Client
     {
+        static string _ip;
         static TcpClient _client;
         static NetworkStream _stream;
         static BinaryReader _reader;
         static BinaryWriter _writer;
-        static CancellationTokenSource _cancellationTokenSource;
-        static WaitingRoomViewModel _viewModel;
-        static Task _listening;
-        static NetMode _lastMode;
-        static bool _netAction;
 
-        public static void Start(string ip, WaitingRoomViewModel viewModel)
+        static Task _listening;
+        static CancellationTokenSource _cancellationTokenSource;
+        static NetMode _lastMode;
+        static bool _blockAction;
+
+        public static Action<ViewModelBase> _SetContent;
+        static WaitingRoomViewModel _viewModel;
+        
+
+        public static void Start(string ip, Action<ViewModelBase> SetContent)
         {
             try
             {
-                _viewModel = viewModel;
+                _ip = ip;
                 _client = new TcpClient();
                 _client.Connect(ip, 10001);
                 _stream = _client.GetStream();
                 _reader = new BinaryReader(_stream);
                 _writer = new BinaryWriter(_stream);
                 _cancellationTokenSource = new CancellationTokenSource();
+                _SetContent = SetContent;
 
                 _listening = Task.Run(ReceiveMessages);
             }
@@ -53,10 +59,38 @@ namespace Jackal.Network
         {
             try
             {
-                RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true)));
-                int playerCount = _reader.ReadInt32();
-                for (int i = 0; i < playerCount; i++)
-                    RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
+                bool preapreToGame = _reader.ReadBoolean();
+                if (preapreToGame)
+                {
+                    _viewModel = new WaitingRoomViewModel(_ip);
+                    _SetContent(_viewModel);
+                    RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true)));
+                    int playerCount = _reader.ReadInt32();
+                    for (int i = 0; i < playerCount; i++)
+                        RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
+                }
+                else
+                {
+                    int count = _reader.ReadInt32();
+                    Player[] players = new Player[count];
+                    for (int i = 0; i < count; i++)
+                        players[i] = _reader.ReadPlayer();
+                    int seed = _reader.ReadInt32();
+
+                    count = _reader.ReadInt32();
+                    int[][] operations = new int[count][];
+                    for (int i = 0; i < count; i++)
+                    {
+                        int length = _reader.ReadInt32();
+                        operations[i] = new int[length];
+                        for (int j = 0; j < length; j++)
+                            operations[i][j] = _reader.ReadInt32();
+                    }
+
+                    _blockAction = true;
+                    _SetContent(new GameViewModel(players, seed, operations));
+                    _blockAction = false;
+                }
 
                 bool continueListening = true;
                 byte[] buffer = new byte[1];
@@ -64,7 +98,7 @@ namespace Jackal.Network
                 {
                     _ = await _stream.ReadAsync(buffer.AsMemory(0, 1), _cancellationTokenSource.Token);
                     _lastMode = _reader.ReadNetMode();
-                    _netAction = true;
+                    _blockAction = true;
                     switch (_lastMode)
                     {
                         case NetMode.Disconnect:
@@ -75,19 +109,27 @@ namespace Jackal.Network
                         case NetMode.NewPlayer:
                             RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
                             break;
+                        case NetMode.GetPlayer:
+                            RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true), 0));
+                            break;
                         case NetMode.UpdatePlayer:
                             RunInUIThread(() => _viewModel.UpdatePlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.DeletePlayer:
-                            RunInUIThread(() => _viewModel.DeletePlasyer(_reader.ReadInt32()));
+                            RunInUIThread(() => _viewModel.DeletePlayer(_reader.ReadInt32()));
                             break;
                         case NetMode.StartGame:
                             int count = _reader.ReadInt32();
-                            Team[] mixedTeams = new Team[count];
+                            Player[] players = new Player[count];
                             for (int i = 0; i < count; i++)
-                                mixedTeams[i] = _reader.ReadTeam();
-                            int mapSeed = _reader.ReadInt32();
-                            RunInUIThread(() => _viewModel.StartGame(mixedTeams, mapSeed));
+                            {
+                                Team team = _reader.ReadTeam();
+                                players[i] = _viewModel.Players.First(playerVM => playerVM.Player.Team == team).Player;
+                            }
+
+                            int seed = _reader.ReadInt32();
+                            Task.Delay(200).Wait();
+                            _SetContent(new GameViewModel(players: players, seed: seed));
                             break;
                         case NetMode.MovePirate:
                             int index = _reader.ReadInt32();
@@ -118,7 +160,7 @@ namespace Jackal.Network
                             Game.PirateBirth();
                             break;
                     }
-                    _netAction = false;
+                    _blockAction = false;
                 }
 
             }
@@ -137,19 +179,31 @@ namespace Jackal.Network
             _writer.Write(player);
             _writer.Flush();
         }
-        public static void StartGame(Team[] mixedteams, int seed)
+        public static void DeletePlayer()
+        {
+            _writer.Write(NetMode.DeletePlayer);
+            _writer.Flush();
+        }
+        public static void GetPlayer()
+        {
+            _writer.Write(NetMode.GetPlayer);
+            _writer.Flush();
+        }
+        public static void StartGame(Player[] mixedPlayers, int seed)
         {
             _writer.Write(NetMode.StartGame);
-            _writer.Write(mixedteams.Length);
-            foreach (Team team in mixedteams)
-                _writer.Write(team);
+            _writer.Write(mixedPlayers.Length);
+            foreach (Player player in mixedPlayers)
+                _writer.Write(player.Team);
             _writer.Write(seed);
             _writer.Flush();
+
+            Dispatcher.UIThread.InvokeAsync(() => _SetContent(new GameViewModel(players: mixedPlayers, seed: seed)));
         }
 
         public static void MovePirate(Pirate pirate, Cell targetCell)
         {
-            if (_client == null || !_client.Connected || _netAction)
+            if (_client == null || !_client.Connected || _blockAction)
                 return;
 
             _writer.Write(NetMode.MovePirate);
@@ -161,7 +215,7 @@ namespace Jackal.Network
         }
         public static void SelectCell(NetMode netMode, Cell cell)
         {
-            if (_client == null || !_client.Connected || _netAction)
+            if (_client == null || !_client.Connected || _blockAction)
                 return;
 
             _writer.Write(netMode);
@@ -170,7 +224,7 @@ namespace Jackal.Network
         }
         public static void DrinkRum(Pirate pirate, ResidentType type)
         {
-            if (_client == null || !_client.Connected || _netAction)
+            if (_client == null || !_client.Connected || _blockAction)
                 return;
 
             _writer.Write(NetMode.DrinkRum);
@@ -180,7 +234,7 @@ namespace Jackal.Network
         }
         public static void PirateBirth(Pirate pirate)
         {
-            if (_client == null || !_client.Connected || _netAction)
+            if (_client == null || !_client.Connected || _blockAction)
                 return;
 
             _writer.Write(NetMode.PirateBirth);

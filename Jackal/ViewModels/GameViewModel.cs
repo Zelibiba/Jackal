@@ -27,7 +27,7 @@ namespace Jackal.ViewModels
         //static bool _falshStart = true;
 
 
-        public GameViewModel(string? filename = null, IEnumerable<Player>? players = null, int seed = -1, bool isEnabled = true)
+        public GameViewModel(IEnumerable<Player>? players, int seed, IEnumerable<int[]>? operations = null)
         {
             Activator = new ViewModelActivator();
             this.WhenActivated(disposable =>
@@ -36,24 +36,34 @@ namespace Jackal.ViewModels
                 _disPlayers.DisposeWith(disposable);
             });
 
-            //if (_falshStart)
-            //{
-            //    _falshStart = false;
-            //    return;
-            //}
-
-            if (filename == null)
+            Game.CreateMap(players, seed, autosave: operations == null);
+            foreach (int[] operation in operations ?? new List<int[]>())
             {
-                if (players != null)
-                    Game.CreateMap(players, seed);
-                else
-                    Game.CreateMap(new Player[]{new Player(0, "TEST", Team.White, true),
-                                                new Player(1, "DD", Team.Black, true),
-                                                new Player(2, "AETHNAETRN", Team.Red, true),
-                                                new Player(3, "djk", Team.Yellow, true) });
+                switch ((Actions)operation[0])
+                {
+                    case Actions.MovePirate:
+                        int index = operation[1];
+                        bool gold = operation[2] == 1;
+                        bool galeon = operation[3] == 1;
+                        int[] coords = operation[4..];
+                        Game.SelectPirate(index, gold, galeon, coords);
+                        Game.SelectCell(coords); break;
+                    case Actions.MoveShip:
+                        Game.SelectCell(Game.CurrentPlayer.ManagedShip);
+                        Game.SelectCell(operation[1..]); break;
+                    case Actions.CellSelection:
+                        Game.SelectCell(operation[1..]); break;
+                    case Actions.DrinkRum:
+                        index = operation[1];
+                        ResidentType type = (ResidentType)operation[2];
+                        Game.SelectPirate(index);
+                        Game.GetDrunk(type); break;
+                    case Actions.GetBirth:
+                        index = operation[1];
+                        Game.SelectPirate(index);
+                        Game.PirateBirth(); break;
+                }
             }
-            else
-                FileHandler.ReadSave(filename);
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
             Game.SetWinner = (player) => Views.MessageBox.Show("Ура победителю: " + player.Name + "!");
@@ -70,7 +80,7 @@ namespace Jackal.ViewModels
                 .ToPropertyEx(this, vm => vm.IsPirateSelected);
 
             HiddenGold = Game.HiddenGold;
-            IsEnabled = isEnabled;
+            IsEnabled = players.First().IsControllable;
         }
 
         [Reactive] public bool IsEnabled { get; set; }

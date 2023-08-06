@@ -46,6 +46,10 @@ namespace Jackal.Models
 
             //Alliance = team;
 
+            this.WhenAnyValue(player => player.IsReady)
+                .Select(_ => IsControllable && !IsReady)
+                .ToPropertyEx(this, p => p.CanChangeWatcher);
+
             Pirates = new ObservableCollection<Pirate>();
             Pirates.ToObservableChangeSet()
                    .ToCollection()
@@ -88,6 +92,14 @@ namespace Jackal.Models
         /// Флаг того, что игрок готов к запуску игры.
         /// </summary>
         [Reactive] public bool IsReady { get; set; }
+        /// <summary>
+        /// Флаг того, что игрок может сменить статус Наблюдателя (<see cref="IsWatcher"/>).
+        /// </summary>
+        [ObservableAsProperty] public bool CanChangeWatcher { get; }
+        /// <summary>
+        /// Флаг того, что игрок является Наблюдателем.
+        /// </summary>
+        //public bool IsWatcher { get; set; }
         /// <summary>
         /// Метод копирует основные параметры игрока.
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Jackal.Models;
 using Jackal.Network;
 using Jackal.Views;
 using ReactiveUI.Fody.Helpers;
@@ -18,19 +19,22 @@ namespace Jackal.ViewModels
             //Content = new GameViewModel();
         }
 
-        [Reactive] public ViewModelBase Content { get; set; }
+        [Reactive] public ViewModelBase Content { get; private set; }
+        ViewModelBase GetContent() => Content;
+        void SetContent(ViewModelBase viewModel) => Content = viewModel;
 
         public void CreateServer(object param)
         {
-            Content = new WaitingRoomViewModel(SetContent);
+            Server.Start();
+            Client.Start(Server.IP, SetContent);
         }
         public async Task ConnectToServer(object param)
         {
-            IPWindow dialog = new IPWindow();
-            string ip = await dialog.ShowDialog<string>(param as Window);
-            if (!string.IsNullOrEmpty(ip))
-                Content = new WaitingRoomViewModel(SetContent, ip: ip);
-            //Content = new WaitingRoomViewModel(SetContent, ip: Server.IP);
+            //IPWindow dialog = new IPWindow();
+            //string ip = await dialog.ShowDialog<string>(param as Window);
+            //if (!string.IsNullOrEmpty(ip))
+            //    Content = new WaitingRoomViewModel(SetContent, ip: ip);
+            Client.Start(Server.IP, SetContent);
         }
         public async void LoadGame(object param)
         {
@@ -42,7 +46,8 @@ namespace Jackal.ViewModels
             if (result?[0] == null)
                 return;
 
-            Content = new GameViewModel(result[0]);
+            (Player[], int, List<int[]>) data = SaveOperator.ReadSave(result[0]);
+            Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
         public void Cansel()
         {
@@ -51,11 +56,6 @@ namespace Jackal.ViewModels
                 Server.Stop();
             else
                 Client.Stop();
-        }
-
-        void SetContent(ViewModelBase viewModel)
-        {
-            Content = viewModel;
         }
     }
 }

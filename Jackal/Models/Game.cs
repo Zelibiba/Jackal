@@ -20,8 +20,6 @@ namespace Jackal.Models
     /// </summary>
     public static class Game
     {
-        public static bool IsGoing { get; private set; }
-
         /// <summary>
         /// Размер карты.
         /// </summary>
@@ -151,10 +149,8 @@ namespace Jackal.Models
         /// <param name="players">Упорядоченный список игроков.</param>
         /// <param name="seed">Сид для генерации карты.</param>
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
-        public static void CreateMap(IEnumerable<Player> players, int seed = -1, bool autosave = true)
+        public static void CreateMap(IEnumerable<Player> players, int seed, bool autosave = true)
         {
-            IsGoing = true;
-
             #region создание паттерна клеток
             List<string> pattern = new List<string>(117);
             for (int i = 0; i < 18; i++)
@@ -234,7 +230,7 @@ namespace Jackal.Models
             #endregion
 
             #region создание моря и регионов кораблей
-            Map = new ObservableMap(MapSize);
+            Map = new ObservableMap(MapSize, seed);
             for (int i = 0; i < MapSize; i++)
             {
                 for (int j = 0; j < MapSize; j++)
@@ -256,13 +252,7 @@ namespace Jackal.Models
             #endregion
 
             #region создание карты
-            Random rand;
-            if (seed == -1)
-            {
-                rand = new Random();
-                seed = rand.Next();
-            }
-            rand = new Random(seed);
+            Random rand = new(seed);
 
             List<CaveCell> caveCells = new(4);
             for (int i = 1; i < MapSize - 1; i++)
@@ -426,8 +416,8 @@ namespace Jackal.Models
                 case 2:
                     Map[12, 6] = new ShipCell(12, 6, Players[1], ShipRegions[2]); break;
                 case 3:
-                    Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
-                    Map[6, 0] = new ShipCell(6, 0, Players[2], ShipRegions[3]);
+                    Map[8, 12] = new ShipCell(8, 12, Players[1], ShipRegions[1]);
+                    Map[8, 0] = new ShipCell(8, 0, Players[2], ShipRegions[3]);
                     break;
                 case 4:
                     Map[6, 12] = new ShipCell(6, 12, Players[1], ShipRegions[1]);
@@ -443,7 +433,7 @@ namespace Jackal.Models
                 cell.SetSelectableCoords(Map);
 
             if (autosave)
-                FileHandler.StartAutosave(Players, seed);
+                SaveOperator.StartAutosave(Players, seed);
 
             CurrentPlayerNumber = Players.Count - 1;
             NextPlayer();
@@ -560,7 +550,7 @@ namespace Jackal.Models
         /// <summary>
         /// <inheritdoc cref="SelectCell(Cell)" path="/summary"/>
         /// </summary>
-        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/> и <see cref="Client"/>.</remarks>
+        /// <remarks>Необходима для <see cref="SaveOperator.ReadSave(string)"/> и <see cref="Client"/>.</remarks>
         /// <param name="coordinates">Координаты выбранной ячейки.</param>
         public static void SelectCell(int[] coordinates) => SelectCell(Map[coordinates]);
         /// <summary>
@@ -580,7 +570,7 @@ namespace Jackal.Models
         /// <param name="cell">Выбираемая клетка.</param>
         static void SelectEarthQuakeCell(Cell cell)
         {
-            FileHandler.EarthQuake(cell);
+            SaveOperator.EarthQuake(cell);
             Client.SelectCell(NetMode.EathQuake, cell);
 
             if (earthQuake.SelectedCell == null)
@@ -603,7 +593,7 @@ namespace Jackal.Models
         /// <param name="cell">Выбираемая клетка.</param>
         static void SelectLightHouseCell(Cell cell)
         {
-            FileHandler.LightHouse(cell);
+            SaveOperator.LightHouse(cell);
             Client.SelectCell(NetMode.LightHouse, cell);
 
             if (lightHouse.SelectedCells.Count < lightHouse.SelectedCells.Capacity)
@@ -681,7 +671,7 @@ namespace Jackal.Models
         /// <summary>
         /// Метод тихой выборки пирата без обработки интерфейса и достижимых координат.
         /// </summary>
-        /// <remarks>Необходима для <see cref="FileHandler.ReadSave(string)"/> и <see cref="Client"/>.</remarks>
+        /// <remarks>Необходима для <see cref="SaveOperator.ReadSave(string)"/> и <see cref="Client"/>.</remarks>
         /// <param name="pirateIndex">Индекс пирата в списке пиратов у игрока.</param>
         /// <param name="gold">Флаг того, что пират понесёт золото.</param>
         /// <param name="galeon">Флаг того, что пират понесёт Галеон.</param>
@@ -782,7 +772,7 @@ namespace Jackal.Models
         static void StartMovePirate(Cell cell)
         {
             LogWriter.MovePirate(SelectedPirate, cell);
-            FileHandler.MovePirate(SelectedPirate, cell);
+            SaveOperator.MovePirate(SelectedPirate, cell);
             Client.MovePirate(SelectedPirate, cell);
 
             SelectedPirate.TargetCell = cell;
@@ -890,7 +880,7 @@ namespace Jackal.Models
         static void MoveShip(Cell cell)
         {
             LogWriter.MoveShip(cell);
-            FileHandler.MoveShip(cell);
+            SaveOperator.MoveShip(cell);
             Client.SelectCell(NetMode.MoveShip, cell);
 
             // Подобрать или убить пиратов в море
@@ -1040,7 +1030,7 @@ namespace Jackal.Models
         public static void GetDrunk(ResidentType type)
         {
             LogWriter.DrinkRum(type);
-            FileHandler.DrinkRum(SelectedPirate, type);
+            SaveOperator.DrinkRum(SelectedPirate, type);
             Client.DrinkRum(SelectedPirate, type);
 
             switch(type)
@@ -1129,7 +1119,7 @@ namespace Jackal.Models
                 EnableInterface?.Invoke(false);
 
             LogWriter.GetBirth();
-            FileHandler.GetBirth(SelectedPirate);
+            SaveOperator.GetBirth(SelectedPirate);
             Client.PirateBirth(SelectedPirate);
 
             SelectedPirate.GiveBirth();
@@ -1158,5 +1148,8 @@ namespace Jackal.Models
         /// Делегат для написания лога о ходе.
         /// </summary>
         public static Action<string>? WriteLog;
+
+
+
     }
 }

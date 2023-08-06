@@ -9,12 +9,18 @@ using System.IO;
 using Jackal.Models;
 using Avalonia.Threading;
 using System.Threading;
+using System.Buffers;
 
 namespace Jackal.Network
 {
     internal class ClientListener
     {
-        internal readonly Player _player;
+        readonly Player _player;
+        /// <summary>
+        /// Флаг того, что связанный игрок является Наблюдателем.
+        /// </summary>
+        bool _isWatcher;
+
         readonly TcpClient _client;
         readonly NetworkStream _stream;
         readonly BinaryReader _reader;
@@ -42,24 +48,46 @@ namespace Jackal.Network
         {
             try
             {
-                _writer.Write(_player);
-                _writer.Write(Server.Clients.Count - 1);
-                foreach (ClientListener client in Server.Clients)
+                _writer.Write(Server.PreapreToGame);
+                if (Server.PreapreToGame)
                 {
-                    if (client == this)
-                        continue;
-                    _writer.Write(client._player);
-                }
-                _writer.Flush();
+                    _writer.Write(_player);
+                    _writer.Write(Server.Clients.Count - 1);
+                    foreach (ClientListener client in Server.Clients)
+                    {
+                        if (client == this)
+                            continue;
+                        _writer.Write(client._player);
+                    }
+                    _writer.Flush();
 
-                SendToOther(NetMode.NewPlayer, writer => 
-                            writer.Write(_player));
+                    SendToOther(NetMode.NewPlayer, writer =>
+                                writer.Write(_player));
+                }
+                else
+                {
+                    _isWatcher = true;
+                    _writer.Write(Game.Players.Count);
+                    foreach(Player player in Game.Players)
+                        _writer.Write(player);
+
+                    _writer.Write(Game.Map.Seed);
+
+                    _writer.Write(SaveOperator.Operations.Count);
+                    foreach (int[] operation in SaveOperator.Operations)
+                    {
+                        _writer.Write(operation.Length);
+                        foreach (int op in operation)
+                            _writer.Write(op);
+                    }
+                    _writer.Flush();
+                }
 
                 bool continueListening = true;
                 byte[] buffer = new byte[1];
                 while (continueListening)
                 {
-                    _ = await _stream.ReadAsync(buffer, 0, 1, _cancellationTokenSource.Token);
+                    _ = await _stream.ReadAsync(buffer.AsMemory(0, 1), _cancellationTokenSource.Token);
                     _lastMode = _reader.ReadNetMode();
                     switch (_lastMode)
                     {
@@ -67,13 +95,27 @@ namespace Jackal.Network
                             await Task.Delay(500);
                             Server.Clients.Remove(this);
                             continueListening = false;
-                            SendToOther(NetMode.DeletePlayer, writer =>
-                                        writer.Write(_player.Index)); break;
+                            if (!_isWatcher)
+                                SendToOther(NetMode.DeletePlayer, writer =>
+                                            writer.Write(_player.Index)); break;
+                        case NetMode.GetPlayer:
+                            _isWatcher = false;
+                            _writer.Write(NetMode.GetPlayer);
+                            _writer.Write(_player);
+                            _writer.Flush();
+                            SendToOther(NetMode.NewPlayer, writer =>
+                                        writer.Write(_player)); break;
                         case NetMode.UpdatePlayer:
                             _player.Copy(_reader.ReadPlayer());
                             SendToOther(NetMode.UpdatePlayer, writer =>
                                         writer.Write(_player)); break;
+                        case NetMode.DeletePlayer:
+                            _player.IsReady = false;
+                            _isWatcher = true;
+                            SendToOther(NetMode.DeletePlayer,writer=>
+                                        writer.Write(_player.Index)); break; 
                         case NetMode.StartGame:
+                            Server.PreapreToGame = false;
                             int count = _reader.ReadInt32();
                             Team[] mixedTeams = new Team[count];
                             for (int i = 0; i < count; i++)
@@ -85,8 +127,7 @@ namespace Jackal.Network
                                 foreach (Team team in mixedTeams)
                                     writer.Write(team);
                                 writer.Write(mapSeed);
-                            });
-                            break;
+                            }); break;
                         case NetMode.MovePirate:
                             int index = _reader.ReadInt32();
                             bool gold = _reader.ReadBoolean();
@@ -98,8 +139,7 @@ namespace Jackal.Network
                                 writer.Write(gold);
                                 writer.Write(galeon);
                                 writer.Write(coords);
-                            });
-                            break;
+                            }); break;
                         case NetMode.MoveShip:
                         case NetMode.EathQuake:
                         case NetMode.LightHouse:

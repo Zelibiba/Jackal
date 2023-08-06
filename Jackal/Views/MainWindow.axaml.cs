@@ -23,7 +23,7 @@ namespace Jackal.Views
             else
                 Client.Stop();
             
-            FileHandler.Close();
+            SaveOperator.Close();
 
             Closed -= ServerStop;
         }

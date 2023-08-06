@@ -17,42 +17,52 @@ using Jackal.Network;
 using Avalonia.Threading;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Jackal.Views;
 
 namespace Jackal.ViewModels
 {
     public class WaitingRoomViewModel : ViewModelBase
     {
-        public WaitingRoomViewModel(Action<ViewModelBase> setViewModel, string? ip = null)
+        public WaitingRoomViewModel(string? ip = null)
         {
             Players = new ObservableCollection<PlayerAdderViewModel>();
+
             IObservable<bool> canStartServer = Players.ToObservableChangeSet()
                                                       .AutoRefresh(playerVM => playerVM.Player.IsReady)
                                                       .Transform(playersVM => playersVM.Player)
                                                       .ToCollection()
                                                       .Select(players => CheckPlayers(players));
+            StartGameCommand = ReactiveCommand.Create(StartGame, canStartServer);
 
-            StartServerCommand = ReactiveCommand.Create(MixPlayers, canStartServer);
+            IObservable<bool> canChangeWatcher = Players.ToObservableChangeSet()
+                                                        .AutoRefresh(playerVM => playerVM.Player.CanChangeWatcher)
+                                                        .Transform(playersVM => playersVM.Player)
+                                                        .ToCollection()
+                                                        .Select(players => players.Count > 1 && players.First().CanChangeWatcher
+                                                                           || !players.First().IsControllable);
+            ChangeWatcherCommand = ReactiveCommand.Create<bool>(ChangeWatcher, canChangeWatcher);
 
-            SetViewModel = setViewModel;
 
-            IsServerHolder = ip == null;
-            if (IsServerHolder)
-            {
-                Server.Start();
-                IP = Server.IP;
-            }
-            else
-                IP = ip;
-            Client.Start(IP, this);
+            IsServerHolder = Server.IsServerHolder;
+            IP = ip ?? Server.IP;
         }
         public ObservableCollection<PlayerAdderViewModel> Players { get; }
         public bool IsServerHolder { get; }
         public string IP { get; }
 
-        readonly Action<ViewModelBase> SetViewModel;
 
-        public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
-
+        public ReactiveCommand<Unit, Unit> StartGameCommand { get; }
+        public ReactiveCommand<bool, Unit> ChangeWatcherCommand { get; }
+        public void ChangeWatcher(bool isWatcher)
+        {
+            if (isWatcher)
+            {
+                Client.DeletePlayer();
+                Players.RemoveAt(0);
+            }
+            else
+                Client.GetPlayer();
+        }
 
         private bool CheckPlayers(IEnumerable<Player> players)
         {
@@ -68,52 +78,38 @@ namespace Jackal.ViewModels
             }
             return true;
         }
-        public void AddPlayer(Player player) => Players.Add(new PlayerAdderViewModel(player));
+        public void AddPlayer(Player player, int index = -1)
+        {
+            if (index == -1)
+                Players.Add(new PlayerAdderViewModel(player));
+            else 
+                Players.Insert(index, new PlayerAdderViewModel(player));
+        }
         public void UpdatePlayer(Player player)
         {
-            foreach (PlayerAdderViewModel playerVM in Players)
-                if (playerVM.Player.Index == player.Index)
-                {
-                    playerVM.Player.Copy(player);
-                    break;
-                }
+            Players.First(playerVM => playerVM.Player.Index == player.Index).Player.Copy(player);
         }
-        public void DeletePlasyer(int index)
+        public void DeletePlayer(int index)
         {
-            foreach (PlayerAdderViewModel playerVM in Players)
-                if (playerVM.Player.Index == index)
-                {
-                    Players.Remove(playerVM);
-                    break;
-                }
+            Players.Remove(Players.First(playerVM => playerVM.Player.Index == index));
         }
 
-        void MixPlayers()
+        void StartGame()
         {
-            Random rand = new Random();
-            List<Team> teams = Players.Select(vm => vm.Player.Team).ToList();
-            Team[] mixedTeams = new Team[teams.Count];
-            for (int i = 0; i < mixedTeams.Length; i++)
+            Random rand = new ();
+            List<Player> players = Players.Select(vm => vm.Player).ToList();
+            Player[] mixedPlayers = new Player[players.Count];
+            for (int i = 0; i < mixedPlayers.Length; i++)
             {
-                int index = teams.IndexOf(Team.White);
-                index = (index >= 0) ? index : rand.Next(teams.Count);
-                mixedTeams[i] = teams[index];
-                teams.RemoveAt(index);
+                int index = players.FindIndex(player => player.Team == Team.White);
+                if (index < 0)
+                    index = rand.Next(players.Count);
+                mixedPlayers[i] = players[index];
+                players.RemoveAt(index);
             }
             int seed = rand.Next();
 
-            Client.StartGame(mixedTeams, seed);
-            Dispatcher.UIThread.InvokeAsync(() => StartGame(mixedTeams, seed));
-        }
-        public void StartGame(Team[] mixedTeam, int mapSeed)
-        {
-            Player[] players = new Player[Players.Count];
-            for (int i = 0; i < players.Length; i++)
-                players[i] = Players.First(vm => vm.Player.Team == mixedTeam[i]).Player;
-
-            bool isEnabled = Players[0].Player.Team == players[0].Team;
-
-            SetViewModel(new GameViewModel(players: players, seed: mapSeed, isEnabled: isEnabled));
+            Client.StartGame(mixedPlayers, seed);
         }
     }
 }

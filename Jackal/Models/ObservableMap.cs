@@ -21,12 +21,14 @@ namespace Jackal.Models
         /// <inheritdoc cref="ObservableMap" path="/summary"/>
         /// </summary>
         /// <param name="mapSize">Размер квадратного массива.</param>
-        public ObservableMap(int mapSize)
+        public ObservableMap(int mapSize, int seed)
         {
             MapSize = mapSize;
+            Seed = seed;
         }
 
         public readonly int MapSize;
+        public readonly int Seed;
         public Cell this[int row, int column]
         {
             get

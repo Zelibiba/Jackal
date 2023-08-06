@@ -26,6 +26,7 @@ namespace Jackal.Models
         None,
         Disconnect,
         NewPlayer,
+        GetPlayer,
         UpdatePlayer,
         DeletePlayer,
         StartGame,
@@ -95,5 +96,17 @@ namespace Jackal.Models
         Ben,
         Friday,
         Missioner
+    }
+    /// <summary>
+    /// Перечисление операций, совершнных игроком.
+    /// </summary>
+    /// <remarks>Необходимо для <see cref="SaveOperator"/>.</remarks>
+    public enum Actions
+    {
+        MovePirate,
+        MoveShip,
+        CellSelection,
+        DrinkRum,
+        GetBirth
     }
 }
