@@ -33,7 +33,7 @@ namespace Jackal.Models
 
             _writer?.WriteLine("players: " + players.Count());
             foreach (Player player in players)
-                _writer?.WriteLine(string.Format("    {0}, {1}({2}), {3}", player.Name, (int)player.Team, player.Team, player.IntAlliance));
+                _writer?.WriteLine(string.Format("    {0}, {1}({2}), {3}", player.Name, (int)player.Team, player.Team, (int)player.AllianceIdentifier));
 
             _writer?.WriteLine();
             _writer?.WriteLine("seed: " + seed);
@@ -138,7 +138,7 @@ namespace Jackal.Models
                 players[i] = new Player(i, line.Split(',')[0],
                                         (Team)int.Parse(words[^2][..words[^2].IndexOf('(')]),
                                         isControllable: true)
-                { IntAlliance = int.Parse(words[^1]) };
+                { AllianceIdentifier = (AllianceIdentifier)int.Parse(words[^1]) };
             }
 
             reader.ReadLine();

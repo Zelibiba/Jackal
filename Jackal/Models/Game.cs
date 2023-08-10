@@ -57,6 +57,17 @@ namespace Jackal.Models
             }
         }
         static int __currentPlayerNumber;
+        /// <summary>
+        /// Список команд игроков.
+        /// </summary>
+        static readonly List<List<Player>> _ListAllies = new();
+        /// <summary>
+        /// Список команд игроков, упорядоченных по накопленному командой золоту по убыванию.
+        /// </summary>
+        /// <remarks>Целое значение Item1 является золотом, накопленным командой.</remarks>
+        static readonly IEnumerable<(int, List<Player>)> _orderedAllies = from allies in _ListAllies
+                                                                          orderby allies.Sum(player => player.Gold) descending
+                                                                          select (allies.Sum(player => player.Gold), allies);
 
         /// <summary>
         /// Пират, выбранный на текущий момент.
@@ -407,8 +418,28 @@ namespace Jackal.Models
                 cave.LinkCaves(caveCells);
             #endregion
 
+            #region инициализация игроков с командами
             foreach (Player player in players)
+            {
                 Players.Add(player);
+
+                List<Player>? allies = _ListAllies.FirstOrDefault(allies => allies[0].AllianceIdentifier == player.AllianceIdentifier &&
+                                                                            player.AllianceIdentifier != AllianceIdentifier.None);
+                if (allies == null)
+                    _ListAllies.Add(new List<Player> { player });
+                else
+                    allies.Add(player);
+            }
+
+            foreach(List<Player> allies in _ListAllies)
+            {
+                Team alliance = Team.None;
+                foreach (Player player in allies)
+                    alliance |= player.Team;
+                foreach (Player player in allies)
+                    player.SetAlliance(alliance, allies);
+            }
+            #endregion
 
             Map[0, 6] = new ShipCell(0, 6, Players[0], ShipRegions[0]);
             switch (Players.Count)
@@ -425,7 +456,8 @@ namespace Jackal.Models
                     Map[6, 0] = new ShipCell(6, 0, Players[3], ShipRegions[3]);
                     break;
             }
-            //Map[1, 6] = new Cell(1, 6,"Field");
+            //Map[1, 6] = new MazeCell(1, 6, 3);
+            //Players[1].Bottles = 1;
             //Map[0, 6].AddPirate(new Missioner(Players[0], Players[0]));
             //Map[1, 6].AddPirate(new Friday(Players[1], Players[1]));
 
@@ -481,13 +513,13 @@ namespace Jackal.Models
                     pirate.DefineDrinkingOpportynities(Map);
 
                 #region Проверка на победителя
-                if (!_hasWinner)
+                if (!_hasWinner && _ListAllies.Count > 1)
                 {
-                    Player[] orderedPlayers = Players.OrderByDescending(player => player.Gold).ToArray();
-                    if (orderedPlayers[0].Gold > orderedPlayers[1].Gold + CurrentGold + HiddenGold)
+                    (int,List<Player>)[] orderedAllies = _orderedAllies.ToArray();
+                    if (orderedAllies[0].Item1 > orderedAllies[1].Item1 + CurrentGold + HiddenGold)
                     {
                         _hasWinner = true;
-                        Dispatcher.UIThread.InvokeAsync(() => SetWinner?.Invoke(orderedPlayers[0])).Wait();
+                        Dispatcher.UIThread.InvokeAsync(() => SetWinner?.Invoke(orderedAllies[0].Item2)).Wait();
                     }
                 }
                 #endregion
@@ -501,7 +533,7 @@ namespace Jackal.Models
         /// <summary>
         /// Делегат для оповещения о назначении победителя.
         /// </summary>
-        public static Action<Player>? SetWinner;
+        public static Action<IEnumerable<Player>>? SetWinner;
         /// <summary>
         /// Флаг того, что победитель уже есть.
         /// </summary>
@@ -1024,6 +1056,16 @@ namespace Jackal.Models
         }
 
         /// <summary>
+        /// Метод уменьшает на 1 количество бутылок рома у игрока или его союзника.
+        /// </summary>
+        static void DecreaseBottles()
+        {
+            if (CurrentPlayer.Bottles > 0)
+                CurrentPlayer.Bottles--;
+            else
+                CurrentPlayer.Ally.Bottles--;
+        }
+        /// <summary>
         /// Метод спаивания какого-либо юнита.
         /// </summary>
         /// <param name="type">Тип спаиваемого юнита. Для обычного пирата равен <see cref="ResidentType.Ben"/>.</param>
@@ -1049,7 +1091,7 @@ namespace Jackal.Models
         static void GetPirateDrunk()
         {
             PirateIsDrunk = true;
-            CurrentPlayer.Bottles--;
+            DecreaseBottles();
             Deselect(false);
             SelectedPirate.IsDrunk = true;
             if (CurrentPlayer.IsControllable)
@@ -1060,7 +1102,7 @@ namespace Jackal.Models
         /// </summary>
         static void GetFridayDrunk()
         {
-            CurrentPlayer.Bottles--;
+            DecreaseBottles();
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToFriday = false;
 
@@ -1087,7 +1129,7 @@ namespace Jackal.Models
         /// </summary>
         static void GetMissionerDrunk()
         {
-            CurrentPlayer.Bottles--;
+            DecreaseBottles();
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToMissioner = false;
 

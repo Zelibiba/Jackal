@@ -19,6 +19,16 @@ namespace Jackal.Models
     }
 
     /// <summary>
+    /// Перечисление возможных команд игроков.
+    /// </summary>
+    public enum AllianceIdentifier
+    {
+        None,
+        Red,
+        Blue
+    }
+
+    /// <summary>
     /// Перечисление типов сообщений клиент-сервер.
     /// </summary>
     public enum NetMode

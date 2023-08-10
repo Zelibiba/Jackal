@@ -110,14 +110,14 @@ namespace Jackal.Network
                             RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.GetPlayer:
-                            RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true), 0));
+                            int number = _reader.ReadInt32();
+                            RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true), number));
                             break;
                         case NetMode.UpdatePlayer:
                             RunInUIThread(() => _viewModel.UpdatePlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.DeletePlayer:
-                            RunInUIThread(() => _viewModel.DeletePlayer(_reader.ReadInt32()));
-                            break;
+                            RunInUIThread(() => _viewModel.DeletePlayer(_reader.ReadInt32())); break;
                         case NetMode.StartGame:
                             int count = _reader.ReadInt32();
                             Player[] players = new Player[count];
@@ -165,7 +165,7 @@ namespace Jackal.Network
 
             }
             catch (OperationCanceledException) { }
-            catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Receive: " + ex.Message)); }
+            catch (Exception ex) { Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Receive (" + _lastMode.ToString() + "): " + ex.Message)); }
             finally { Close(); }
         }
 
@@ -173,20 +173,31 @@ namespace Jackal.Network
         {
             Dispatcher.UIThread.InvokeAsync(function).Wait();
         }
+
         public static void UpdatePlayer(Player player)
         {
             _writer.Write(NetMode.UpdatePlayer);
             _writer.Write(player);
             _writer.Flush();
         }
-        public static void DeletePlayer()
+        /// <summary>
+        /// Информирует сервер об удалении игрока.
+        /// </summary>
+        /// <param name="number">Индекс игрока в альянсе. 0 - главный игрок, 1 - дублёр.</param>
+        public static void DeletePlayer(int number)
         {
             _writer.Write(NetMode.DeletePlayer);
+            _writer.Write(number);
             _writer.Flush();
         }
-        public static void GetPlayer()
+        /// <summary>
+        /// Информирует сервер о запросе на получение игрока.
+        /// </summary>
+        /// <param name="number">Индекс игрока в альянсе. 0 - главный игрок, 1 - дублёр.</param>
+        public static void GetPlayer(int number)
         {
             _writer.Write(NetMode.GetPlayer);
+            _writer.Write(number);
             _writer.Flush();
         }
         public static void StartGame(Player[] mixedPlayers, int seed)

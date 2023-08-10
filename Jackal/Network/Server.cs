@@ -49,8 +49,8 @@ namespace Jackal.Network
                 while (!_canselListening)
                 {
                     TcpClient client = await _server.AcceptTcpClientAsync();
-                    _playerIndex++;
                     Clients.Add(new ClientListener(client, _playerIndex));
+                    _playerIndex++;
                 }
             }
             catch (SocketException) { }
@@ -58,6 +58,8 @@ namespace Jackal.Network
                                    "Server.Listen: " + ex.GetType()+'\n'+ex.Message)); }
             finally { Close(); }
         }
+
+        public static int GetPlayerIndex() => _playerIndex++;
 
         static void Close()
         {

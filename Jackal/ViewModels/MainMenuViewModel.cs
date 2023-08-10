@@ -30,11 +30,11 @@ namespace Jackal.ViewModels
         }
         public async Task ConnectToServer(object param)
         {
-            //IPWindow dialog = new IPWindow();
-            //string ip = await dialog.ShowDialog<string>(param as Window);
-            //if (!string.IsNullOrEmpty(ip))
-            //    Content = new WaitingRoomViewModel(SetContent, ip: ip);
-            Client.Start(Server.IP, SetContent);
+            IPWindow dialog = new IPWindow();
+            string ip = await dialog.ShowDialog<string>(param as Window);
+            if (!string.IsNullOrEmpty(ip))
+                Client.Start(ip, SetContent);
+            //Client.Start(Server.IP, SetContent);
         }
         public async void LoadGame(object param)
         {

@@ -32,8 +32,12 @@
 					Command="{Binding StartGameCommand}">
 				Начать игру
 			</Button>
+			<CheckBox Name="AllyBox" Content="Двойник в команде" FontSize="20"
+					  Margin="0,10" IsEnabled="{Binding !#WatcherBox.IsChecked}"
+					  Command="{Binding CreateAllyCommand}"
+					  CommandParameter="{Binding #AllyBox.IsChecked}"/>
 			<CheckBox Name="WatcherBox" Content="Зритель" FontSize="20"
-					  Margin="0,10"
+					  IsEnabled="{Binding !#AllyBox.IsChecked}"
 					  Command="{Binding ChangeWatcherCommand}"
 					  CommandParameter="{Binding #WatcherBox.IsChecked}"/>
 		</WrapPanel>

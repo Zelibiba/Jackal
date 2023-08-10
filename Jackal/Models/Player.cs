@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using DynamicData.Binding;
 using DynamicData.Aggregation;
 using System.Reactive.Linq;
+using System.Drawing.Printing;
 
 namespace Jackal.Models
 {
@@ -24,7 +25,7 @@ namespace Jackal.Models
     public class Player : ReactiveObject
     {
         /// <summary>
-        /// Заглушка игрока для корректной работы <see cref="Pirate.Empty"/>
+        /// Заглушка игрока для корректной работы <see cref="Pirate.Empty"/> и <see cref="Player.Ally"/>.
         /// </summary>
         public Player() { }
 
@@ -40,11 +41,8 @@ namespace Jackal.Models
         {
             Index = index;
             Name = name;
-            IntAlliance = index;
             Team = team;
             IsControllable = isControllable;
-
-            //Alliance = team;
 
             this.WhenAnyValue(player => player.IsReady)
                 .Select(_ => IsControllable && !IsReady)
@@ -53,9 +51,7 @@ namespace Jackal.Models
             Pirates = new ObservableCollection<Pirate>();
             Pirates.ToObservableChangeSet()
                    .ToCollection()
-                   .Select(pirates =>
-                   { bool b= pirates.Count(pirate => pirate.IsFighter) >= 3;
-                       return b; })
+                   .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
                    .ToPropertyEx(this, p => p.IsEnoughtPirates);
         }
 
@@ -80,13 +76,23 @@ namespace Jackal.Models
         /// </summary>
         [Reactive] public Team Team { get; set; }
         /// <summary>
-        /// Номер альянса игрока.
+        /// Цвет альянса игрока.
         /// </summary>
-        [Reactive] public int IntAlliance { get; set; }
+        [Reactive] public AllianceIdentifier AllianceIdentifier { get; set; }
         /// <summary>
         /// Объединение команд альянса игрока.
         /// </summary>
-        public Team Alliance => Team;
+        public Team Alliance { get; private set; }
+        /// <summary>
+        /// Метод задаёт альянс для игрока.
+        /// </summary>
+        /// <param name="alliance">Задаваемый альянс.</param>
+        /// <param name="Allies">Список игроков в альянсе.</param>
+        public void SetAlliance(Team alliance, IEnumerable<Player> Allies) 
+        {
+            Alliance = alliance;
+            Ally = Allies.FirstOrDefault(player => player != this) ?? new Player();
+        }
 
         /// <summary>
         /// Флаг того, что игрок готов к запуску игры.
@@ -97,18 +103,14 @@ namespace Jackal.Models
         /// </summary>
         [ObservableAsProperty] public bool CanChangeWatcher { get; }
         /// <summary>
-        /// Флаг того, что игрок является Наблюдателем.
-        /// </summary>
-        //public bool IsWatcher { get; set; }
-        /// <summary>
         /// Метод копирует основные параметры игрока.
         /// </summary>
         /// <param name="player">игрок, с котого копируют.</param>
         public void Copy(Player player)
         {
             Name = player.Name;
-            IntAlliance = player.IntAlliance;
-            //Alliance = player.Alliance;
+            AllianceIdentifier = player.AllianceIdentifier;
+            Alliance = player.Alliance;
             Team = player.Team;
             IsReady = player.IsReady;
         }
@@ -156,6 +158,11 @@ namespace Jackal.Models
         /// Количество бутылок с ромом у игрока.
         /// </summary>
         [Reactive] public int Bottles { get; set; }
+        /// <summary>
+        /// Союзник в альянсе.
+        /// </summary>
+        /// <remarks>Необходим для совместного пользования ромом. Если союзника нет, то стоит заглушка <see cref="Player.Player"/></remarks>
+        public Player Ally { get; private set; }
         
         /// <summary>
         /// Флаг того, что с этого игрока начался ход конопли.

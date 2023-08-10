@@ -42,6 +42,13 @@ namespace Jackal.ViewModels
                                                                            || !players.First().IsControllable);
             ChangeWatcherCommand = ReactiveCommand.Create<bool>(ChangeWatcher, canChangeWatcher);
 
+            IObservable<bool> canCreateAlly = Players.ToObservableChangeSet()
+                                                     .AutoRefresh(playerVM => playerVM.Player.CanChangeWatcher)
+                                                     .Transform(playersVM => playersVM.Player)
+                                                     .ToCollection()
+                                                     .Select(players => players.First().IsControllable && !players.First().IsReady);
+            CreateAllyCommand = ReactiveCommand.Create<bool>(CreateAlly, canCreateAlly);
+
 
             IsServerHolder = Server.IsServerHolder;
             IP = ip ?? Server.IP;
@@ -52,16 +59,63 @@ namespace Jackal.ViewModels
 
 
         public ReactiveCommand<Unit, Unit> StartGameCommand { get; }
+        void StartGame()
+        {
+            Random rand = new();
+            List<Player> players = Players.Select(vm => vm.Player).ToList();
+            Player[] mixedPlayers = new Player[players.Count];
+            int I = 0;
+            if (players.Count == 4)
+            {
+                mixedPlayers[0] = players.Find(player => player.Team == Team.White);
+                players.Remove(mixedPlayers[0]);
+                I = 1;
+                if (mixedPlayers[0].AllianceIdentifier != AllianceIdentifier.None)
+                {
+                    int index = rand.Next(players.Count);
+                    while (players[index].AllianceIdentifier == mixedPlayers[0].AllianceIdentifier)
+                        index = rand.Next(players.Count);
+                    mixedPlayers[1] = players[index];
+                    players.RemoveAt(index);
+                    mixedPlayers[2] = players.Find(player => player.AllianceIdentifier == mixedPlayers[0].AllianceIdentifier);
+                    players.Remove(mixedPlayers[2]);
+                    mixedPlayers[3] = players[0];
+                    I = 4;
+                }
+            }
+            for (; I < mixedPlayers.Length; I++)
+            {
+                int index = players.FindIndex(player => player.Team == Team.White);
+                if (index < 0)
+                    index = rand.Next(players.Count);
+                mixedPlayers[I] = players[index];
+                players.RemoveAt(index);
+            }
+            int seed = rand.Next();
+
+            Client.StartGame(mixedPlayers, seed);
+        }
         public ReactiveCommand<bool, Unit> ChangeWatcherCommand { get; }
-        public void ChangeWatcher(bool isWatcher)
+        void ChangeWatcher(bool isWatcher)
         {
             if (isWatcher)
             {
-                Client.DeletePlayer();
+                Client.DeletePlayer(0);
                 Players.RemoveAt(0);
             }
             else
-                Client.GetPlayer();
+                Client.GetPlayer(0);
+        }
+        public ReactiveCommand<bool,Unit> CreateAllyCommand { get; }
+        void CreateAlly(bool create)
+        {
+            if (create)
+                Client.GetPlayer(1);
+            else
+            {
+                Client.DeletePlayer(1);
+                Players.RemoveAt(1);
+            }
         }
 
         private bool CheckPlayers(IEnumerable<Player> players)
@@ -83,7 +137,7 @@ namespace Jackal.ViewModels
             if (index == -1)
                 Players.Add(new PlayerAdderViewModel(player));
             else 
-                Players.Insert(index, new PlayerAdderViewModel(player));
+                Players.Insert(index, new PlayerAdderViewModel(player, index != 0));
         }
         public void UpdatePlayer(Player player)
         {
@@ -92,24 +146,6 @@ namespace Jackal.ViewModels
         public void DeletePlayer(int index)
         {
             Players.Remove(Players.First(playerVM => playerVM.Player.Index == index));
-        }
-
-        void StartGame()
-        {
-            Random rand = new ();
-            List<Player> players = Players.Select(vm => vm.Player).ToList();
-            Player[] mixedPlayers = new Player[players.Count];
-            for (int i = 0; i < mixedPlayers.Length; i++)
-            {
-                int index = players.FindIndex(player => player.Team == Team.White);
-                if (index < 0)
-                    index = rand.Next(players.Count);
-                mixedPlayers[i] = players[index];
-                players.RemoveAt(index);
-            }
-            int seed = rand.Next();
-
-            Client.StartGame(mixedPlayers, seed);
         }
     }
 }

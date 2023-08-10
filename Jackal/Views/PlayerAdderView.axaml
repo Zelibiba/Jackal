@@ -9,8 +9,9 @@
 	<UserControl.Resources>
 		<converters:TeamConverter x:Key="TeamConverter"/>
 		<converters:IsReadyConverter x:Key="IsReadyConverter"/>
+		<converters:AllianceIdentifierConverter x:Key="AllianceConverter"/>
 	</UserControl.Resources>
-	<Border BorderBrush="Black" BorderThickness="1" Background="Lavender">
+	<Border BorderBrush="Black" BorderThickness="1" Background="{Binding Player.AllianceIdentifier, Converter={StaticResource AllianceConverter}}">
 		<Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,5">
 			<Button Grid.Column="0" Height="40" Width="40" Margin="5,0"
 					Command="{Binding ChangeTeam}"  IsEnabled="{Binding !Player.IsReady}">
@@ -21,13 +22,9 @@
 					</ControlTemplate>
 				</Button.Template>
 			</Button>
-			<Grid Grid.Column="1" RowDefinitions="Auto,*" Height="40" Width="40">
-				<TextBlock Grid.Row="0" HorizontalAlignment="Center"
-						   Text="Альянс" FontSize="10"/>
-				<Button Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center"
-						IsEnabled="{Binding !Player.IsReady}"
-						Content="{Binding Player.IntAlliance}" Command="{Binding ChangeAlliance}"/>
-			</Grid>
+			<Button Grid.Column="1" VerticalAlignment="Stretch"
+					IsEnabled="{Binding !Player.IsReady}" Command="{Binding ChangeAlliance}"
+					Content="АЛЬЯНС" FontSize="10" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
 			<TextBox Grid.Column="2" FontSize="20" Margin="5,0"
 					 Text="{Binding Player.Name}" MaxLength="40" IsEnabled="{Binding !Player.IsReady}"/>
 			<ToggleButton Grid.Column="3" Height="30" Width="30" VerticalContentAlignment="Center" Margin="5,0"
@@ -35,7 +32,16 @@
 				<ToggleButton.Template>
 					<ControlTemplate TargetType="ToggleButton">
 						<Border BorderBrush="Black" BorderThickness="2"
-								Background="{Binding Player.IsReady, Converter={StaticResource IsReadyConverter}}">
+								Classes="NotReady"
+								Classes.Ready="{Binding Player.IsReady}">
+							<Border.Styles>
+								<Style Selector="Border.NotReady">
+									<Setter Property="Background" Value="Red"/>
+								</Style>
+								<Style Selector="Border.Ready">
+									<Setter Property="Background" Value="Green"/>
+								</Style>
+							</Border.Styles>
 							<TextBlock Text="OK" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 						</Border>
 					</ControlTemplate>

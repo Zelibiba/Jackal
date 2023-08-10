@@ -108,8 +108,8 @@ namespace Jackal.Models.Pirates
                         _loopDict.Clear();
                 });
 
-            this.WhenAnyValue(p => p.Cell, p => p.Manager.Bottles, p => p.Manager.IsRumBlocked, p => p.IsDrunk,
-                (cell, bottles, isRumBlocked, isDrunk) => cell is ITrapCell && bottles > 0 && !isRumBlocked && !isDrunk)
+            this.WhenAnyValue(p => p.Cell, p => p.Manager.Bottles, p => p.Manager.Ally.Bottles, p => p.Manager.IsRumBlocked, p => p.IsDrunk,
+                (cell, bottles, altBottles, isRumBlocked, isDrunk) => cell is ITrapCell && (bottles > 0 || altBottles > 0) && !isRumBlocked && !isDrunk)
                 .ToPropertyEx(this, p => p.CanDrinkRum);
 
             _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)
@@ -272,7 +272,7 @@ namespace Jackal.Models.Pirates
             CanGiveRumToFriday = false;
             CanGiveRumToMissioner = false;
 
-            if (this is Friday || this is Missioner || Manager.Bottles == 0 || Manager.IsRumBlocked)
+            if (this is Friday || this is Missioner || Manager.Bottles == 0 && Manager.Ally.Bottles == 0 || Manager.IsRumBlocked)
                 return;
 
             if (Cell is not JungleCell)

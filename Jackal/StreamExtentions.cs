@@ -14,9 +14,17 @@ namespace Jackal
         {
             return (Team)reader.ReadInt32();
         }
+        public static AllianceIdentifier ReadAllianceIdentifier(this BinaryReader reader)
+        {
+            return (AllianceIdentifier)reader.ReadInt32();
+        }
         public static void Write(this BinaryWriter writer, Team team)
         {
             writer.Write((int)team);
+        }
+        public static void Write(this BinaryWriter writer, AllianceIdentifier allianceIdentifier)
+        {
+            writer.Write((int)allianceIdentifier);
         }
 
 
@@ -27,7 +35,7 @@ namespace Jackal
                               team: reader.ReadTeam(),
                               isControllable)
             {
-                IntAlliance = reader.ReadInt32(),
+                AllianceIdentifier = reader.ReadAllianceIdentifier(),
                 IsReady = reader.ReadBoolean(),
                 Gold = reader.ReadInt32(),
                 Bottles = reader.ReadInt32()
@@ -38,7 +46,7 @@ namespace Jackal
             writer.Write(player.Index);
             writer.Write(player.Name);
             writer.Write(player.Team);
-            writer.Write(player.IntAlliance);
+            writer.Write(player.AllianceIdentifier);
             writer.Write(player.IsReady);
             writer.Write(player.Gold);
             writer.Write(player.Bottles);

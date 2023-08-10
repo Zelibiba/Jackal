@@ -16,26 +16,31 @@ namespace Jackal.ViewModels
 {
     public class PlayerAdderViewModel : ViewModelBase
     {
-        public PlayerAdderViewModel(Player player)
+        public PlayerAdderViewModel(Player player, bool isAlly = false)
         {
             Player = player;
-            if (player.IsControllable)
+            _isAlly = isAlly;
+            if (IsControllable)
             {
-                this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.IntAlliance, vm => vm.Player.IsReady)
+                this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.AllianceIdentifier, vm => vm.Player.IsReady)
                     .Skip(1)
                     .Subscribe(x => Client.UpdatePlayer(Player));
             }
         }
 
         public Player Player { get; }
-        public bool IsControllable => Player.IsControllable;
+        /// <summary>
+        /// Флаг того, что игрок - дублёр.
+        /// </summary>
+        readonly bool _isAlly;
+        public bool IsControllable => Player.IsControllable && !_isAlly;
 
         public void ChangeAlliance()
         {
-            if (Player.IntAlliance == 4)
-                Player.IntAlliance = 1;
+            if (Player.AllianceIdentifier == AllianceIdentifier.None)
+                Player.AllianceIdentifier = AllianceIdentifier.Blue;
             else
-                Player.IntAlliance++;
+                Player.AllianceIdentifier--;
         }
         public void ChangeTeam()
         {

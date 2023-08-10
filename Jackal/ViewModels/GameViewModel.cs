@@ -24,7 +24,6 @@ namespace Jackal.ViewModels
         public ViewModelActivator Activator { get; }
         readonly IDisposable _disCells;
         readonly IDisposable _disPlayers;
-        //static bool _falshStart = true;
 
 
         public GameViewModel(IEnumerable<Player>? players, int seed, IEnumerable<int[]>? operations = null)
@@ -66,7 +65,9 @@ namespace Jackal.ViewModels
             }
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
-            Game.SetWinner = (player) => Views.MessageBox.Show("Ура победителю: " + player.Name + "!");
+            Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",
+                                                                              players.Count() > 1 ? "ям" : "ю",
+                                                                              string.Join('\n', players.Select(p => p.Name))));
             SelectedPirate = Pirate.Empty;
 
             _disCells = Game.Map.ToObservableChangeSet()
