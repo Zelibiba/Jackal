@@ -5,6 +5,7 @@ using Jackal.Views;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,8 +41,8 @@ namespace Jackal.ViewModels
         {
             OpenFileDialog dialog = new OpenFileDialog();
             string path = Environment.CurrentDirectory;
-            path = path[..path.LastIndexOf("Jackal\\")];
-            dialog.Directory = path + "Jackal\\saves";
+            path = path[..path.LastIndexOf("Jackal" + Path.DirectorySeparatorChar)];
+            dialog.Directory = path + "Jackal" + Path.DirectorySeparatorChar + "saves";
             string[]? result = await dialog.ShowAsync(param as Window);
             if (result?[0] == null)
                 return;

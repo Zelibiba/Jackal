@@ -10,6 +10,7 @@
 			 HorizontalAlignment="Stretch">
 	<UserControl.Resources>
 		<converters:TeamConverter x:Key="TeamConverter"/>
+		<converters:AllianceIdentifierConverter x:Key="AllianceConverter"/>
 	</UserControl.Resources>
 	<UserControl.Styles>
 		<Style Selector="TextBlock">
@@ -20,7 +21,8 @@
 		</Style>
 	</UserControl.Styles>
 	<Grid RowDefinitions="*,*" Classes.IsTurn="{Binding Turn}">
-		<WrapPanel Grid.Row="0" Margin="5">
+		<WrapPanel Grid.Row="0" Margin="5" HorizontalAlignment="Left"
+				   Background="{Binding AllianceIdentifier, Converter={StaticResource AllianceConverter}}">
 			<Rectangle Height="25" Width="25" Margin="0,0,5,0"
 					   Fill="{Binding Team, Converter={StaticResource TeamConverter}}"
 					   Stroke="Black" StrokeThickness="1"/>
