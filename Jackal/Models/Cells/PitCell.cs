@@ -26,7 +26,7 @@ namespace Jackal.Models.Cells
         public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
-            if (Pirates.Count == 1)
+            if (Pirates.Count == 1 && pirate is not Friday)
                 pirate.IsBlocked = true;
             else if (Pirates.Count > 1)
             {

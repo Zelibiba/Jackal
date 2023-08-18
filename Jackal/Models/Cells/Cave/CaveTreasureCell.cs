@@ -37,7 +37,7 @@ namespace Jackal.Models.Cells.Cave
         public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
-            pirate.SetStartCell();
+            pirate.StartMove();
             return MovementResult.Continue;
         }
     }

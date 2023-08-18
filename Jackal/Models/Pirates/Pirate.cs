@@ -92,30 +92,26 @@ namespace Jackal.Models.Pirates
 
             this.WhenAnyValue(p => p.Cell)
                 .Skip(1)
+                .Where(cell => cell is ArrowCell || cell is CrocodileCell)
                 .Subscribe(cell =>
                 {
-                    if (cell is ArrowCell || cell is CrocodileCell)
+                    if (_loopDict.ContainsKey(cell))
                     {
-                        if (_loopDict.ContainsKey(cell))
-                        {
-                            if (++_loopDict[cell] == 4)
-                                IsInLoop = true;
-                        }
-                        else
-                            _loopDict.Add(cell, 1);
+                        if (++_loopDict[cell] == 4)
+                            IsInLoop = true;
                     }
                     else
-                        _loopDict.Clear();
+                        _loopDict[cell] = 1;
                 });
 
             this.WhenAnyValue(p => p.Cell, p => p.Manager.Bottles, p => p.Manager.Ally.Bottles, p => p.Manager.IsRumBlocked, p => p.IsDrunk,
                 (cell, bottles, altBottles, isRumBlocked, isDrunk) => cell is ITrapCell && (bottles > 0 || altBottles > 0) && !isRumBlocked && !isDrunk)
                 .ToPropertyEx(this, p => p.CanDrinkRum);
 
-            _mazeNodeNumber = this.WhenAnyValue(p => p.Cell)
-                                  .Skip(1)
-                                  .Select(cell => cell.Number)
-                                  .ToProperty(this, p => p.MazeNodeNumber);
+            this.WhenAnyValue(p => p.Cell)
+                .Skip(1)
+                .Select(cell => cell.Number)
+                .ToPropertyEx(this, p => p.MazeNodeNumber);
         }
 
         /// <summary>
@@ -172,9 +168,17 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public Cell StartCell { get; protected set; }
         /// <summary>
-        /// Метод задаёт <see cref="StartCell"/>.
+        /// Метод для подготовки пирата к движению.
         /// </summary>
-        public void SetStartCell() => StartCell = Cell;
+        /// <remarks>Метод задаёт <see cref="StartCell"/>, очищает <see cref="_loopDict"/> и удаляет возможности спаивания.</remarks>
+        public void StartMove()
+        {
+            StartCell = Cell;
+            _loopDict.Clear();
+
+            CanGiveRumToFriday = false;
+            CanGiveRumToMissioner = false;
+        }
 
         /// <summary>
         /// Список координат ячеек, куда пират может пойти.
@@ -218,8 +222,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Номер уровня лабиринта, на котором находится пират.
         /// </summary>
-        public int MazeNodeNumber => _mazeNodeNumber?.Value ?? 0;
-        readonly ObservableAsPropertyHelper<int> _mazeNodeNumber;
+        [ObservableAsProperty] public int MazeNodeNumber { get; }
 
         /// <summary>
         /// Флаг того, что пират перемещает монету.
@@ -275,12 +278,8 @@ namespace Jackal.Models.Pirates
             if (this is Friday || this is Missioner || Manager.Bottles == 0 && Manager.Ally.Bottles == 0 || Manager.IsRumBlocked)
                 return;
 
-            if (Cell is not JungleCell)
-            {
-                CanGiveRumToFriday = Cell.Pirates.Any(p => p is Friday);
-                CanGiveRumToMissioner = Cell.Pirates.Any(p => p is Missioner);
-            }
-            foreach (Cell cell in map.Cells(this).Where(cell => cell is not JungleCell))
+            var cells = map.Cells(this).Concat(new Cell[] { Cell });
+            foreach (Cell cell in cells.Where(cell => cell is not JungleCell))
             {
                 CanGiveRumToFriday |= cell.Pirates.Any(p => p is Friday);
                 CanGiveRumToMissioner |= cell.Pirates.Any(p => p is Missioner);
@@ -300,7 +299,7 @@ namespace Jackal.Models.Pirates
         /// Флаг того, что пират заблокирован в яме или пещере.
         /// </summary>
         /// <remarks>Используется в интерфейсе.</remarks>
-        [Reactive] public virtual bool IsBlocked { get; set; }
+        [Reactive] public bool IsBlocked { get; set; }
         /// <summary>
         /// Счётчик ходов, которые осталось пропустить из-за бочки с ромом.
         /// </summary>

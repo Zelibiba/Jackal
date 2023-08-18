@@ -33,7 +33,7 @@ namespace Jackal.Models.Cells
             {
                 int row = Row + coords[0];
                 int column = Column + coords[1];
-                if (row < 0 || column < 0 || row >= map.MapSize || column >= map.MapSize)
+                if (map.CheckIndexes(row, column))
                     continue;
                 SelectableCoords.Add(new int[] { row, column });
             }

@@ -36,33 +36,8 @@ namespace Jackal.ViewModels
             });
 
             Game.CreateMap(players, seed, autosave: operations == null);
-            foreach (int[] operation in operations ?? new List<int[]>())
-            {
-                switch ((Actions)operation[0])
-                {
-                    case Actions.MovePirate:
-                        int index = operation[1];
-                        bool gold = operation[2] == 1;
-                        bool galeon = operation[3] == 1;
-                        int[] coords = operation[4..];
-                        Game.SelectPirate(index, gold, galeon, coords);
-                        Game.SelectCell(coords); break;
-                    case Actions.MoveShip:
-                        Game.SelectCell(Game.CurrentPlayer.ManagedShip);
-                        Game.SelectCell(operation[1..]); break;
-                    case Actions.CellSelection:
-                        Game.SelectCell(operation[1..]); break;
-                    case Actions.DrinkRum:
-                        index = operation[1];
-                        ResidentType type = (ResidentType)operation[2];
-                        Game.SelectPirate(index);
-                        Game.GetDrunk(type); break;
-                    case Actions.GetBirth:
-                        index = operation[1];
-                        Game.SelectPirate(index);
-                        Game.PirateBirth(); break;
-                }
-            }
+            Game.ReadOperations(operations ?? new List<int[]>());
+            
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
             Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",

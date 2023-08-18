@@ -33,12 +33,14 @@ namespace Jackal.Models
         {
             get
             {
-                CheckIndexes(row, column);
+                if (CheckIndexes(row, column))
+                    throw new ArgumentOutOfRangeException("Wrong indexes of map!");
                 return this[row * MapSize + column];
             }
             set
             {
-                CheckIndexes(row, column);
+                if (CheckIndexes(row, column))
+                    throw new ArgumentOutOfRangeException("Wrong indexes of map!");
                 this[row * MapSize + column] = value;
             }
         }
@@ -71,14 +73,22 @@ namespace Jackal.Models
         public IEnumerable<Cell> Cells(Pirate pirate) => pirate.SelectableCoords.Select(coords => this[coords].GetSelectedCell(pirate));
 
         /// <summary>
-        /// Метод проверяет, не вышли ли индексы за границы массива.
+        /// Метод проверяет, не вышли ли индексы за границы карты.
+        /// </summary>
+        /// <param name="row">Номер строки.</param>
+        /// <param name="column">Номер столбца.</param>
+        /// <param name="mapSize">Размер карты.</param>
+        /// <returns>False, если проверка пройдена.</returns>
+        public static bool CheckIndexes(int row, int column, int mapSize)
+        {
+            return row < 0 || column < 0 || row >= mapSize || column >= mapSize;
+        }
+        /// <summary>
+        /// <inheritdoc cref="CheckIndexes(int, int, int)" path="/summary"/>
         /// </summary>
         /// <param name="row"></param>
         /// <param name="column"></param>
-        void CheckIndexes(int row, int column)
-        {
-            if (row < 0 || column < 0 || row >= MapSize || column >= MapSize)
-                throw new ArgumentOutOfRangeException("Wrong indexes of map!");
-        }
+        /// <returns><inheritdoc cref="CheckIndexes(int, int, int)" path="/returns"/></returns>
+        public bool CheckIndexes(int row, int column) => CheckIndexes(row, column, MapSize); 
     }
 }

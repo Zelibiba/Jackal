@@ -470,6 +470,40 @@ namespace Jackal.Models
             CurrentPlayerNumber = Players.Count - 1;
             NextPlayer();
         }
+        /// <summary>
+        ///Метод совершает все ходы игры, записанные в списке операций.
+        /// </summary>
+        /// <param name="operations">Список загружаемых операций.</param>
+        public static void ReadOperations(IEnumerable<int[]> operations)
+        {
+            foreach (int[] operation in operations)
+            {
+                switch ((Actions)operation[0])
+                {
+                    case Actions.MovePirate:
+                        int index = operation[1];
+                        bool gold = operation[2] == 1;
+                        bool galeon = operation[3] == 1;
+                        int[] coords = operation[4..];
+                        SelectPirate(index, gold, galeon, coords);
+                        SelectCell(coords); break;
+                    case Actions.MoveShip:
+                        SelectCell(CurrentPlayer.ManagedShip);
+                        SelectCell(operation[1..]); break;
+                    case Actions.CellSelection:
+                        SelectCell(operation[1..]); break;
+                    case Actions.DrinkRum:
+                        index = operation[1];
+                        ResidentType type = (ResidentType)operation[2];
+                        SelectPirate(index);
+                        GetDrunk(type); break;
+                    case Actions.GetBirth:
+                        index = operation[1];
+                        SelectPirate(index);
+                        PirateBirth(); break;
+                }
+            }
+        }
 
 
 
@@ -811,7 +845,7 @@ namespace Jackal.Models
             if (!PirateInMotion)
             {
                 PirateInMotion = true;
-                SelectedPirate.SetStartCell();
+                SelectedPirate.StartMove();
                 if (PirateIsDrunk)
                     PirateIsDrunk = false;
             }

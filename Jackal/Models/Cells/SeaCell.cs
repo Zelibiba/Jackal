@@ -43,13 +43,13 @@ namespace Jackal.Models.Cells
                     if (i == 0 && j == 0)
                         continue;
 
-                    int newI = Row + i;
-                    int newJ = Column + j;
-                    if (newI < 0 || newJ < 0 || newI >= map.MapSize || newJ >= map.MapSize)
+                    int row = Row + i;
+                    int column = Column + j;
+                    if (map.CheckIndexes(row, column))
                         continue;
-                    if (map[newI, newJ] is not SeaCell && map[newI, newJ] is not ShipCell)
+                    if (map[row, column] is not SeaCell && map[row, column] is not ShipCell)
                         continue;
-                    SelectableCoords.Add(new int[] { newI, newJ });
+                    SelectableCoords.Add(new int[] { row, column });
                 }
             }
         }

@@ -41,7 +41,7 @@ namespace Jackal.Models.Cells
                 {
                     int row = Row + coords[0];
                     int column = Column + coords[1];
-                    if (row < 0 || column < 0 || row >= _mapSize || column >= _mapSize)
+                    if (ObservableMap.CheckIndexes(row, column, _mapSize))
                         continue;
                     SelectableCoords.Add(new int[] { row, column });
                 }
