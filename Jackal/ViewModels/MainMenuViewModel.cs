@@ -40,9 +40,11 @@ namespace Jackal.ViewModels
         public async void LoadGame(object param)
         {
             OpenFileDialog dialog = new OpenFileDialog();
-            string path = Environment.CurrentDirectory;
-            path = path[..path.LastIndexOf("Jackal" + Path.DirectorySeparatorChar)];
-            dialog.Directory = path + "Jackal" + Path.DirectorySeparatorChar + "saves";
+#if DEBUG
+            dialog.Directory = Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves");
+#else
+            dialog.Directory = Path.Combine(Environment.CurrentDirectory, "saves");
+#endif
             string[]? result = await dialog.ShowAsync(param as Window);
             if (result?[0] == null)
                 return;

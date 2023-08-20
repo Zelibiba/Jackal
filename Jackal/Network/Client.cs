@@ -117,7 +117,7 @@ namespace Jackal.Network
                             RunInUIThread(() => _viewModel.UpdatePlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.DeletePlayer:
-                            RunInUIThread(() => _viewModel.DeletePlayer(_reader.ReadInt32())); break;
+                            RunInUIThread(() => _viewModel?.DeletePlayer(_reader.ReadInt32())); break;
                         case NetMode.StartGame:
                             int count = _reader.ReadInt32();
                             Player[] players = new Player[count];

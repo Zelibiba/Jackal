@@ -19,11 +19,13 @@ namespace Jackal.Network
         static IPAddress ip => Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork)[1];
         public static string IP => ip.ToString();
         static Task _listening;
-        public static bool IsServerHolder;
-        public static bool PreapreToGame;
+        public static bool IsServerHolder { get; private set; }
+        public static bool PreapreToGame { get; set; }
 
         internal static List<ClientListener> Clients;
         static int _playerIndex;
+
+        static Task? _processingMessages;
 
         public static void Start()
         {
@@ -49,8 +51,7 @@ namespace Jackal.Network
                 while (!_canselListening)
                 {
                     TcpClient client = await _server.AcceptTcpClientAsync();
-                    Clients.Add(new ClientListener(client, _playerIndex));
-                    _playerIndex++;
+                    Clients.Add(new ClientListener(client, _playerIndex++));
                 }
             }
             catch (SocketException) { }
@@ -60,6 +61,17 @@ namespace Jackal.Network
         }
 
         public static int GetPlayerIndex() => _playerIndex++;
+
+        public static Task AddTask(Action action)
+        {
+            if (_processingMessages == null || _processingMessages.Status != TaskStatus.Running)
+            {
+                _processingMessages = Task.Run(action);
+                return _processingMessages;
+            }
+            else
+                return _processingMessages.ContinueWith(_ => action());
+        }
 
         static void Close()
         {
@@ -76,6 +88,7 @@ namespace Jackal.Network
                 return;
             _server?.Stop();
             _listening.Wait();
+            _processingMessages?.Wait();
             _server = null;
             Clients.Clear();
         }
