@@ -47,27 +47,16 @@ namespace Jackal.Network
                 _cancellationTokenSource = new CancellationTokenSource();
                 _SetContent = SetContent;
 
-                _listening = Task.Run(ReceiveMessages);
-            }
-            catch (Exception ex)
-            {
-                Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Start: " + ex.Message));
-                Close();
-            }
-        }
-        static async Task ReceiveMessages()
-        {
-            try
-            {
+
                 bool preapreToGame = _reader.ReadBoolean();
                 if (preapreToGame)
                 {
                     _viewModel = new WaitingRoomViewModel(_ip);
                     _SetContent(_viewModel);
-                    RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true)));
+                    _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true));
                     int playerCount = _reader.ReadInt32();
                     for (int i = 0; i < playerCount; i++)
-                        RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
+                        _viewModel.AddPlayer(_reader.ReadPlayer());
                 }
                 else
                 {
@@ -92,6 +81,18 @@ namespace Jackal.Network
                     _blockAction = false;
                 }
 
+                _listening = Task.Run(ReceiveMessages);
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.UIThread.Post(() => Views.MessageBox.Show("Client.Start: " + ex.Message));
+                Close();
+            }
+        }
+        static async Task ReceiveMessages()
+        {
+            try
+            {
                 bool continueListening = true;
                 byte[] buffer = new byte[1];
                 while (continueListening)

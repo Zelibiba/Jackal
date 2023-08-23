@@ -32,7 +32,6 @@ namespace Jackal.Network
         NetMode _lastMode;
         bool _continueListening;
 
-        //Task _sendingSaves;
 
         internal ClientListener(TcpClient tcpClient, int index)
         {
@@ -84,7 +83,6 @@ namespace Jackal.Network
                     Server.AddTask(() =>
                     {
                         int[][] operations = SaveOperator.Operations.ToArray();
-                        Task.Delay(5000).Wait();
                         _writer.Write(operations.Length);
                         foreach (int[] operation in operations)
                         {
