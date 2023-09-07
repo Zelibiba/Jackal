@@ -33,24 +33,13 @@ namespace Jackal.Models.Cells
             return result;
         }
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            for (int i = -1; i < 2; i++)
+            foreach(Coordinates coords in map.AdjacentCellsCoords(this))
             {
-                for (int j = -1; j < 2; j++)
-                {
-                    if (i == 0 && j == 0)
-                        continue;
-
-                    int row = Row + i;
-                    int column = Column + j;
-                    if (map.CheckIndexes(row, column))
-                        continue;
-                    if (map[row, column] is not SeaCell && map[row, column] is not ShipCell)
-                        continue;
-                    SelectableCoords.Add(new int[] { row, column });
-                }
+                if (map[coords] is not SeaCell && map[coords] is not ShipCell) continue;
+                SelectableCoords.Add(coords);
             }
         }
     }

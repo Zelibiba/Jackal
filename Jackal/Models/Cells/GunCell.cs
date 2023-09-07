@@ -9,18 +9,18 @@ namespace Jackal.Models.Cells
 {
     public class GunCell : Cell, IOrientableCell
     {
-        public GunCell(int row, int column, int rotation, Func<int[], MovementResult> continueMove) : base(row, column, "Gun", false)
+        public GunCell(int row, int column, int rotation, Func<Coordinates, MovementResult> continueMove) : base(row, column, "Gun", false)
         {
             _continueMove = continueMove;
-            _orientation = Orientation.Up;
-            _angle = (this as IOrientableCell).Rotate(rotation, ref _orientation);
+            Directions = new Coordinates[] { new(-1, 0) };
+            _angle = (this as IOrientableCell).Rotate(rotation);
         }
 
-        readonly Func<int[], MovementResult> _continueMove;
+        readonly Func<Coordinates, MovementResult> _continueMove;
 
+        public Coordinates[] Directions { get; }
         public override int Angle => _angle;
         readonly int _angle;
-        Orientation _orientation;
 
         public override MovementResult AddPirate(Pirate pirate)
         {
@@ -28,15 +28,13 @@ namespace Jackal.Models.Cells
             return _continueMove(SelectableCoords[0]);
         }
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            int[] coords = Coords;
-            int i_changed = (Orientation.Up | Orientation.Down).HasFlag(_orientation) ? 0 : 1;
-            int changing = (Orientation.Down | Orientation.Right).HasFlag(_orientation) ? 1 : -1;
+            Coordinates coords = Coords;
             do
-                coords[i_changed] += changing;
-            while (map[coords] is not SeaCell && map[coords] is not ShipCell);
+                coords += Directions[0];
+            while (!(map[coords] is SeaCell || map[coords] is ShipCell));
             SelectableCoords.Add(coords);
         }
     }

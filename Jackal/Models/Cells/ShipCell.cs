@@ -9,30 +9,30 @@ namespace Jackal.Models.Cells
 {
     public class ShipCell : Cell
     {
-        public ShipCell(int row, int column, Player owner, (Orientation, int[][]) shipRegion) : base(row, column, "Ship")
+        public ShipCell(ShipPlacement shipPlacement, Player owner) : base(shipPlacement.InitialCoordinates.Row, shipPlacement.InitialCoordinates.Column, "Ship")
         {
             Open();
             _owner = owner;
             Manager = owner;
             _owner.SetShip(this);
 
-            Orientation = shipRegion.Item1;
-            _shipRegion = shipRegion.Item2;
-            MovableCoords = new List<int[]>();
-
-            if (!(Orientation.Up | Orientation.Right | Orientation.Down | Orientation.Left).HasFlag(Orientation))
-                throw new ArgumentException("Wrong ship orientation!");
+            Directions = shipPlacement.Directions;
+            ShipRegion = shipPlacement.Region;
+            MovableCoords = new List<Coordinates>();
         }
 
         /// <summary>
         /// Направление выхода с корабля.
         /// </summary>
-        readonly public Orientation Orientation;
-        readonly int[][] _shipRegion;
+        readonly public Coordinates[] Directions;
         /// <summary>
-        /// Координаты, на которые корабль может переместиться.
+        /// Координаты клеток, по которым корабль может ходить в целом.
         /// </summary>
-        readonly public List<int[]> MovableCoords;
+        public readonly Coordinates[] ShipRegion;
+        /// <summary>
+        /// Координаты, на которые корабль может переместиться в данный момент.
+        /// </summary>
+        readonly public List<Coordinates> MovableCoords;
 
         public override bool IsShip => true;
         readonly Player _owner;
@@ -67,40 +67,16 @@ namespace Jackal.Models.Cells
             }
         }
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
+            foreach (Coordinates coord in map.AdjacentCellsCoords(this, Directions))
+                SelectableCoords.Add(coord);
 
-            int r = Row;
-            int c = Column;
-            switch (Orientation)
-            {
-                case Orientation.Up:
-                    r--; break;
-                case Orientation.Down:
-                    r++; break;
-                case Orientation.Left:
-                    c--; break;
-                case Orientation.Right:
-                    c++; break;
-            }
-            SelectableCoords.Add(new int[] { r, c });
-
-            int coord = -1;
-            int[] shipCoord = Coords;
-            switch (Orientation)
-            {
-                case Orientation.Up:
-                case Orientation.Down:
-                    coord = 1; break;
-                case Orientation.Right:
-                case Orientation.Left:
-                    coord = 0; break;
-            }
             MovableCoords.Clear();
-            foreach (int[] coords in _shipRegion)
+            foreach (Coordinates coords in ShipRegion)
             {
-                if (Math.Abs(coords[coord] - shipCoord[coord]) == 1)
+                if ((coords - Coords).Distance() <= 1 && coords != Coords)
                     MovableCoords.Add(coords);
             }
         }

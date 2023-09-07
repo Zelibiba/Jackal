@@ -8,6 +8,7 @@ using ReactiveUI.Fody.Helpers;
 using Jackal.Models.Cells;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Reactive;
 
 namespace Jackal.Models.Pirates
 {
@@ -171,7 +172,7 @@ namespace Jackal.Models.Pirates
         /// Метод для подготовки пирата к движению.
         /// </summary>
         /// <remarks>Метод задаёт <see cref="StartCell"/>, очищает <see cref="_loopDict"/> и удаляет возможности спаивания.</remarks>
-        public void StartMove()
+        public void PrepareToMove()
         {
             StartCell = Cell;
             _loopDict.Clear();
@@ -186,7 +187,7 @@ namespace Jackal.Models.Pirates
         /// <remarks>
         /// Имеет логику.
         /// </remarks>
-        public virtual List<int[]> SelectableCoords
+        public virtual List<Coordinates> SelectableCoords
         {
             get
             {
@@ -270,7 +271,7 @@ namespace Jackal.Models.Pirates
         /// Метод определяет параметры <see cref="CanGiveRumToFriday"/> и <see cref="CanGiveRumToMissioner"/>.
         /// </summary>
         /// <param name="map">Карта игры.</param>
-        public void DefineDrinkingOpportynities(ObservableMap map)
+        public void DefineDrinkingOpportynities(Map map)
         {
             CanGiveRumToFriday = false;
             CanGiveRumToMissioner = false;

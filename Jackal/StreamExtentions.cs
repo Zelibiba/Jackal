@@ -64,14 +64,14 @@ namespace Jackal
         }
 
 
-        public static int[] ReadCoords(this BinaryReader reader)
+        public static Coordinates ReadCoords(this BinaryReader reader)
         {
-            return new int[] { reader.ReadInt32(), reader.ReadInt32() };
+            return new Coordinates(reader.ReadInt32(), reader.ReadInt32());
         }
-        public static void Write(this BinaryWriter writer, int[] coords)
+        public static void Write(this BinaryWriter writer, Coordinates coords)
         {
-            writer.Write(coords[0]);
-            writer.Write(coords[1]);
+            writer.Write(coords.Row);
+            writer.Write(coords.Column);
         }
     }
 }

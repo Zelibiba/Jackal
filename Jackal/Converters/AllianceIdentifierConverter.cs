@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Avalonia.Media;
 using Jackal.Models;
 
-namespace Jacal.Converters
+namespace Jackal.Converters
 {
     public class AllianceIdentifierConverter : IValueConverter
     {

@@ -11,7 +11,7 @@ namespace Jackal.Models.Cells
 {
     public class CaveCell : Cell
     {
-        public CaveCell(int row, int column, Func<int[], MovementResult> continueMove) : base(row, column, "Cave")
+        public CaveCell(int row, int column, Func<Coordinates, MovementResult> continueMove) : base(row, column, "Cave")
         {
             Enter = new CaveEnterCell(this, continueMove);
             Exit = new CaveExitCell(this);
@@ -38,7 +38,7 @@ namespace Jackal.Models.Cells
             Enter.SetCoordinates(row, column);
             TreasureCell.SetCoordinates(row, column);
         }
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             base.SetSelectableCoords(map);
             Exit.SetSelectableCoords(map);

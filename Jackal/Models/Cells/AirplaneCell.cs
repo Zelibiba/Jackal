@@ -25,12 +25,11 @@ namespace Jackal.Models.Cells
             base.RemovePirate(pirate, withGold);
 
             if (pirate.TargetCell == this)
-                SelectableCoords.RemoveAll(coords => HasSameCoords(coords));
-            else if (IsActive && (Pirates.Count == 0 || Math.Abs(Row - pirate.TargetCell.Row) > 1 || Math.Abs(Column - pirate.TargetCell.Column) > 1))
+                SelectableCoords.RemoveAll(coords => coords == Coords);
+            else if (IsActive && (Pirates.Count == 0 || (pirate.TargetCell.Coords - Coords).Distance() > 1))
             {
                 IsActive = false;
-                SelectableCoords.RemoveAll(coords => Math.Abs(Row - coords[0]) > 1 || Math.Abs(Column - coords[1]) > 1 ||
-                                                     HasSameCoords(coords));
+                SelectableCoords.RemoveAll(coords => (coords - Coords).Distance() > 1 || coords == Coords);
             }
         }
         public override MovementResult AddPirate(Pirate pirate)
@@ -39,18 +38,15 @@ namespace Jackal.Models.Cells
             base.AddPirate(pirate);
             return isOpened ? MovementResult.End : MovementResult.Continue;
         }
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             if (IsActive)
             {
                 SelectableCoords.Clear();
-                for (int i = 0; i < map.MapSize; i++)
+                foreach(Cell cell in map)
                 {
-                    for (int j = 0; j < map.MapSize; j++)
-                    {
-                        if (map[i, j] is not SeaCell && map[i, j] is not ShipCell)
-                            SelectableCoords.Add(new int[2] { i, j });
-                    }
+                    if (cell is SeaCell || cell is ShipCell) continue;
+                    SelectableCoords.Add(cell.Coords);
                 }
             }
             else

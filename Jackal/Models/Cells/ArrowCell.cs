@@ -11,53 +11,82 @@ namespace Jackal.Models.Cells
 {
     public class ArrowCell : Cell, IOrientableCell
     {
-        public ArrowCell(int row, int column, ArrowType arrowType, int rotation, Func<int[], MovementResult> continueMove) : base(row, column, "Arrow" + arrowType.ToString(), false)
+        public ArrowCell(int row, int column, ArrowType arrowType, int rotation, Func<Coordinates, MovementResult> continueMove) : base(row, column, "Arrow" + arrowType.ToString(), false)
         {
             _continueMove = continueMove;
-            _orientations = new List<Orientation>();
-            switch (arrowType)
+            if (Map.Type == MapType.Quadratic)
             {
-                case ArrowType.Side1:
-                    _orientations.Add(Orientation.Up);
-                    break;
-                case ArrowType.Side2:
-                    _orientations.Add(Orientation.Up);
-                    _orientations.Add(Orientation.Down);
-                    break;
-                case ArrowType.Side4:
-                    _orientations.Add(Orientation.Up);
-                    _orientations.Add(Orientation.Right);
-                    _orientations.Add(Orientation.Down);
-                    _orientations.Add(Orientation.Left);
-                    break;
-                case ArrowType.Angle1:
-                    _orientations.Add(Orientation.RightUp);
-                    break;
-                case ArrowType.Angle2:
-                    _orientations.Add(Orientation.RightUp);
-                    _orientations.Add(Orientation.LeftDown);
-                    break;
-                case ArrowType.Angle3:
-                    _orientations.Add(Orientation.RightUp);
-                    _orientations.Add(Orientation.Down);
-                    _orientations.Add(Orientation.Left);
-                    break;
-                case ArrowType.Angle4:
-                    _orientations.Add(Orientation.RightUp);
-                    _orientations.Add(Orientation.RightDown);
-                    _orientations.Add(Orientation.LeftUp);
-                    _orientations.Add(Orientation.LeftDown);
-                    break;
+                Directions = arrowType switch
+                {
+                    ArrowType.Side1 =>  new Coordinates[] { new(-1, 0) },
+
+                    ArrowType.Side2 =>  new Coordinates[] { new(-1, 0),
+                                                            new(+1, 0) },
+
+                    ArrowType.Side4 =>  new Coordinates[] { new(-1, 0),
+                                                            new( 0,-1),
+                                                            new(+1, 0),
+                                                            new( 0,+1) },
+
+                    ArrowType.Angle1 => new Coordinates[] { new(-1,-1) },
+
+                    ArrowType.Angle2 => new Coordinates[] { new(-1,-1),
+                                                            new(+1,+1) },
+
+                    ArrowType.Angle3 => new Coordinates[] { new(-1,-1),
+                                                            new(+1, 0),
+                                                            new( 0,+ 1) },
+
+                    ArrowType.Angle4 => new Coordinates[] { new(-1,-1),
+                                                            new(+1,-1),
+                                                            new(+1,+1),
+                                                            new(-1,+1) },
+                    _ => throw new ArgumentException()
+                };
+            }
+            else
+            {
+                Directions = arrowType switch
+                {
+                    ArrowType.Hex1 =>  new Coordinates[] { new(-1, 0) },
+
+                    ArrowType.Hex2 =>  new Coordinates[] { new(-1, 0),
+                                                           new(+1, 0) },
+
+                    ArrowType.Hex3a => new Coordinates[] { new(-1, 0),
+                                                           new(+1,-1),
+                                                           new( 0,+1) },
+
+                    ArrowType.Hex3b => new Coordinates[] { new(-1, 0),
+                                                           new(+1, 0),
+                                                           new( 0,-1) },
+
+                    ArrowType.Hex3c => new Coordinates[] { new(-1, 0),
+                                                           new(+1, 0),
+                                                           new(-1,+1) },
+
+                    ArrowType.Hex4a => new Coordinates[] { new(-1, 0),
+                                                           new(+1, 0),
+                                                           new( 0,+1),
+                                                           new( 0,-1) },
+
+                    ArrowType.Hex4b => new Coordinates[] { new(-1, 0),
+                                                           new(+1, 0),
+                                                           new(-1,+1),
+                                                           new( 0,-1) },
+                    _ => throw new ArgumentException()
+                };
+
             }
 
-            _angle = (this as IOrientableCell).Rotate(rotation, ref _orientations);
+            _angle = (this as IOrientableCell).Rotate(rotation);
         }
 
-        readonly Func<int[], MovementResult> _continueMove;
+        readonly Func<Coordinates, MovementResult> _continueMove;
 
+        public Coordinates[] Directions { get; }
         public override int Angle => _angle;
         readonly int _angle;
-        readonly List<Orientation> _orientations;
 
         public override MovementResult AddPirate(Pirate pirate)
         {
@@ -72,23 +101,12 @@ namespace Jackal.Models.Cells
             else
                 return MovementResult.Continue;
         }
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            foreach (Orientation orientation in _orientations)
-            {
-                int r = Row;
-                int c = Column;
-                if (orientation.HasFlag(Orientation.Up))
-                    r--;
-                if (orientation.HasFlag(Orientation.Down))
-                    r++;
-                if (orientation.HasFlag(Orientation.Right))
-                    c++;
-                if (orientation.HasFlag(Orientation.Left))
-                    c--;
-                SelectableCoords.Add(new int[] { r, c });
-            }
+            Coordinates coords = Coords;
+            foreach (Coordinates direction in Directions)
+                SelectableCoords.Add(coords + direction);
         }
     }
 }

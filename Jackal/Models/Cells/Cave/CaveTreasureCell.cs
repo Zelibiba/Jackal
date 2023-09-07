@@ -28,7 +28,7 @@ namespace Jackal.Models.Cells.Cave
             set => Exit.Galeon = value;
         }
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
             SelectableCoords.Add(Coords);
@@ -37,7 +37,7 @@ namespace Jackal.Models.Cells.Cave
         public override MovementResult AddPirate(Pirate pirate)
         {
             base.AddPirate(pirate);
-            pirate.StartMove();
+            pirate.PrepareToMove();
             return MovementResult.Continue;
         }
     }

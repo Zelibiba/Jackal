@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using SkiaSharp;
 using Avalonia;
 using Avalonia.Platform;
+using Jackal.Models;
 
-namespace Jacal.Converters
+namespace Jackal.Converters
 {
     public class ImageConverter : IValueConverter
     {
@@ -21,12 +22,14 @@ namespace Jacal.Converters
             string[] words = value.ToString().Split('_');
 
             Bitmap bitmap;
-
+            string path;
 #if DEBUG
-            bitmap = new(Path.Combine("..", "..", "..", "Assets", "Images", words[0] + ".png"));
+            path = Path.Combine("..", "..", "..", "Assets", "Images");
 #else
-            bitmap = new(Path.Combine("Assets", "Images", words[0] + ".png"));
+            path = Path.Combine("Assets", "Images");
 #endif
+            path = Path.Combine(path, Map.Type.ToString(), words[0] + ".png");
+            bitmap = new(path);
 
             if (words.Length == 1)
                 return bitmap;

@@ -9,7 +9,7 @@ namespace Jackal.Models.Cells.Cave
 {
     public class CaveEnterCell : Cell
     {
-        public CaveEnterCell(CaveCell cave, Func<int[], MovementResult> continueMove) : base(cave.Row, cave.Column, "Cave", number: 0)
+        public CaveEnterCell(CaveCell cave, Func<Coordinates, MovementResult> continueMove) : base(cave.Row, cave.Column, "Cave", number: 0)
         {
             _cave = cave;
             _continueMove = continueMove;
@@ -19,7 +19,7 @@ namespace Jackal.Models.Cells.Cave
         public CaveExitCell Exit => _cave.Exit;
         CaveCell[] Caves => _cave.Caves;
 
-        Func<int[], MovementResult> _continueMove;
+        Func<Coordinates, MovementResult> _continueMove;
 
         public void SendPiratesTo(CaveExitCell exit)
         {

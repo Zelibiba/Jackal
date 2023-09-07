@@ -11,14 +11,15 @@ namespace Jackal.Models.Cells
     {
         public PitCell(int row, int column) : base(row, column, "Pit")
         {
-            AltSelectableCoords = new List<int[]>();
+            AltSelectableCoords = new List<Coordinates>();
         }
 
-        public List<int[]> AltSelectableCoords { get; }
+        public List<Coordinates> AltSelectableCoords { get; }
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             base.SetSelectableCoords(map);
+            AltSelectableCoords.Clear();
             AltSelectableCoords.AddRange(SelectableCoords);
             SelectableCoords.Clear();
         }

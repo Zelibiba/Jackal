@@ -9,16 +9,16 @@ namespace Jackal.Models.Cells
 {
     public class CrocodileCell : Cell
     {
-        public CrocodileCell (int row, int column, Func<int[], MovementResult> continueMove):base(row,column,"Crocodile",false)
+        public CrocodileCell (int row, int column, Func<Coordinates, MovementResult> continueMove):base(row,column,"Crocodile",false)
         {
             _continueMove = continueMove;
         }
 
-        readonly Func<int[], MovementResult> _continueMove;
+        readonly Func<Coordinates, MovementResult> _continueMove;
 
         public override MovementResult AddPirate(Pirate pirate)
         {
-            int[] coords = pirate.Cell.Coords;
+            Coordinates coords = pirate.Cell.Coords;
             base.AddPirate(pirate);
             if (pirate.IsInLoop)
             {

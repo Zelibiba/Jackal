@@ -182,7 +182,7 @@ namespace Jackal.Network
                     int index = _reader.ReadInt32();
                     bool gold = _reader.ReadBoolean();
                     bool galeon = _reader.ReadBoolean();
-                    int[] coords = _reader.ReadCoords();
+                    Coordinates coords = _reader.ReadCoords();
                     SendToOther(NetMode.MovePirate, writer =>
                     {
                         writer.Write(index);

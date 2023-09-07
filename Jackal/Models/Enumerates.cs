@@ -59,21 +59,6 @@ namespace Jackal.Models
         Cannabis    // Происходит ход конопли
     }
     /// <summary>
-    /// Перечисление ориентаций поворота клетки.
-    /// </summary>
-    public enum Orientation
-    {
-        None = 0,
-        Up = 1,
-        Right = 2,
-        Down = 4,
-        Left = 8,
-        RightUp = Right | Up,       // 3
-        RightDown = Right | Down,   // 6
-        LeftUp = Left | Up,         // 9
-        LeftDown = Left | Down      // 12
-    }
-    /// <summary>
     /// Перечисление типов стрелок.
     /// </summary>
     public enum ArrowType
@@ -84,7 +69,15 @@ namespace Jackal.Models
         Angle1,
         Angle2,
         Angle3,
-        Angle4
+        Angle4,
+
+        Hex1,
+        Hex2,
+        Hex3a,
+        Hex3b,
+        Hex3c,
+        Hex4a,
+        Hex4b
     }
     /// <summary>
     /// Перечисление типов клеток с сокровищем.
@@ -118,5 +111,14 @@ namespace Jackal.Models
         CellSelection,
         DrinkRum,
         GetBirth
+    }
+    /// <summary>
+    /// Перечисление типов карты.
+    /// </summary>
+    /// <remarks>Карта может быть из квадратных или гексагональных ячеек.</remarks>
+    public enum MapType
+    {
+        Quadratic,
+        Hexagonal
     }
 }

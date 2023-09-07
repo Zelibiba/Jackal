@@ -48,7 +48,7 @@ namespace Jackal.Models.Cells
             foreach (Cell cell in Nodes)
                 cell.SetCoordinates(row, column);
         }
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             base.SetSelectableCoords(map);
             foreach(Cell cell in Nodes)

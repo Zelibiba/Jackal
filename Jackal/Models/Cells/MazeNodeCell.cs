@@ -12,11 +12,11 @@ namespace Jackal.Models.Cells
         public MazeNodeCell(int row, int column, MazeCell owner, int step) : base(row, column, owner.Image[..5], number: step)
         {
             _owner = owner;
-            AltSelectableCoords = new List<int[]>();
+            AltSelectableCoords = new List<Coordinates>();
         }
 
         readonly MazeCell _owner;
-        public List<int[]> AltSelectableCoords { get; }
+        public List<Coordinates> AltSelectableCoords { get; }
 
         public override void Open()
         {
@@ -38,7 +38,7 @@ namespace Jackal.Models.Cells
             return base.AddPirate(pirate);
         }
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             if(_owner.Nodes.Count == Number)
                 base.SetSelectableCoords(map);

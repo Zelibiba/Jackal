@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DynamicData;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -12,44 +13,65 @@ namespace Jackal.Models.Cells
     /// </summary>
     internal interface IOrientableCell
     {
+
+        private static Coordinates[][] RotationFamilies => Map.Type == MapType.Quadratic ? _rotationFamiliesQuad : _rotationFamiliesHex;
+        private readonly static Coordinates[][] _rotationFamiliesQuad = new Coordinates[2][]
+        {
+            new Coordinates[4]
+            {
+                new Coordinates(-1, 0),
+                new Coordinates( 0,-1),
+                new Coordinates(+1, 0),
+                new Coordinates( 0,+1)
+            },
+            new Coordinates[4]
+            {
+                new Coordinates(-1,-1),
+                new Coordinates(+1,-1),
+                new Coordinates(+1,+1),
+                new Coordinates(-1,+1)
+            }
+        };
+        private readonly static Coordinates[][] _rotationFamiliesHex = new Coordinates[1][]
+        {
+            new Coordinates[6]
+            {
+                new Coordinates(-1,  0),
+                new Coordinates( 0, -1),
+                new Coordinates(+1, -1),
+                new Coordinates(+1,  0),
+                new Coordinates( 0, +1),
+                new Coordinates(-1, +1)
+            }
+        };
+
+        /// <summary>
+        /// Массив направлений клетки.
+        /// </summary>
+        Coordinates[] Directions { get; }
         /// <summary>
         /// Метод поворачивает клетку и изменяет её ориентацию.
         /// </summary>
-        /// <param name="rotation">Поворот клетки по часовой стрелки от 12. Принимает значения 0, 1, 2, 3.</param>
-        /// <param name="orientation">Ориентация клетки.</param>
+        /// <param name="rotation">Поворот клетки по часовой стрелки от 12.</param>
         /// <returns>Угол, на который повернулась клетка.</returns>
-        int Rotate(int rotation, ref Orientation orientation)
+        int Rotate(int rotation)
         {
             if (rotation == 0)
                 return 0;
 
-            if (rotation < 0 || rotation > 3)
+            if (rotation < 0 || Map.Type == MapType.Quadratic && rotation > 3
+                             || Map.Type == MapType.Hexagonal && rotation > 5)
                 throw new ArgumentException("Wrong cell rotation!");
 
-            int orient = orientation == Orientation.LeftUp ? 24 : (int)orientation;
-            orient *= (int)Math.Pow(2, rotation);
-            if (orient / 16 != 0 && orient != 24)
-                orient /= 16;
-            orientation = orient == 24 ? Orientation.LeftUp : (Orientation)orient;
-
-            return rotation * 90;
-        }
-        /// <summary>
-        /// <inheritdoc cref="Rotate(int, ref Orientation)" path="/summary"/>
-        /// </summary>
-        /// <param name="rotation"><inheritdoc cref="Rotate(int, ref Orientation)" path="/param"/></param>
-        /// <param name="orientations"></param>
-        /// <returns><inheritdoc cref="Rotate(int, ref Orientation)" path="/returns"/></returns>
-        int Rotate(int rotation, ref List<Orientation> orientations)
-        {
-            for (int i = 0; i < orientations.Count; i++)
+            for (int i = 0; i < Directions.Length; i++)
             {
-                Orientation orientation = orientations[i];
-                Rotate(rotation, ref orientation);
-                orientations[i] = orientation;
+                Coordinates[] rotationFamily = RotationFamilies.First(family => family.Any(coords => coords == Directions[i]));
+                int index = Array.FindIndex(rotationFamily, coords => coords == Directions[i]);
+                Directions[i] = rotationFamily[(index + rotation) % rotationFamily.Length];
             }
 
-            return rotation * 90;
+            int angleUnit = Map.Type == MapType.Quadratic ? 90 : 60;
+            return rotation * angleUnit;
         }
     }
 }

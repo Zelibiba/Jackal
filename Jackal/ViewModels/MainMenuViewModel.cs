@@ -16,8 +16,11 @@ namespace Jackal.ViewModels
     {
         public MainMenuViewModel()
         {
-            Content = this;
-            //Content = new GameViewModel();
+            //Content = this;
+
+            //(Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "спаивание миссионера.txt"));
+            (Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "0.txt"));
+            Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
 
         [Reactive] public ViewModelBase Content { get; private set; }
@@ -31,11 +34,11 @@ namespace Jackal.ViewModels
         }
         public async Task ConnectToServer(object param)
         {
-            IPWindow dialog = new IPWindow();
-            string ip = await dialog.ShowDialog<string>(param as Window);
-            if (!string.IsNullOrEmpty(ip))
-                Client.Start(ip, SetContent);
-            //Client.Start(Server.IP, SetContent);
+            //IPWindow dialog = new IPWindow();
+            //string ip = await dialog.ShowDialog<string>(param as Window);
+            //if (!string.IsNullOrEmpty(ip))
+            //    Client.Start(ip, SetContent);
+            Client.Start(Server.IP, SetContent);
         }
         public async void LoadGame(object param)
         {

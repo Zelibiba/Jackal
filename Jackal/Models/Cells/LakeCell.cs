@@ -10,26 +10,28 @@ namespace Jackal.Models.Cells
 {
     internal class LakeCell : Cell
     {
-        public LakeCell(int row, int column, Func<int[], MovementResult> continueMove) : base(row, column, "Lake", false)
+        public LakeCell(int row, int column, Func<Coordinates, MovementResult> continueMove) : base(row, column, "Lake", false)
         {
             _continueMove = continueMove;
-            _mapCoords = new List<int[]>();
+            _mapCoords = new List<Coordinates>();
+            _horseCoords = new List<Coordinates>();
         }
 
-        readonly Func<int[], MovementResult> _continueMove;
-        int _mapSize;
-        readonly List<int[]> _mapCoords;
+        readonly Func<Coordinates, MovementResult> _continueMove;
+        readonly List<Coordinates> _mapCoords;
+        readonly List<Coordinates> _horseCoords;
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
-            _mapSize = map.MapSize;
+            _mapCoords.Clear();
             foreach (Cell cell in map)
             {
-                if (cell is SeaCell || cell is ShipCell ||
-                    cell.HasSameCoords(Row, Column))
-                    continue;
+                if (cell is SeaCell || cell is ShipCell || cell.Coords == Coords) continue;
                 _mapCoords.Add(cell.Coords);
             }
+            _horseCoords.Clear();
+            foreach (Coordinates coords in map.AdjacentCellsCoords(this, HorseCell.HorseCoordsPattern))
+                _horseCoords.Add(coords);
         }
 
         public override MovementResult AddPirate(Pirate pirate)
@@ -37,14 +39,7 @@ namespace Jackal.Models.Cells
             SelectableCoords.Clear();
             if (pirate.AtHorse)
             {
-                foreach (int[] coords in HorseCell.SelectableCoordsPattern)
-                {
-                    int row = Row + coords[0];
-                    int column = Column + coords[1];
-                    if (ObservableMap.CheckIndexes(row, column, _mapSize))
-                        continue;
-                    SelectableCoords.Add(new int[] { row, column });
-                }
+                SelectableCoords.AddRange(_horseCoords);
                 return base.AddPirate(pirate);
             }
             else if(pirate.AtAirplane)
@@ -54,7 +49,7 @@ namespace Jackal.Models.Cells
             }
             else
             {
-                int[] coords = new int[2] { Row + (Row - pirate.Cell.Row), Column + (Column - pirate.Cell.Column) };
+                Coordinates coords = Coords + (Coords - pirate.Cell.Coords);
                 base.AddPirate(pirate);
                 return _continueMove(coords);
             }

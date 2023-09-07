@@ -14,29 +14,33 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Массив относительных координат хода конём.
         /// </summary>
-        public static readonly int[][] SelectableCoordsPattern = new int[8][]
+        public static Coordinates[] HorseCoordsPattern => Map.Type == MapType.Quadratic ? _HorseCoordsPatternQuad : _HorseCoordsPatternHex;
+        static readonly Coordinates[] _HorseCoordsPatternQuad = new Coordinates[8]
         {
-            new int[2] { -2,  1 },
-            new int[2] { -1,  2 },
-            new int[2] {  1,  2 },
-            new int[2] {  2,  1 },
-            new int[2] {  2, -1 },
-            new int[2] {  1, -2 },
-            new int[2] { -1, -2 },
-            new int[2] { -2, -1 }
+            new(-2,-1),
+            new(-1,-2),
+            new( 1,-2),
+            new( 2,-1),
+            new( 2, 1),
+            new( 1, 2),
+            new(-1, 2),
+            new(-2, 1)
+        };
+        static readonly Coordinates[] _HorseCoordsPatternHex = new Coordinates[6]
+        {
+            new(-2, 1),
+            new(-1,-1),
+            new(+1,-2),
+            new(+2,-1),
+            new(+1, 1),
+            new(-1, 2)
         };
 
-        public override void SetSelectableCoords(ObservableMap map)
+        public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            foreach (int[] coords in SelectableCoordsPattern)
-            {
-                int row = Row + coords[0];
-                int column = Column + coords[1];
-                if (map.CheckIndexes(row, column))
-                    continue;
-                SelectableCoords.Add(new int[] { row, column });
-            }
+            foreach (Coordinates coords in map.AdjacentCellsCoords(this, HorseCoordsPattern))
+                SelectableCoords.Add(coords);
         }
     }
 }

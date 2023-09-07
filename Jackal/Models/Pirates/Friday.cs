@@ -15,7 +15,7 @@ namespace Jackal.Models.Pirates
         public override bool CanDrinkRum => false;
         public override bool CanHaveSex => false;
 
-        public override List<int[]> SelectableCoords
+        public override List<Coordinates> SelectableCoords
         {
             get
             {

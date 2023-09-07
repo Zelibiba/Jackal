@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media;
 
-namespace Jacal.Converters
+namespace Jackal.Converters
 {
     public class TeamConverter : IValueConverter
     {

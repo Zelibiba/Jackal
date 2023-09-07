@@ -22,7 +22,6 @@ namespace Jackal.ViewModels
     public class GameViewModel : ViewModelBase, IActivatableViewModel
     {
         public ViewModelActivator Activator { get; }
-        readonly IDisposable _disCells;
         readonly IDisposable _disPlayers;
 
 
@@ -31,7 +30,6 @@ namespace Jackal.ViewModels
             Activator = new ViewModelActivator();
             this.WhenActivated(disposable =>
             {
-                _disCells.DisposeWith(disposable);
                 _disPlayers.DisposeWith(disposable);
             });
 
@@ -45,12 +43,10 @@ namespace Jackal.ViewModels
                                                                               string.Join('\n', players.Select(p => p.Name))));
             SelectedPirate = Pirate.Empty;
 
-            _disCells = Game.Map.ToObservableChangeSet()
-                                .Bind(out _cells)
-                                .Subscribe();
             _disPlayers = Game.Players.ToObservableChangeSet()
                                       .Bind(out _players)
                                       .Subscribe();
+
             this.WhenAnyValue(vm => vm.SelectedPirate)
                 .Select(pirate => pirate != Pirate.Empty)
                 .ToPropertyEx(this, vm => vm.IsPirateSelected);
@@ -59,10 +55,12 @@ namespace Jackal.ViewModels
             IsEnabled = players.First().IsControllable;
         }
 
+        public int MapHeight => Map.Type == MapType.Quadratic ? Map.RowsCount * 64 : 64 + (Map.RowsCount - 1) * 48;
+        public int MapWidth => 64 * Map.ColumnsCount;
+
         [Reactive] public bool IsEnabled { get; set; }
 
-        public ReadOnlyObservableCollection<Cell> Cells => _cells;
-        readonly ReadOnlyObservableCollection<Cell> _cells;
+        public List<Cell> Cells => Game.Map;
 
         public ReadOnlyObservableCollection<Player> Players => _players;
         readonly ReadOnlyObservableCollection<Player> _players;

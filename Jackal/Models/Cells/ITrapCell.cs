@@ -14,6 +14,6 @@ namespace Jackal.Models.Cells
         /// <remarks>
         /// Необходимы для механики выпивания рома.
         /// </remarks>
-        List<int[]> AltSelectableCoords { get; }
+        List<Coordinates> AltSelectableCoords { get; }
     }
 }

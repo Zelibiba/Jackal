@@ -18,7 +18,7 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
-            if (_goldType == Models.GoldType.Galeon)
+            if (_goldType == GoldType.Galeon)
             {
                 Galeon = true;
                 Game.HiddenGold -= 3;

@@ -33,45 +33,40 @@ namespace Jackal.Models.Cells
         public Cell(int row, int column, string image, bool isStandable = true, int angle = 0, int number = 0)
         {
             Row = row;
-            Column= column;
+            Column = column;
+            Coords = new(Row, Column);
             Image = image;
             Angle = angle;
             Pirates = new ObservableCollection<Pirate>();
-            SelectableCoords = new List<int[]>();
+            SelectableCoords = new List<Coordinates>();
             Nodes = new ObservableCollection<Cell> { this };
+            IsVisible = true;
+            IsStandable = isStandable;
+            Number = number;
 
             this.WhenAnyValue(c => c.Gold, c => c.Galeon,
                 (gold, galeon) => gold > 0 || galeon)
                 .ToPropertyEx(this, c => c.Treasure);
-
-            IsVisible = true;
-            IsStandable = isStandable;
-            Number = number;
-        }
-        /// <summary>
-        /// Метод создаёт поверхностную копию клетки.
-        /// </summary>
-        /// <param name="cell">Клетка, с которой копируются значения.</param>
-        /// <remarks>Необходим для анимации перемещения ячейки.</remarks>
-        public static Cell Copy(Cell cell)
-        {
-            return new Cell(cell.Row, cell.Column, cell.Image, angle: cell.Angle)
-            {
-                Pirates = cell.Pirates,
-                IsPreOpened = cell.IsPreOpened,
-                IsVisible = cell.IsVisible,
-                IsLightHousePicked = cell.IsLightHousePicked
-            };
         }
 
-        /// <summary>
-        /// Название изображения клетки.
-        /// </summary>
-        [Reactive] public string Image { get; protected set; }
         /// <summary>
         /// Угол, на который повёрнута клетка.
         /// </summary>
         public virtual int Angle { get; }
+        public int X
+        {
+            get
+            {
+                if (Map.Type == MapType.Quadratic) return Column * 64;
+
+                return Column * 64 + (Row - 7) * 32;
+            }
+        }
+        public int Y => Row * (Map.Type == MapType.Hexagonal ? 48 : 64);
+        /// <summary>
+        /// Название изображения клетки.
+        /// </summary>
+        [Reactive] public string Image { get; protected set; }
         /// <summary>
         /// Флаг того, что изображение чёрно-белое.
         /// </summary>
@@ -98,20 +93,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Координаты клетки.
         /// </summary>
-        public int[] Coords => new int[] { Row, Column };
-        /// <summary>
-        /// Флаг того, что данная клетка имеет такие же координаты.
-        /// </summary>
-        /// <param name="row">Строка.</param>
-        /// <param name="column">Колонка.</param>
-        /// <returns>true, если координаты такие же.</returns>
-        public bool HasSameCoords(int row, int column) => row == Row && column == Column;
-        /// <summary>
-        /// <inheritdoc cref="HasSameCoords(int, int)" path="/summary"/>
-        /// </summary>
-        /// <param name="coords">Сравниваемые координаты.</param>
-        /// <returns><inheritdoc cref="HasSameCoords(int, int)" path="/returns"/></returns>
-        public bool HasSameCoords(int[] coords) => coords.Length == 2 && HasSameCoords(coords[0], coords[1]);
+        public Coordinates Coords {get; protected set; }
         /// <summary>
         /// Метод задаёт новые координаты клетки.
         /// </summary>
@@ -121,27 +103,28 @@ namespace Jackal.Models.Cells
         {
             Row = row;
             Column = column;
+            Coords = new(Row, Column);
+            this.RaisePropertyChanged(nameof(X));
+            this.RaisePropertyChanged(nameof(Y));
+            this.RaisePropertyChanged(nameof(Row));
+            this.RaisePropertyChanged(nameof(Column));
         }
 
         /// <summary>
         /// Список координат клеток, на которые можно переместиться с данной клетки.
         /// </summary>
-        public List<int[]> SelectableCoords { get; }
+        public List<Coordinates> SelectableCoords { get; }
         /// <summary>
         /// Метод определяет координаты клеток, куда пират может походить.
         /// </summary>
         /// <param name="map">Карта игры.</param>
-        public virtual void SetSelectableCoords(ObservableMap map)
+        public virtual void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            for (int i = -1; i < 2; i++)
+            foreach(Coordinates coords in map.AdjacentCellsCoords(this))
             {
-                for (int j = -1; j < 2; j++)
-                {
-                    if ((i == 0 && j == 0) || map[Row + i, Column + j] is SeaCell)
-                        continue;
-                    SelectableCoords.Add(new int[2] { Row + i, Column + j });
-                }
+                if (map[coords] is SeaCell) continue;
+                SelectableCoords.Add(coords);
             }
         }
 
@@ -156,6 +139,9 @@ namespace Jackal.Models.Cells
         /// В нелабиринтной клетке равняется 0.
         /// </remarks>
         public int Number { get; }
+        /// <summary>
+        /// создаёт реактивные связи между данной клеткой и её подклетками из <see cref="Nodes"/>.
+        /// </summary>
         protected void LinkCellWithNodes()
         {
             Nodes.ToObservableChangeSet()

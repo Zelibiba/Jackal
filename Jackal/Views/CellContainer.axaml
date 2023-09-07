@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:converters="clr-namespace:Jackal.Converters"
+             mc:Ignorable="d" d:DesignWidth="64" d:DesignHeight="64"
+             x:Class="Jackal.Views.CellContainer">
+	<UserControl.Resources>
+		<converters:ClipConverter x:Key="ClipConverter"/>
+	</UserControl.Resources>
+	<UserControl.Template>
+		<ControlTemplate>
+			<Panel Name="Panel">
+				<Path Name="Border" Stroke="{TemplateBinding BorderBrush}"
+					  StrokeThickness="{Binding BorderThickness.Top, RelativeSource={RelativeSource TemplatedParent}}">
+					<Path.Data>
+						<MultiBinding Converter="{StaticResource ClipConverter}">
+							<Binding Path="#Panel.Bounds.Width"/>
+							<Binding Path="#Panel.Bounds.Height"/>
+							<Binding Path="#Border.StrokeThickness"/>
+						</MultiBinding>
+					</Path.Data>
+				</Path>
+				<Panel Name="Back" Margin="{TemplateBinding BorderThickness}"
+					  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+					  Background="{TemplateBinding Background}">
+					<Panel.Clip>
+						<MultiBinding Converter="{StaticResource ClipConverter}">
+							<Binding Path="#Back.Bounds.Width"/>
+							<Binding Path="#Back.Bounds.Height"/>
+						</MultiBinding>
+					</Panel.Clip>
+					<ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+									  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+									  ClipToBounds="True"
+									  Margin="{TemplateBinding Padding}"
+									  Content="{TemplateBinding Content}"
+									  ContentTemplate="{TemplateBinding ContentTemplate}"/>
+				</Panel>
+			</Panel>
+		</ControlTemplate>
+	</UserControl.Template>
+</UserControl>

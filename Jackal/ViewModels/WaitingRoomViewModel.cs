@@ -1,5 +1,4 @@
-﻿using Jacal;
-using ReactiveUI;
+﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;

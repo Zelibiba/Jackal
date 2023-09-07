@@ -9,12 +9,12 @@ namespace Jackal.Models.Cells
 {
     public class BalloonCell : Cell
     {
-        public BalloonCell(int row, int column, Func<int[], MovementResult> continueMove) : base(row, column, "Balloon", false)
+        public BalloonCell(int row, int column, Func<Coordinates, MovementResult> continueMove) : base(row, column, "Balloon", false)
         {
             _continueMove = continueMove;
         }
 
-        readonly Func<int[], MovementResult> _continueMove;
+        readonly Func<Coordinates, MovementResult> _continueMove;
 
         public override MovementResult AddPirate(Pirate pirate)
         {
