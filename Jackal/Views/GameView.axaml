@@ -37,7 +37,33 @@
 					</ItemsControl.Styles>
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<v:CellView Height="64" Width="64"/>
+							<v:CellView/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+				<ItemsControl Name="Pirates" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+							  Items="{Binding Pirates}" Background="{x:Null}" ZIndex="10">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<Canvas/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.Styles>
+						<Style Selector="ItemsControl ContentPresenter">
+							<Setter Property="Canvas.Right" Value="{Binding X}"/>
+							<Setter Property="Canvas.Top" Value="{Binding Y}"/>
+							<Setter Property="Transitions">
+								<Transitions>
+									<DoubleTransition Property="Canvas.Right" Duration="0:0:0.3"/>
+									<DoubleTransition Property="Canvas.Top" Duration="0:0:0.3"/>
+								</Transitions>
+							</Setter>
+						</Style>
+					</ItemsControl.Styles>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<Button Height="{Binding Size}" Width="{Binding Size}"
+									Classes="Pirate"/>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>

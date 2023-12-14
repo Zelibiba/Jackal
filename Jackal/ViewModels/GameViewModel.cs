@@ -23,6 +23,7 @@ namespace Jackal.ViewModels
     {
         public ViewModelActivator Activator { get; }
         readonly IDisposable _disPlayers;
+        readonly IDisposable _disPirates;
 
 
         public GameViewModel(IEnumerable<Player>? players, int seed, IEnumerable<int[]>? operations = null)
@@ -35,7 +36,12 @@ namespace Jackal.ViewModels
 
             Game.CreateMap(players, seed, autosave: operations == null);
             Game.ReadOperations(operations ?? new List<int[]>());
-            
+            Game.StartPirateAnimation = (cellIndex) =>
+            {
+                PirateViewModel pirate = Pirates.First(vm => vm.Pirate == Game.SelectedPirate);
+                Cells[cellIndex].AddPirate(pirate);
+                return Task.Delay(300);
+            };
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
             Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",
@@ -43,8 +49,15 @@ namespace Jackal.ViewModels
                                                                               string.Join('\n', players.Select(p => p.Name))));
             SelectedPirate = Pirate.Empty;
 
+            Cells = (from cell in Game.Map
+                     select new CellViewModel(cell)).ToArray();
+
             _disPlayers = Game.Players.ToObservableChangeSet()
                                       .Bind(out _players)
+                                      .Subscribe();
+            _disPirates = Game.Pirates.ToObservableChangeSet()
+                                      .Transform(p => new PirateViewModel(p, Cells))
+                                      .Bind(out _pirates)
                                       .Subscribe();
 
             this.WhenAnyValue(vm => vm.SelectedPirate)
@@ -55,15 +68,18 @@ namespace Jackal.ViewModels
             IsEnabled = players.First().IsControllable;
         }
 
-        public int MapHeight => Map.Type == MapType.Quadratic ? Map.RowsCount * 64 : 64 + (Map.RowsCount - 1) * 48;
-        public int MapWidth => 64 * Map.ColumnsCount;
+        public int MapHeight => Map.Type == MapType.Quadratic ? Map.RowsCount * CellViewModel.Height :
+                                                                CellViewModel.Height + (Map.RowsCount - 1) * CellViewModel.Height * 3 / 4;
+        public int MapWidth => CellViewModel.Width * Map.ColumnsCount;
 
         [Reactive] public bool IsEnabled { get; set; }
 
-        public List<Cell> Cells => Game.Map;
+        public CellViewModel[] Cells { get; }
 
         public ReadOnlyObservableCollection<Player> Players => _players;
         readonly ReadOnlyObservableCollection<Player> _players;
+        public ReadOnlyObservableCollection<PirateViewModel> Pirates => _pirates;
+        readonly ReadOnlyObservableCollection<PirateViewModel> _pirates;
 
         [Reactive] public Pirate SelectedPirate { get; set; }
         [ObservableAsProperty] public bool IsPirateSelected { get; }

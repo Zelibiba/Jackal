@@ -53,20 +53,10 @@ namespace Jackal.Models.Cells
         /// Угол, на который повёрнута клетка.
         /// </summary>
         public virtual int Angle { get; }
-        public int X
-        {
-            get
-            {
-                if (Map.Type == MapType.Quadratic) return Column * 64;
-
-                return Column * 64 + (Row - 7) * 32;
-            }
-        }
-        public int Y => Row * (Map.Type == MapType.Hexagonal ? 48 : 64);
         /// <summary>
         /// Название изображения клетки.
         /// </summary>
-        [Reactive] public string Image { get; protected set; }
+        [Reactive] public string Image { get; private set; }
         /// <summary>
         /// Флаг того, что изображение чёрно-белое.
         /// </summary>
@@ -85,15 +75,15 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Строка клетки.
         /// </summary>
-        public int Row { get; protected set; }
+        public int Row { get; private set; }
         /// <summary>
         /// Столбец клетки.
         /// </summary>
-        public int Column { get; protected set; }
+        public int Column { get; private set; }
         /// <summary>
         /// Координаты клетки.
         /// </summary>
-        public Coordinates Coords {get; protected set; }
+        public Coordinates Coords {get; private set; }
         /// <summary>
         /// Метод задаёт новые координаты клетки.
         /// </summary>
@@ -104,8 +94,6 @@ namespace Jackal.Models.Cells
             Row = row;
             Column = column;
             Coords = new(Row, Column);
-            this.RaisePropertyChanged(nameof(X));
-            this.RaisePropertyChanged(nameof(Y));
             this.RaisePropertyChanged(nameof(Row));
             this.RaisePropertyChanged(nameof(Column));
         }

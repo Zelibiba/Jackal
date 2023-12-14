@@ -32,7 +32,7 @@ namespace Jackal.Models
         /// <summary>
         /// Лист игроков.
         /// </summary>
-        public static ObservableCollection<Player> Players { get; } = new ObservableCollection<Player>();
+        public static ObservableCollection<Player> Players { get; } = new();
         /// <summary>
         /// Игрок, активный в текущий момент.
         /// </summary>
@@ -65,6 +65,8 @@ namespace Jackal.Models
         static readonly IEnumerable<(int, List<Player>)> _orderedAllies = from allies in _ListAllies
                                                                           orderby allies.Sum(player => player.Gold) descending
                                                                           select (allies.Sum(player => player.Gold), allies);
+
+        public static ObservableCollection<Pirate> Pirates { get; } = new();
 
         /// <summary>
         /// Пират, выбранный на текущий момент.
@@ -159,8 +161,9 @@ namespace Jackal.Models
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
         public static void CreateMap(IEnumerable<Player> players, int seed, bool autosave = true)
         {
-            //MapType type = MapType.Quadratic;
-            MapType type = MapType.Hexagonal;
+            MapType type;
+            type = MapType.Quadratic;
+            //type = MapType.Hexagonal;
 
             #region инициализация игроков с командами
             foreach (Player player in players)
@@ -431,7 +434,7 @@ namespace Jackal.Models
             #endregion
 
             #region Создание кораблей
-            if (Players.Count == 3)
+            if (Players.Count == 3 && type == MapType.Quadratic)
             {
                 Map.ShipPlacements[1].InitialCoordinates = new(8, 12);
                 Map.ShipPlacements[3].InitialCoordinates = new(8, 0);
@@ -461,6 +464,9 @@ namespace Jackal.Models
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
+
+            foreach (Player player in Players)
+                Pirates.AddRange(player.Pirates);
 
             if (autosave)
                 SaveOperator.StartAutosave(Players, seed);
@@ -806,7 +812,7 @@ namespace Jackal.Models
         /// <summary>
         /// Делегат запуска анимации перемещения пирата.
         /// </summary>
-        public static Func<Cell,Task>? StartPirateAnimation;
+        public static Func<int, Task>? StartPirateAnimation;
         /// <summary>
         /// Делегат скрытия кнопки пирата для анимации.
         /// </summary>
@@ -818,7 +824,7 @@ namespace Jackal.Models
         static void OnStartPirateAnimation(Cell cell)
         {
             if (StartPirateAnimation != null)
-                Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(cell)).Wait();
+                Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(Map.IndexOf(cell))).Wait();
         }
         /// <summary>
         /// Метод скрытия кнопки для анимации пирата после перемещения пирата.

@@ -273,6 +273,7 @@ namespace Jackal.Models
                 this[coords.Row, coords.Column] = value;
             }
         }
+        public new int IndexOf(Cell cell) => (int)_indexes[cell.Row, cell.Column];
 
         /// <summary>
         /// Метод возвращает перечисление клеток, имеющих заданные координаты.

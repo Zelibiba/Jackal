@@ -6,9 +6,11 @@
 			 xmlns:v="clr-namespace:Jackal.Views"
 			 x:Class="Jackal.Views.CellView"
 			 mc:Ignorable="d" d:DesignWidth="64" d:DesignHeight="64"
+			 Height="{Binding Height}"
+			 Width="{Binding Width}"
 			 HorizontalAlignment="Stretch"
 			 VerticalAlignment="Stretch"
-			 IsVisible="{Binding IsVisible}">
+			 IsVisible="{Binding Cell.IsVisible}">
 	<UserControl.Resources>
 		<converters:TeamConverter x:Key="TeamConverter"/>
 		<converters:ImageConverter x:Key="ImageConverter"/>
@@ -45,18 +47,18 @@
 		</Style>
 		<Style Selector="v|CellContainer.IsShip">
 			<Setter Property="IsVisible" Value="True"/>
-			<Setter Property="BorderBrush" Value="{Binding ShipTeam, Converter={StaticResource TeamConverter}}"/>
+			<Setter Property="BorderBrush" Value="{Binding Cell.ShipTeam, Converter={StaticResource TeamConverter}}"/>
 			<Setter Property="BorderThickness" Value="6"/>
 		</Style>
 		<Style Selector="ToolTip.Gold">
-			<Setter Property="IsVisible" Value="{Binding Treasure}"/>
+			<Setter Property="IsVisible" Value="{Binding Cell.Treasure}"/>
 			<Setter Property="ToolTip.Tip">
 				<Setter.Value>
 					<Template>
-						<ItemsControl Items="{Binding Nodes}">
+						<ItemsControl Items="{Binding Cell.Nodes}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<WrapPanel Orientation="Horizontal" IsVisible="{Binding Treasure}">
+									<WrapPanel Orientation="Horizontal" IsVisible="{Binding Cell.Treasure}">
 										<WrapPanel.Styles>
 											<Style Selector="TextBlock">
 												<Setter Property="HorizontalAlignment" Value="Center"/>
@@ -66,12 +68,12 @@
 											</Style>
 										</WrapPanel.Styles>
 										<TextBlock VerticalAlignment="Top" Margin="0,0,5,0"
-												   Text="{Binding Number}" IsVisible="{Binding !!Number}"/>
-										<Panel IsVisible="{Binding !!Gold}">
+												   Text="{Binding Cell.Number}" IsVisible="{Binding !!Cell.Number}"/>
+										<Panel IsVisible="{Binding !!Cell.Gold}">
 											<Ellipse Height="30" Width="30" Fill="Gold" Stroke="Black" StrokeThickness="2"/>
-											<TextBlock Text="{Binding Gold}"/>
+											<TextBlock Text="{Binding Cell.Gold}"/>
 										</Panel>
-										<Panel IsVisible="{Binding Galeon}">
+										<Panel IsVisible="{Binding Cell.Galeon}">
 											<Rectangle Height="30" Width="30" Fill="Gold" Stroke="Black" StrokeThickness="2"/>
 											<TextBlock Text="Г"/>
 										</Panel>
@@ -89,20 +91,20 @@
 	<UserControl.Template>
 		<ControlTemplate>
 			<v:CellContainer Classes="Cell Usual"
-							 Classes.CanBeSelected="{Binding CanBeSelected}"
-							 Classes.IsSelected="{Binding IsSelected}"
-							 Classes.IsLightHousePicked="{Binding IsLightHousePicked}">
+							 Classes.CanBeSelected="{Binding Cell.CanBeSelected}"
+							 Classes.IsSelected="{Binding Cell.IsSelected}"
+							 Classes.IsLightHousePicked="{Binding Cell.IsLightHousePicked}">
 				<Panel>
-					<Image Source="{Binding Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding IsPreOpened}"
-						   Stretch="Fill">
+					<Image Source="{Binding Cell.Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding Cell.IsPreOpened}"
+						   Stretch="UniformToFill">
 						<Image.RenderTransform>
 							<TransformGroup>
-								<RotateTransform Angle="{Binding Angle}"/>
+								<RotateTransform Angle="{Binding Cell.Angle}"/>
 							</TransformGroup>
 						</Image.RenderTransform>
 					</Image>
 					<Button ZIndex="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-							Command="{Binding $parent[v:GameView].DataContext.SelectCell}" CommandParameter="{Binding .}">
+							Command="{Binding $parent[v:GameView].DataContext.SelectCell}" CommandParameter="{Binding Cell}">
 						<Button.Template>
 							<ControlTemplate TargetType="Button">
 								<Grid Background="Transparent">
@@ -112,32 +114,32 @@
 						</Button.Template>
 					</Button>
 					<v:CellContainer Classes="Gold Usual"
-									 Classes.Treasure="{Binding Treasure}"
-									 Classes.IsShip="{Binding IsShip}">
+									 Classes.Treasure="{Binding Cell.Treasure}"
+									 Classes.IsShip="{Binding Cell.IsShip}">
 						<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="2,0">
 							<TextBlock Text="Г" FontWeight="Bold" FontSize="20"
-									   IsVisible="{Binding Galeon}"/>
-							<TextBlock Text="{Binding Gold}" FontWeight="Bold" FontSize="20"
-									   IsVisible="{Binding !!Gold}"/>
+									   IsVisible="{Binding Cell.Galeon}"/>
+							<TextBlock Text="{Binding Cell.Gold}" FontWeight="Bold" FontSize="20"
+									   IsVisible="{Binding !!Cell.Gold}"/>
 						</WrapPanel>
 					</v:CellContainer>
-					<ItemsControl ZIndex="10" Margin="4,10" Items="{Binding Pirates}">
-						<ItemsControl.ItemsPanel>
-							<ItemsPanelTemplate>
-								<UniformGrid Rows="2" Columns="3"/>
-							</ItemsPanelTemplate>
-						</ItemsControl.ItemsPanel>
-						<ItemsControl.ItemTemplate>
-							<DataTemplate>
-								<Button Height="18" Width="18"
-										Classes="Pirate"
-										Classes.IsSelected="{Binding IsSelected}"/>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
+					<!--<ItemsControl ZIndex="10" Margin="4,10" Items="{Binding Cell.Pirates}">-->
+					<!--	<ItemsControl.ItemsPanel>-->
+					<!--		<ItemsPanelTemplate>-->
+					<!--			<UniformGrid Rows="2" Columns="3"/>-->
+					<!--		</ItemsPanelTemplate>-->
+					<!--	</ItemsControl.ItemsPanel>-->
+					<!--	<ItemsControl.ItemTemplate>-->
+					<!--		<DataTemplate>-->
+					<!--			<Button Height="18" Width="18"-->
+					<!--					Classes="Pirate"-->
+					<!--					Classes.IsSelected="{Binding Cell.IsSelected}"/>-->
+					<!--		</DataTemplate>-->
+					<!--	</ItemsControl.ItemTemplate>-->
+					<!--</ItemsControl>-->
 					<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-						<TextBlock Text="{Binding Row}" Margin="5,0"/>
-						<TextBlock Text="{Binding Column}" Margin="5,0"/>
+						<TextBlock Text="{Binding Cell.Row}" Margin="5,0"/>
+						<TextBlock Text="{Binding Cell.Column}" Margin="5,0"/>
 					</WrapPanel>
 				</Panel>
 			</v:CellContainer>
