@@ -14,8 +14,6 @@
 	<Grid ColumnDefinitions="auto,*">
 		<Viewbox Grid.Column="0" IsEnabled="{Binding IsEnabled}">
 			<Panel Name="MapControl" Height="{Binding MapHeight}" Width="{Binding MapWidth}">
-				<Button Name="PirateAnimator" Classes="Pirate" IsEnabled="False" IsVisible="False"
-						HorizontalAlignment="Right" VerticalAlignment="Top" Height="18" Width="18" ZIndex="2"/>
 				<ItemsControl Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
 							  Items="{Binding Cells}" Background="#FF00A5FF">
 					<ItemsControl.ItemsPanel>

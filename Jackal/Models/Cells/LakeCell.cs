@@ -34,23 +34,23 @@ namespace Jackal.Models.Cells
                 _horseCoords.Add(coords);
         }
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay = 0)
         {
             SelectableCoords.Clear();
             if (pirate.AtHorse)
             {
                 SelectableCoords.AddRange(_horseCoords);
-                return base.AddPirate(pirate);
+                return base.AddPirate(pirate, delay);
             }
-            else if(pirate.AtAirplane)
+            else if (pirate.AtAirplane)
             {
                 SelectableCoords.AddRange(_mapCoords);
-                return base.AddPirate(pirate);
+                return base.AddPirate(pirate, delay);
             }
             else
             {
                 Coordinates coords = Coords + (Coords - pirate.Cell.Coords);
-                base.AddPirate(pirate);
+                base.AddPirate(pirate, delay);
                 return _continueMove(coords);
             }
         }

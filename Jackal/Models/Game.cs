@@ -22,6 +22,11 @@ namespace Jackal.Models
     public static class Game
     {
         /// <summary>
+        /// Количество миллисекунд анимации пирата.
+        /// </summary>
+        public static readonly int pirateDelay = 300;
+
+        /// <summary>
         /// Карта.
         /// </summary>
         /// <remarks>
@@ -66,6 +71,10 @@ namespace Jackal.Models
                                                                           orderby allies.Sum(player => player.Gold) descending
                                                                           select (allies.Sum(player => player.Gold), allies);
 
+        /// <summary>
+        /// Коллекция всех пиратов в игре.
+        /// </summary>
+        /// <remarks>Необходима для их отображения в интерфейсе.</remarks>
         public static ObservableCollection<Pirate> Pirates { get; } = new();
 
         /// <summary>
@@ -436,8 +445,8 @@ namespace Jackal.Models
             #region Создание кораблей
             if (Players.Count == 3 && type == MapType.Quadratic)
             {
-                Map.ShipPlacements[1].InitialCoordinates = new(8, 12);
-                Map.ShipPlacements[3].InitialCoordinates = new(8, 0);
+                Map.ShipPlacements[1].InitialCoordinates = new(4,  0);
+                Map.ShipPlacements[3].InitialCoordinates = new(8, 12);
             }
             Map.SetShipToPlayer(0, Players[0]);
             switch (Players.Count)
@@ -457,16 +466,15 @@ namespace Jackal.Models
             }
             #endregion
 
-            //Map[1, 6] = new MazeCell(1, 6, 3);
+            //Map[1, 6] = new HorseCell(1, 6);
+            //Map[5, 6] = new Cell(5, 6,"Field");
+            //Map[8,11] = new HorseCell(8,11);
             //Players[1].Bottles = 1;
-            //Map[0, 6].AddPirate(new Missioner(Players[0], Players[0]));
-            //Map[1, 6].AddPirate(new Friday(Players[1], Players[1]));
+            Map[0, 6].AddPirate(new Missioner(Players[0], Players[0]));
+            Map[1, 6].AddPirate(new Friday(Players[1], Players[1]));
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
-
-            foreach (Player player in Players)
-                Pirates.AddRange(player.Pirates);
 
             if (autosave)
                 SaveOperator.StartAutosave(Players, seed);
@@ -812,27 +820,20 @@ namespace Jackal.Models
         /// <summary>
         /// Делегат запуска анимации перемещения пирата.
         /// </summary>
-        public static Func<int, Task>? StartPirateAnimation;
-        /// <summary>
-        /// Делегат скрытия кнопки пирата для анимации.
-        /// </summary>
-        public static Action? EndPirateMove;
+        public static Action<int, int, bool>? StartPirateAnimation;
         /// <summary>
         /// Метод запуска анимации перемещения пирата.
         /// </summary>
         /// <param name="cell">Клетка, куда перемещается пират.</param>
-        static void OnStartPirateAnimation(Cell cell)
+        public static void OnStartPirateAnimation(Pirate pirate, Cell cell, bool kill = false)
         {
             if (StartPirateAnimation != null)
-                Dispatcher.UIThread.InvokeAsync(() => StartPirateAnimation(Map.IndexOf(cell))).Wait();
-        }
-        /// <summary>
-        /// Метод скрытия кнопки для анимации пирата после перемещения пирата.
-        /// </summary>
-        static void OnEndPirateMove()
-        {
-            if(EndPirateMove != null)
-                Dispatcher.UIThread.InvokeAsync(EndPirateMove).Wait();
+            {
+                cell.IsPreOpened = true;
+                int pirateIndex = Pirates.IndexOf(pirate);
+                int cellIndex = Map.IndexOf(cell);
+                StartPirateAnimation(pirateIndex, cellIndex, kill);
+            }
         }
         /// <summary>
         /// Метод обработки перемещения пирата.
@@ -853,17 +854,9 @@ namespace Jackal.Models
                     PirateIsDrunk = false;
             }
 
-            OnStartPirateAnimation(cell);
-
-            Pirate selectedPirate = SelectedPirate;
             switch (MovePirate(cell))
             {
                 case MovementResult.End:
-                    if (SelectedPirate is Friday && cell.ContainsMissioner || SelectedPirate is Missioner && cell.ContainsFriday)
-                    {
-                        SelectedPirate.Kill();
-                        cell.Pirates.First(pirate => pirate is Friday || pirate is Missioner).Kill();
-                    }
                     SelectedPirate = null;
                     PirateInMotion = false;
                     NextPlayer();
@@ -887,8 +880,6 @@ namespace Jackal.Models
                     StartCannabis();
                     break;
             }
-            selectedPirate.IsVisible = true;
-            OnEndPirateMove();
         }
         /// <summary>
         /// Метод безусловного продолжения перемещения пирата.
@@ -898,8 +889,6 @@ namespace Jackal.Models
         static MovementResult ContinueMovePirate(Coordinates coords)
         {
             Cell cell = Map[coords].GetSelectedCell(SelectedPirate);
-
-            OnStartPirateAnimation(cell);
 
             if (!cell.IsGoldFriendly(SelectedPirate))
             {
@@ -924,7 +913,7 @@ namespace Jackal.Models
         static MovementResult MovePirate(Cell cell)
         {
             SelectedPirate.RemoveFromCell();
-            return cell.AddPirate(SelectedPirate);
+            return cell.AddPirate(SelectedPirate, delay: pirateDelay);
         }
 
 

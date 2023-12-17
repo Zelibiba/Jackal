@@ -36,11 +36,14 @@ namespace Jackal.ViewModels
 
             Game.CreateMap(players, seed, autosave: operations == null);
             Game.ReadOperations(operations ?? new List<int[]>());
-            Game.StartPirateAnimation = (cellIndex) =>
+            Game.StartPirateAnimation = (pirateIndex, cellIndex, kill) =>
             {
-                PirateViewModel pirate = Pirates.First(vm => vm.Pirate == Game.SelectedPirate);
-                Cells[cellIndex].AddPirate(pirate);
-                return Task.Delay(300);
+                PirateViewModel pirateVM = Pirates[pirateIndex];
+                CellViewModel cellVM = Cells[cellIndex];
+                if (kill)
+                    cellVM.ClearIndex(pirateVM.Index);
+                else if (pirateVM.CellVM != cellVM)
+                    pirateVM.SetCell(cellVM);
             };
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;

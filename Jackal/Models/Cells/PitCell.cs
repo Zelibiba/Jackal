@@ -1,4 +1,5 @@
-﻿using Jackal.Models.Pirates;
+﻿using Jackal.Models.Cells.Utilites;
+using Jackal.Models.Pirates;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +25,9 @@ namespace Jackal.Models.Cells
             SelectableCoords.Clear();
         }
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             if (Pirates.Count == 1 && pirate is not Friday)
                 pirate.IsBlocked = true;
             else if (Pirates.Count > 1)

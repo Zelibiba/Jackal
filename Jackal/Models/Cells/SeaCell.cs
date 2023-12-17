@@ -25,9 +25,9 @@ namespace Jackal.Models.Cells
             set => Game.LostGold += 3;
         }
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
-            MovementResult result = base.AddPirate(pirate);
+            MovementResult result = base.AddPirate(pirate, delay);
             pirate.Gold = false;
             pirate.Galeon = false;
             return result;

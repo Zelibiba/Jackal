@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using Jackal.Models.Cells;
+using Jackal.Models.Cells.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -82,11 +82,11 @@ namespace Jackal.Models.Cells
         }
 
         public override bool CanBeSelectedBy(Pirate pirate) => pirate.Cell is SeaCell || IsFriendlyTo(pirate);
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
             if (IsFriendlyTo(pirate))
             {
-                base.AddPirate(pirate);
+                base.AddPirate(pirate, delay);
                 pirate.Gold = false;
                 pirate.Galeon = false;
             }

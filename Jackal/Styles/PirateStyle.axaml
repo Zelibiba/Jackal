@@ -15,7 +15,6 @@
 		<Setter Property="Command" Value="{Binding $parent[v:GameView].DataContext.SelectPirate}"/>
 		<Setter Property="CommandParameter" Value="{Binding Pirate}"/>
 		<Setter Property="IsEnabled" Value="{Binding Pirate.IsEnabled}"/>
-		<Setter Property="IsVisible" Value="{Binding Pirate.IsVisible}"/>
 		<Setter Property="HorizontalAlignment" Value="Center"/>
 		<Setter Property="VerticalAlignment" Value="Center"/>
 		<Setter Property="Template">

@@ -16,10 +16,10 @@ namespace Jackal.Models.Cells
 
         readonly Func<Coordinates, MovementResult> _continueMove;
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
             Coordinates coords = pirate.Cell.Coords;
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             if (pirate.IsInLoop)
             {
                 pirate.LoopKill();

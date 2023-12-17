@@ -16,9 +16,9 @@ namespace Jackal.Models.Cells
 
         readonly Func<Coordinates, MovementResult> _continueMove;
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             return _continueMove(pirate.Owner.Ship.Coords);
         }
     }

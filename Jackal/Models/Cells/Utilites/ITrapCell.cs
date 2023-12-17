@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jackal.Models.Cells
+namespace Jackal.Models.Cells.Utilites
 {
     public interface ITrapCell
     {

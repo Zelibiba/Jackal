@@ -1,4 +1,5 @@
 ﻿using Avalonia.Layout;
+using Jackal.Models.Cells.Utilites;
 using Jackal.Models.Pirates;
 using System;
 using System.Collections.Generic;
@@ -88,9 +89,9 @@ namespace Jackal.Models.Cells
         public override int Angle => _angle;
         readonly int _angle;
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             if (pirate.IsInLoop)
             {
                 pirate.LoopKill();

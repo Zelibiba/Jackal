@@ -9,6 +9,7 @@ using Jackal.Models.Cells;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Reactive;
+using Jackal.Models.Cells.Utilites;
 
 namespace Jackal.Models.Pirates
 {
@@ -22,7 +23,6 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public static readonly Pirate Empty = new()
         {
-            IsVisible = true,
             Owner = new Player(),
             Manager = new Player()
         };
@@ -41,16 +41,18 @@ namespace Jackal.Models.Pirates
             Owner = owner;
             Manager = manager ?? owner;
             Manager.Pirates.Add(this);
+            Game.Pirates.Add(this);
             this.WhenAnyValue(p => p.Owner)
                 .Select(owner => owner.Team)
                 .ToPropertyEx(this, p => p.Team);
 
 
             Image = image ?? Team.ToString();
-            IsVisible = true;
             IsEnabled = true;
 
             _loopDict = new Dictionary<Cell, int>();
+
+            
 
             this.WhenAnyValue(p => p.Cell.Gold)
                 .Select(gold => gold > 0)
@@ -144,13 +146,6 @@ namespace Jackal.Models.Pirates
         /// Необходим для интерфейса.
         /// </remarks>
         [Reactive] public bool IsSelected { get; set; }
-        /// <summary>
-        /// Флаг того, что пират виден.
-        /// </summary>
-        /// /// <remarks>
-        /// Необходим для интерфейса.
-        /// </remarks>
-        [Reactive] public bool IsVisible { get; set; }
         /// <summary>
         /// Цвет изображения пирата.
         /// </summary>
@@ -297,7 +292,7 @@ namespace Jackal.Models.Pirates
         public void GiveBirth() => Cell.AddPirate(new Pirate(Owner, Manager));
 
         /// <summary>
-        /// Флаг того, что пират заблокирован в яме или пещере.
+        /// Флаг того, что пират заблокирован в яме, пещере или из-за бочки рома.
         /// </summary>
         /// <remarks>Используется в интерфейсе.</remarks>
         [Reactive] public bool IsBlocked { get; set; }
@@ -321,6 +316,9 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public void Kill()
         {
+            Game.OnStartPirateAnimation(this, Cell, kill: true);
+            Game.Pirates.Remove(this);
+
             TargetCell = null;
             Cell.RemovePirate(this, withGold: false);
             Manager.Pirates.Remove(this);

@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using DynamicData;
 using DynamicData.Binding;
+using Jackal.Models.Cells.Utilites;
 using Jackal.Models.Pirates;
 using ReactiveUI;
 using System;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Jackal.Models.Cells
 {
-    public class MazeCell : Cell
+    public class MazeCell : NodeOwnerCell
     {
         public MazeCell(int row, int column, int mazeLevel) : base(row, column, "Maze" + mazeLevel)
         {
@@ -21,38 +22,37 @@ namespace Jackal.Models.Cells
                 throw new ArgumentException("Wrong mazeLevel!");
 
             Nodes.Clear();
-            for (int i = 0; i < mazeLevel; i++)
-                Nodes.Add(new MazeNodeCell(Row, Column, this, i + 1));
-
-            LinkCellWithNodes();
+            for (int i = 1; i <= mazeLevel; i++)
+                Nodes.Add(new MazeNodeCell(this, i));
         }
-
-
 
         public override Cell GetSelectedCell(Pirate pirate)
         {
-            int nodeNumber = Pirates.Contains(pirate) ? pirate.MazeNodeNumber : 0;
+            int nodeNumber = pirate.Cell.Coords == Coords ? pirate.MazeNodeNumber : 0;
             return Nodes[nodeNumber];
         }
+    }
 
-        public override void Open()
+    public class MazeNodeCell : NodeCell, ITrapCell
+    {
+        public MazeNodeCell(MazeCell owner, int step) : base(owner, number: step)
         {
-            base.Open();
-            foreach (Cell cell in Nodes)
-                cell.Open();
+            AltSelectableCoords = new List<Coordinates>();
         }
 
-        public override void SetCoordinates(int row, int column)
-        {
-            base.SetCoordinates(row, column);
-            foreach (Cell cell in Nodes)
-                cell.SetCoordinates(row, column);
-        }
+        public List<Coordinates> AltSelectableCoords { get; }
+
         public override void SetSelectableCoords(Map map)
         {
-            base.SetSelectableCoords(map);
-            foreach(Cell cell in Nodes)
-                cell.SetSelectableCoords(map);
+            if (_owner.Nodes.Count == Number)
+                base.SetSelectableCoords(map);
+            else
+            {
+                SelectableCoords.Clear();
+                SelectableCoords.Add(Coords);
+            }
+            AltSelectableCoords.Clear();
+            AltSelectableCoords.AddRange(_owner.SelectableCoords);
         }
     }
 }

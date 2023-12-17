@@ -32,10 +32,10 @@ namespace Jackal.Models.Cells
                 SelectableCoords.RemoveAll(coords => (coords - Coords).Distance() > 1 || coords == Coords);
             }
         }
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
             bool isOpened = IsOpened;
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             return isOpened ? MovementResult.End : MovementResult.Continue;
         }
         public override void SetSelectableCoords(Map map)

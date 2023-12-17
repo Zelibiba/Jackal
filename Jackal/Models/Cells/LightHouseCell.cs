@@ -11,10 +11,10 @@ namespace Jackal.Models.Cells
     {
         public LightHouseCell(int row,int column) : base(row, column, "LightHouse") { }
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
             MovementResult result = IsOpened ? MovementResult.End : MovementResult.LightHouse;
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             return result;
         }
     }

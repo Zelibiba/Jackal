@@ -1,4 +1,4 @@
-﻿using Jackal.Models.Cells.Cave;
+﻿using Jackal.Models.Cells;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;

@@ -34,8 +34,7 @@ namespace Jackal.ViewModels
         public CellViewModel(Cell cell)
         {
             Cell = cell;
-            PiratesVM = new();
-            CellDuration = TimeSpan.FromSeconds(0.5);
+            _piratePlaces = new();
 
             this.WhenAnyValue(vm => vm.Cell.Row, vm => vm.Cell.Column, ComputeX)
                 .ToPropertyEx(this, vm => vm.X);
@@ -54,20 +53,22 @@ namespace Jackal.ViewModels
         [ObservableAsProperty] public int X { get; }
         [ObservableAsProperty] public int Y { get; }
 
-        public TimeSpan CellDuration { get; }
-
-        public List<PirateViewModel?> PiratesVM { get; }
-        public void AddPirate(PirateViewModel pirateVM)
+        private readonly List<bool> _piratePlaces;
+        public void ClearIndex(int index)
         {
-            int index = PiratesVM.FindIndex(vm => vm == null);
+            _piratePlaces[index] = false;
+        }
+        public int GetIndex()
+        {
+            int index = _piratePlaces.FindIndex(i => !i);
             if (index < 0)
             {
-                index = PiratesVM.Count;
-                PiratesVM.Add(pirateVM);
+                index = _piratePlaces.Count;
+                _piratePlaces.Add(true);
             }
             else
-                PiratesVM[index] = pirateVM;
-            pirateVM.SetCell(this, index);
+                _piratePlaces[index] = true;
+            return index;
         }
     }
 }

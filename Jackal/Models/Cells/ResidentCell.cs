@@ -24,11 +24,11 @@ namespace Jackal.Models.Cells
             switch (_type)
             {
                 case ResidentType.Ben:
-                    AddPirate(new Ben(owner, manager)); break;
+                    AddPirate(new Ben(owner, manager), 0); break;
                 case ResidentType.Friday:
-                    AddPirate(new Friday(owner, manager)); break;
+                    AddPirate(new Friday(owner, manager), 0); break;
                 case ResidentType.Missioner:
-                    AddPirate(new Missioner(owner, manager)); break;
+                    AddPirate(new Missioner(owner, manager), 0); break;
             }
         }
     }

@@ -11,10 +11,10 @@ namespace Jackal.Models.Cells
     {
         public CannabisCell(int row, int column) : base(row, column, "Cannabis") { }
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
             MovementResult result = IsOpened ? MovementResult.End : MovementResult.Cannabis;
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
             return result;
         }
     }

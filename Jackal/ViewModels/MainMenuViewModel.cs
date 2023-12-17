@@ -19,7 +19,7 @@ namespace Jackal.ViewModels
             //Content = this;
 
             //(Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "спаивание миссионера.txt"));
-            (Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "0.txt"));
+            (Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "1.txt"));
             Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
 

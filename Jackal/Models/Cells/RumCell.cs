@@ -11,9 +11,9 @@ namespace Jackal.Models.Cells
     {
         public RumCell(int row,int column) : base(row, column, "Rum") { }
 
-        public override MovementResult AddPirate(Pirate pirate)
+        public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
-            base.AddPirate(pirate);
+            base.AddPirate(pirate, delay);
 
             if (pirate is Friday)
                 pirate.Kill();

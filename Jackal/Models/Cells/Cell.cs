@@ -30,14 +30,14 @@ namespace Jackal.Models.Cells
         /// <param name="isStandable"><inheritdoc cref="IsStandable" path="/summary"/></param>
         /// <param name="angle"><inheritdoc cref="Angle" path="/summary"/></param>
         /// <param name="number"><inheritdoc cref="Number" path="/summary"/></param>
-        public Cell(int row, int column, string image, bool isStandable = true, int angle = 0, int number = 0)
+        public Cell(int row, int column, string image, bool isStandable = true, int number = 0)
         {
             Row = row;
             Column = column;
             Coords = new(Row, Column);
             Image = image;
-            Angle = angle;
-            Pirates = new ObservableCollection<Pirate>();
+            Angle = 0;
+            Pirates = new List<Pirate>();
             SelectableCoords = new List<Coordinates>();
             Nodes = new ObservableCollection<Cell> { this };
             IsVisible = true;
@@ -127,33 +127,7 @@ namespace Jackal.Models.Cells
         /// В нелабиринтной клетке равняется 0.
         /// </remarks>
         public int Number { get; }
-        /// <summary>
-        /// создаёт реактивные связи между данной клеткой и её подклетками из <see cref="Nodes"/>.
-        /// </summary>
-        protected void LinkCellWithNodes()
-        {
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.Gold)
-                 .Subscribe(_ => Gold = Nodes.Sum(x => x.Gold));
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.Galeon)
-                 .Subscribe(_ => Galeon = Nodes.Any(x => x.Galeon));
 
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.IsPreOpened)
-                 .Subscribe(_ => IsPreOpened = Nodes.Any(x => x.IsPreOpened));
-
-            Nodes.ToObservableChangeSet()
-                 .AutoRefresh(cell => cell.CanBeSelected)
-                 .Subscribe(_ => CanBeSelected = Nodes.Any(x => x.CanBeSelected));
-            this.WhenAnyValue(cell => cell.CanBeSelected)
-                .Where(x => !x)
-                .Subscribe(_ =>
-                {
-                    foreach (Cell cell in Nodes)
-                        cell.CanBeSelected = false;
-                });
-        }
         /// <summary>
         /// Метод возвращает ту часть клетки, которая досягаема для выбранного пирата.
         /// </summary>
@@ -259,7 +233,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Список пиратов, находящихся на клетке.
         /// </summary>
-        public ObservableCollection<Pirate> Pirates { get; protected set; }
+        public List<Pirate> Pirates { get; protected set; }
         /// <summary>
         /// Команда, которая владеет данной клеткой.
         /// </summary>
@@ -334,8 +308,12 @@ namespace Jackal.Models.Cells
         /// </summary>
         /// <param name="pirate">Пират, добавляемый на клетку.</param>
         /// <returns></returns>
-        public virtual MovementResult AddPirate(Pirate pirate)
+        public virtual MovementResult AddPirate(Pirate pirate, int delay = 0)
         {
+            Game.OnStartPirateAnimation(pirate, this);
+            if (delay > 0)
+                Task.Delay(delay).Wait();
+
             Pirates.Add(pirate);    // Сначала добавить пирата, потом убрать врагов (для корректной работы AirplaneCell)
             pirate.Cell = this;
 
@@ -356,17 +334,22 @@ namespace Jackal.Models.Cells
         /// Метод стукает вражеских пиратов на клетке и забирает пятницу, если это необходимо делать.
         /// </summary>
         /// <param name="pirate">Пират, который пришёл на данную клетку.</param>
-        public void HitPirates(Pirate pirate, bool allPirates = true)
+        public void HitPirates(Pirate pirate, bool allPirates = false)
         {
             if (!IsFriendlyTo(pirate))
             {
+                if(pirate is Friday && ContainsMissioner || pirate is Missioner && ContainsFriday)
+                {
+                    while (Pirates.Count > 0)
+                        Pirates[0].Kill();
+                    return;
+                }
+
                 List<Pirate> pirates = new();
-                foreach (Pirate pir in Pirates.Take(Pirates.Count - (allPirates ? 1 : 0)))
+                foreach (Pirate pir in Pirates.Take(Pirates.Count - (allPirates ? 0 : 1)))
                 {
                     if (pir is Friday friday)
                         friday.SetNewOwner(pirate.Owner, pirate.Manager);
-                    else if (pir is Missioner)
-                        continue;
                     else
                         pirates.Add(pir);
                 }
@@ -374,7 +357,7 @@ namespace Jackal.Models.Cells
                 {
                     pir.TargetCell = pir.Owner.Ship;
                     RemovePirate(pir, withGold: false);
-                    pir.Owner.Ship.AddPirate(pir);
+                    pir.Owner.Ship.AddPirate(pir, delay: 150);
                 }
             }
         }
