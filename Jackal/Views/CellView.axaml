@@ -10,14 +10,14 @@
 			 Width="{Binding Width}"
 			 HorizontalAlignment="Stretch"
 			 VerticalAlignment="Stretch"
-			 IsVisible="{Binding Cell.IsVisible}">
+			 IsVisible="{Binding ZIndex}">
 	<UserControl.Resources>
 		<converters:TeamConverter x:Key="TeamConverter"/>
 		<converters:ImageConverter x:Key="ImageConverter"/>
 	</UserControl.Resources>
 	<UserControl.Styles>
 		<StyleInclude Source="/Styles/PirateStyle.axaml"/>
-		
+
 		<!-- Классы для отображения выбора ячейки. -->
 		<Style Selector="v|CellContainer.Cell.Usual">
 			<Setter Property="BorderBrush" Value="Black"/>
@@ -86,8 +86,8 @@
 			</Setter>
 		</Style>
 	</UserControl.Styles>
-	
-	
+
+
 	<UserControl.Template>
 		<ControlTemplate>
 			<v:CellContainer Classes="Cell Usual"
@@ -143,6 +143,6 @@
 					</WrapPanel>
 				</Panel>
 			</v:CellContainer>
-	</ControlTemplate>
+		</ControlTemplate>
 	</UserControl.Template>
 </UserControl>

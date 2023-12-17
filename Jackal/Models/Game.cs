@@ -466,12 +466,10 @@ namespace Jackal.Models
             }
             #endregion
 
-            //Map[1, 6] = new HorseCell(1, 6);
+            Map[1, 6] = new EarthQuakeCell(1, 6);
             //Map[5, 6] = new Cell(5, 6,"Field");
             //Map[8,11] = new HorseCell(8,11);
             //Players[1].Bottles = 1;
-            Map[0, 6].AddPirate(new Missioner(Players[0], Players[0]));
-            Map[1, 6].AddPirate(new Friday(Players[1], Players[1]));
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -918,6 +916,36 @@ namespace Jackal.Models
 
 
         /// <summary>
+        /// Делегат для управления z-индексом клеток при их перемещении.
+        /// </summary>
+        public static Action<int, int, int, int>? SetCellZIndex;
+        /// <summary>
+        /// Вызов делегата <see cref="SetCellZIndex"/>.
+        /// </summary>
+        /// <param name="cell1">Одна клетка.</param>
+        /// <param name="cell2">Вторая клетка.</param>
+        /// <param name="start">Флаг того, начало ли перемещения или конц.</param>
+        static void OnSetCellZIndex(Cell cell1, Cell cell2, bool start)
+        {
+            if (SetCellZIndex != null)
+            {
+                int cell1Index = Map.IndexOf(cell1);
+                int cell2Index = Map.IndexOf(cell2);
+                int zIndex1, zIndex2;
+                if (start)
+                {
+                    zIndex1 = cell1 is SeaCell ? 0 : 100;
+                    zIndex2 = cell2 is SeaCell ? 0 : 100;
+                }
+                else
+                {
+                    zIndex1 = 1;
+                    zIndex2 = 1;
+                }
+                SetCellZIndex(cell1Index, zIndex1, cell2Index, zIndex2);
+            }
+        }
+        /// <summary>
         /// Метод перемещения корабля.
         /// </summary>
         /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
@@ -980,8 +1008,7 @@ namespace Jackal.Models
             Coordinates coords1 = cell1.Coords;
             Coordinates coords2 = cell2.Coords;
 
-            SeaCell? seaCell = cell1 is SeaCell ? (SeaCell)cell1 : cell2 is SeaCell ? (SeaCell)cell2 : null;
-            if (seaCell != null) seaCell.IsVisible = false;
+            OnSetCellZIndex(cell1, cell2, true);
 
             Map.SwapIndexes(coords1, coords2);
             cell2.SetCoordinates(coords1.Row, coords1.Column);
@@ -990,7 +1017,7 @@ namespace Jackal.Models
             cell2.SetSelectableCoords(Map);
 
             Task.Delay(500).Wait();
-            if (seaCell != null) seaCell.IsVisible = true;
+            OnSetCellZIndex(cell1, cell2, false);
         }
 
         /// <summary>

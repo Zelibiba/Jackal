@@ -34,6 +34,7 @@ namespace Jackal.ViewModels
         public CellViewModel(Cell cell)
         {
             Cell = cell;
+            ZIndex = 1;
             _piratePlaces = new();
 
             this.WhenAnyValue(vm => vm.Cell.Row, vm => vm.Cell.Column, ComputeX)
@@ -43,7 +44,7 @@ namespace Jackal.ViewModels
         }
 
         public Cell Cell { get; }
-
+        [Reactive] public int ZIndex { get; set; }
         
         public static int Height { get; }
         public static int Width { get; }
@@ -53,7 +54,10 @@ namespace Jackal.ViewModels
         [ObservableAsProperty] public int X { get; }
         [ObservableAsProperty] public int Y { get; }
 
-        private readonly List<bool> _piratePlaces;
+        /// <summary>
+        /// Лист доступных мест для отображения пирата поверх клетки.
+        /// </summary>
+        readonly List<bool> _piratePlaces;
         public void ClearIndex(int index)
         {
             _piratePlaces[index] = false;

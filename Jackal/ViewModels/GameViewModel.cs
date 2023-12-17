@@ -45,6 +45,11 @@ namespace Jackal.ViewModels
                 else if (pirateVM.CellVM != cellVM)
                     pirateVM.SetCell(cellVM);
             };
+            Game.SetCellZIndex = (cellIndex1, zIndex1, cellIndex2, zIndex2) =>
+            {
+                Cells[cellIndex1].ZIndex = zIndex1;
+                Cells[cellIndex2].ZIndex = zIndex2;
+            };
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
             Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",

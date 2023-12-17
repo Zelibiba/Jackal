@@ -28,19 +28,15 @@ namespace Jackal.Models.Cells
         /// <param name="column">Колонка клетки.</param>
         /// <param name="image">Название изображения клетки.</param>
         /// <param name="isStandable"><inheritdoc cref="IsStandable" path="/summary"/></param>
-        /// <param name="angle"><inheritdoc cref="Angle" path="/summary"/></param>
         /// <param name="number"><inheritdoc cref="Number" path="/summary"/></param>
         public Cell(int row, int column, string image, bool isStandable = true, int number = 0)
         {
-            Row = row;
-            Column = column;
-            Coords = new(Row, Column);
+            Coords = new(row, column);
             Image = image;
             Angle = 0;
             Pirates = new List<Pirate>();
             SelectableCoords = new List<Coordinates>();
             Nodes = new ObservableCollection<Cell> { this };
-            IsVisible = true;
             IsStandable = isStandable;
             Number = number;
 
@@ -75,15 +71,15 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Строка клетки.
         /// </summary>
-        public int Row { get; private set; }
+        public int Row => Coords.Row;
         /// <summary>
         /// Столбец клетки.
         /// </summary>
-        public int Column { get; private set; }
+        public int Column => Coords.Column;
         /// <summary>
         /// Координаты клетки.
         /// </summary>
-        public Coordinates Coords {get; private set; }
+        public Coordinates Coords { get; private set; }
         /// <summary>
         /// Метод задаёт новые координаты клетки.
         /// </summary>
@@ -91,9 +87,7 @@ namespace Jackal.Models.Cells
         /// <param name="column">Новый столбец.</param>
         public virtual void SetCoordinates(int row, int column)
         {
-            Row = row;
-            Column = column;
-            Coords = new(Row, Column);
+            Coords = new(row, column);
             this.RaisePropertyChanged(nameof(Row));
             this.RaisePropertyChanged(nameof(Column));
         }
@@ -109,7 +103,7 @@ namespace Jackal.Models.Cells
         public virtual void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            foreach(Coordinates coords in map.AdjacentCellsCoords(this))
+            foreach (Coordinates coords in map.AdjacentCellsCoords(this))
             {
                 if (map[coords] is SeaCell) continue;
                 SelectableCoords.Add(coords);
@@ -136,13 +130,6 @@ namespace Jackal.Models.Cells
         /// </remarks>
         public virtual Cell GetSelectedCell(Pirate pirate) => this;
 
-        /// <summary>
-        /// Флаг того, что клетка видима.
-        /// </summary>
-        /// <remarks>
-        /// Необходим для анимации перемещения клеток.
-        /// </remarks>
-        [Reactive] public bool IsVisible { get; set; }
         /// <summary>
         /// Флаг того, что изображение клетки видимо.
         /// </summary>
@@ -307,7 +294,7 @@ namespace Jackal.Models.Cells
         /// Метод помещает пирата на клетку.
         /// </summary>
         /// <param name="pirate">Пират, добавляемый на клетку.</param>
-        /// <returns></returns>
+        /// <param name="delay">Миллисекунды паузы для ожидания анимации.</param>
         public virtual MovementResult AddPirate(Pirate pirate, int delay = 0)
         {
             Game.OnStartPirateAnimation(pirate, this);
@@ -334,6 +321,7 @@ namespace Jackal.Models.Cells
         /// Метод стукает вражеских пиратов на клетке и забирает пятницу, если это необходимо делать.
         /// </summary>
         /// <param name="pirate">Пират, который пришёл на данную клетку.</param>
+        /// <param name="allPirates">Флаг того, что необходимо стукнуть всех пиратов, а не оставить последнего.</param>
         public void HitPirates(Pirate pirate, bool allPirates = false)
         {
             if (!IsFriendlyTo(pirate))

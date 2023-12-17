@@ -23,6 +23,7 @@
 					</ItemsControl.ItemsPanel>
 					<ItemsControl.Styles>
 						<Style Selector="ItemsControl ContentPresenter">
+							<Setter Property="ZIndex" Value="{Binding ZIndex}"/>
 							<Setter Property="Canvas.Right" Value="{Binding X}"/>
 							<Setter Property="Canvas.Top" Value="{Binding Y}"/>
 							<Setter Property="Transitions">
