@@ -16,11 +16,11 @@ namespace Jackal.ViewModels
     {
         public MainMenuViewModel()
         {
-            //Content = this;
+            Content = this;
 
             //(Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "спаивание миссионера.txt"));
-            (Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "1.txt"));
-            Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
+            //(Player[], int, MapType, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "1.txt"));
+            //Content = new GameViewModel(data.Item1, data.Item2, data.Item3, data.Item4);
         }
 
         [Reactive] public ViewModelBase Content { get; private set; }
@@ -34,11 +34,11 @@ namespace Jackal.ViewModels
         }
         public async Task ConnectToServer(object param)
         {
-            //IPWindow dialog = new IPWindow();
-            //string ip = await dialog.ShowDialog<string>(param as Window);
-            //if (!string.IsNullOrEmpty(ip))
-            //    Client.Start(ip, SetContent);
-            Client.Start(Server.IP, SetContent);
+            IPWindow dialog = new IPWindow();
+            string ip = await dialog.ShowDialog<string>(param as Window);
+            if (!string.IsNullOrEmpty(ip))
+                Client.Start(ip, SetContent);
+            //Client.Start(Server.IP, SetContent);
         }
         public async void LoadGame(object param)
         {
@@ -52,8 +52,8 @@ namespace Jackal.ViewModels
             if (result?[0] == null)
                 return;
 
-            (Player[], int, List<int[]>) data = SaveOperator.ReadSave(result[0]);
-            Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
+            (Player[], int, MapType,List<int[]>) data = SaveOperator.ReadSave(result[0]);
+            Content = new GameViewModel(data.Item1, data.Item2, data.Item3, data.Item4);
         }
         public void Cansel()
         {

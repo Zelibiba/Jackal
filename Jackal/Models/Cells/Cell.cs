@@ -235,7 +235,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Флаг того, что на клетке находится Миссионер.
         /// </summary>
-        public bool ContainsMissioner => Pirates.Any(pirate => pirate is Missioner);
+        bool ContainsMissioner => Pirates.Any(pirate => pirate is Missioner);
         /// <summary>
         /// Флаг того, что на клетке находится Пятница.
         /// </summary>
@@ -270,8 +270,7 @@ namespace Jackal.Models.Cells
             {
                 if (pirate.Gold)
                 {
-                    Gold--;
-                    if (Gold == 0)
+                    if (--Gold == 0)
                     {
                         foreach (Pirate p in Pirates)
                             p.Gold = false;
@@ -324,15 +323,15 @@ namespace Jackal.Models.Cells
         /// <param name="allPirates">Флаг того, что необходимо стукнуть всех пиратов, а не оставить последнего.</param>
         public void HitPirates(Pirate pirate, bool allPirates = false)
         {
+            if (pirate is Friday && ContainsMissioner || pirate is Missioner && ContainsFriday)
+            {
+                while (Pirates.Count > 0)
+                    Pirates[0].Kill();
+                return;
+            }
+
             if (!IsFriendlyTo(pirate))
             {
-                if(pirate is Friday && ContainsMissioner || pirate is Missioner && ContainsFriday)
-                {
-                    while (Pirates.Count > 0)
-                        Pirates[0].Kill();
-                    return;
-                }
-
                 List<Pirate> pirates = new();
                 foreach (Pirate pir in Pirates.Take(Pirates.Count - (allPirates ? 0 : 1)))
                 {

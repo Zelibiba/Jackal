@@ -22,7 +22,7 @@ namespace Jackal.ViewModels
                               (i, x) => x + i % 3 * (Size + 1) + 4)
                               .ToPropertyEx(this, vm => vm.X);
             this.WhenAnyValue(vm => vm.Index, vm => vm.CellVM.Y,
-                              (i, y) => y + i / 3 * (Size + 1) + 11)
+                              (i, y) => y + i / 3 * (Size + 1) + 16)
                               .ToPropertyEx(this, vm => vm.Y);
         }
 

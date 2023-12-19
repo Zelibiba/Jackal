@@ -27,16 +27,19 @@
 			</WrapPanel>
 		</Grid>
 		<WrapPanel Grid.Column="1" Orientation="Vertical" Margin="10">
-			<Button Grid.Column="1" FontSize="25"
+			<Button Grid.Column="1" FontSize="25" Content="Начать игру"
 					IsVisible="{Binding IsServerHolder}"
-					Command="{Binding StartGameCommand}">
-				Начать игру
-			</Button>
+					Command="{Binding StartGameCommand}"/>
+			<CheckBox Content="Гексагональная карта" FontSize="20"
+					  Margin="0,10"
+					  IsEnabled="{Binding IsServerHolder}"
+					  IsChecked="{Binding IsHexagonal}"/>
 			<CheckBox Name="AllyBox" Content="Двойник в команде" FontSize="20"
-					  Margin="0,10" IsEnabled="{Binding !#WatcherBox.IsChecked}"
+					  IsEnabled="{Binding !#WatcherBox.IsChecked}"
 					  Command="{Binding CreateAllyCommand}"
 					  CommandParameter="{Binding #AllyBox.IsChecked}"/>
 			<CheckBox Name="WatcherBox" Content="Зритель" FontSize="20"
+					  Margin="0,10"
 					  IsEnabled="{Binding !#AllyBox.IsChecked}"
 					  Command="{Binding ChangeWatcherCommand}"
 					  CommandParameter="{Binding #WatcherBox.IsChecked}"/>

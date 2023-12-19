@@ -98,16 +98,16 @@ namespace Jackal.Models.Cells
     {
         public CaveTreasureCell(CaveCell cave) : base(cave, isStandable: false) { }
 
-        CaveExitCell? Exit => (_owner as CaveCell)?.Exit;
+        CaveExitCell Exit => (_owner as CaveCell).Exit;
 
         public override int Gold
         {
-            get => Exit?.Gold ?? 0;
+            get => Pirates.Count > 0 ? Exit.Gold : 0;
             set => Exit.Gold = value;
         }
         public override bool Galeon
         {
-            get => Exit?.Galeon ?? false;
+            get => Pirates.Count > 0 ? Exit.Galeon : false;
             set => Exit.Galeon = value;
         }
 

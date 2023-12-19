@@ -27,6 +27,14 @@ namespace Jackal
             writer.Write((int)allianceIdentifier);
         }
 
+        public static MapType ReadMapType(this BinaryReader reader)
+        {
+            return (MapType)reader.ReadInt32();
+        }
+        public static void Write(this BinaryWriter writer, MapType mapType)
+        {
+            writer.Write((int)mapType);
+        }
 
         public static Player ReadPlayer(this BinaryReader reader, bool isControllable = false)
         {

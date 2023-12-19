@@ -109,106 +109,118 @@ namespace Jackal.Network
 
         void ProcessMessages()
         {
-            _lastMode = _reader.ReadNetMode();
-            switch (_lastMode)
+            try
             {
-                case NetMode.Disconnect:
-                    Task.Delay(500).Wait();
-                    Server.Clients.Remove(this);
-                    _continueListening = false;
-                    if (!_isWatcher)
-                    {
-                        foreach (Player player in _players)
+                _lastMode = _reader.ReadNetMode();
+                switch (_lastMode)
+                {
+                    case NetMode.Disconnect:
+                        Task.Delay(500).Wait();
+                        Server.Clients.Remove(this);
+                        _continueListening = false;
+                        if (!_isWatcher)
                         {
-                            SendToOther(NetMode.DeletePlayer, writer =>
-                                        writer.Write(player.Index));
+                            foreach (Player player in _players)
+                            {
+                                SendToOther(NetMode.DeletePlayer, writer =>
+                                            writer.Write(player.Index));
+                            }
                         }
-                    }
-                    break;
-                case NetMode.GetPlayer:
-                    int number = _reader.ReadInt32();
-                    if (number == 0)
-                        _isWatcher = false;
-                    else if (_players.Count < number + 1)
-                        _players.Add(new Player(Server.GetPlayerIndex(), _players[0].Name, SetAllyTeam(_players[0].Team))
-                        { AllianceIdentifier = _players[0].AllianceIdentifier });
+                        break;
+                    case NetMode.GetPlayer:
+                        int number = _reader.ReadInt32();
+                        if (number == 0)
+                            _isWatcher = false;
+                        else if (_players.Count < number + 1)
+                            _players.Add(new Player(Server.GetPlayerIndex(), _players[0].Name, SetAllyTeam(_players[0].Team))
+                            { AllianceIdentifier = _players[0].AllianceIdentifier });
 
-                    _writer.Write(NetMode.GetPlayer);
-                    _writer.Write(number);
-                    _writer.Write(_players[number]);
-                    _writer.Flush();
-                    SendToOther(NetMode.NewPlayer, writer =>
-                                writer.Write(_players[number])); break;
-                case NetMode.UpdatePlayer:
-                    _players[0] = _reader.ReadPlayer();
-                    if (_players.Count == 2)
-                    {
-                        _players[1].Name = _players[0].Name;
-                        _players[1].Team = SetAllyTeam(_players[0].Team);
-                        _players[1].AllianceIdentifier = _players[0].AllianceIdentifier;
-                        _players[1].IsReady = _players[0].IsReady;
-                        _writer.Write(NetMode.UpdatePlayer);
-                        _writer.Write(_players[1]);
+                        _writer.Write(NetMode.GetPlayer);
+                        _writer.Write(number);
+                        _writer.Write(_players[number]);
                         _writer.Flush();
+                        SendToOther(NetMode.NewPlayer, writer =>
+                                    writer.Write(_players[number])); break;
+                    case NetMode.UpdatePlayer:
+                        _players[0] = _reader.ReadPlayer();
+                        if (_players.Count == 2)
+                        {
+                            _players[1].Name = _players[0].Name;
+                            _players[1].Team = SetAllyTeam(_players[0].Team);
+                            _players[1].AllianceIdentifier = _players[0].AllianceIdentifier;
+                            _players[1].IsReady = _players[0].IsReady;
+                            _writer.Write(NetMode.UpdatePlayer);
+                            _writer.Write(_players[1]);
+                            _writer.Flush();
+                            SendToOther(NetMode.UpdatePlayer, writer =>
+                                    writer.Write(_players[1]));
+                        }
                         SendToOther(NetMode.UpdatePlayer, writer =>
-                                writer.Write(_players[1]));
-                    }
-                    SendToOther(NetMode.UpdatePlayer, writer =>
-                                writer.Write(_players[0])); break;
-                case NetMode.DeletePlayer:
-                    number = _reader.ReadInt32();
-                    SendToOther(NetMode.DeletePlayer, writer =>
-                                writer.Write(_players[number].Index));
-                    if (number == 0)
-                        _isWatcher = true;
-                    else
-                        _players.RemoveAt(number);
-                    break;
-                case NetMode.StartGame:
-                    Server.PreapreToGame = false;
-                    int count = _reader.ReadInt32();
-                    Team[] mixedTeams = new Team[count];
-                    for (int i = 0; i < count; i++)
-                        mixedTeams[i] = _reader.ReadTeam();
-                    int mapSeed = _reader.ReadInt32();
-                    SendToOther(NetMode.StartGame, writer =>
-                    {
-                        writer.Write(count);
-                        foreach (Team team in mixedTeams)
-                            writer.Write(team);
-                        writer.Write(mapSeed);
-                    }); break;
-                case NetMode.MovePirate:
-                    int index = _reader.ReadInt32();
-                    bool gold = _reader.ReadBoolean();
-                    bool galeon = _reader.ReadBoolean();
-                    Coordinates coords = _reader.ReadCoords();
-                    SendToOther(NetMode.MovePirate, writer =>
-                    {
-                        writer.Write(index);
-                        writer.Write(gold);
-                        writer.Write(galeon);
-                        writer.Write(coords);
-                    }); break;
-                case NetMode.MoveShip:
-                case NetMode.EathQuake:
-                case NetMode.LightHouse:
-                    coords = _reader.ReadCoords();
-                    SendToOther(_lastMode, writer =>
-                                writer.Write(coords)); break;
-                case NetMode.DrinkRum:
-                    index = _reader.ReadInt32();
-                    int type = _reader.ReadInt32();
-                    SendToOther(NetMode.DrinkRum, writer =>
-                    {
-                        writer.Write(index);
-                        writer.Write(type);
-                    }); break;
-                case NetMode.PirateBirth:
-                    index = _reader.ReadInt32();
-                    SendToOther(NetMode.PirateBirth, writer =>
-                                writer.Write(index)); break;
+                                    writer.Write(_players[0])); break;
+                    case NetMode.DeletePlayer:
+                        number = _reader.ReadInt32();
+                        SendToOther(NetMode.DeletePlayer, writer =>
+                                    writer.Write(_players[number].Index));
+                        if (number == 0)
+                            _isWatcher = true;
+                        else
+                            _players.RemoveAt(number);
+                        break;
+                    case NetMode.ChangeMapeType:
+                        MapType maptype = _reader.ReadMapType();
+                        SendToOther(NetMode.ChangeMapeType, writer =>
+                        {
+                            writer.Write(maptype);
+                        }); break;
+                    case NetMode.StartGame:
+                        Server.PreapreToGame = false;
+                        int count = _reader.ReadInt32();
+                        Team[] mixedTeams = new Team[count];
+                        for (int i = 0; i < count; i++)
+                            mixedTeams[i] = _reader.ReadTeam();
+                        int mapSeed = _reader.ReadInt32();
+                        MapType mapType = (MapType)_reader.ReadInt32();
+                        SendToOther(NetMode.StartGame, writer =>
+                        {
+                            writer.Write(count);
+                            foreach (Team team in mixedTeams)
+                                writer.Write(team);
+                            writer.Write(mapSeed);
+                            writer.Write(mapType);
+                        }); break;
+                    case NetMode.MovePirate:
+                        int index = _reader.ReadInt32();
+                        bool gold = _reader.ReadBoolean();
+                        bool galeon = _reader.ReadBoolean();
+                        Coordinates coords = _reader.ReadCoords();
+                        SendToOther(NetMode.MovePirate, writer =>
+                        {
+                            writer.Write(index);
+                            writer.Write(gold);
+                            writer.Write(galeon);
+                            writer.Write(coords);
+                        }); break;
+                    case NetMode.MoveShip:
+                    case NetMode.EathQuake:
+                    case NetMode.LightHouse:
+                        coords = _reader.ReadCoords();
+                        SendToOther(_lastMode, writer =>
+                                    writer.Write(coords)); break;
+                    case NetMode.DrinkRum:
+                        index = _reader.ReadInt32();
+                        int type = _reader.ReadInt32();
+                        SendToOther(NetMode.DrinkRum, writer =>
+                        {
+                            writer.Write(index);
+                            writer.Write(type);
+                        }); break;
+                    case NetMode.PirateBirth:
+                        index = _reader.ReadInt32();
+                        SendToOther(NetMode.PirateBirth, writer =>
+                                    writer.Write(index)); break;
+                }
             }
+            catch (Exception ex) { }
         }
 
         void Close()

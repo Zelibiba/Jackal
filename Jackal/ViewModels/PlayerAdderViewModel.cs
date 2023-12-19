@@ -44,7 +44,7 @@ namespace Jackal.ViewModels
         }
         public void ChangeTeam()
         {
-            if (Player.Team == Team.Black)
+            if (Player.Team == Team.Purple)
                 Player.Team = Team.White;
             else
                 Player.Team = (Team)(2 * (int)Player.Team);

@@ -58,7 +58,7 @@
 						<ItemsControl Items="{Binding Cell.Nodes}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<WrapPanel Orientation="Horizontal" IsVisible="{Binding Cell.Treasure}">
+									<WrapPanel Orientation="Horizontal" IsVisible="{Binding Treasure}">
 										<WrapPanel.Styles>
 											<Style Selector="TextBlock">
 												<Setter Property="HorizontalAlignment" Value="Center"/>
@@ -68,12 +68,12 @@
 											</Style>
 										</WrapPanel.Styles>
 										<TextBlock VerticalAlignment="Top" Margin="0,0,5,0"
-												   Text="{Binding Cell.Number}" IsVisible="{Binding !!Cell.Number}"/>
-										<Panel IsVisible="{Binding !!Cell.Gold}">
+												   Text="{Binding Number}" IsVisible="{Binding !!Number}"/>
+										<Panel IsVisible="{Binding !!Gold}">
 											<Ellipse Height="30" Width="30" Fill="Gold" Stroke="Black" StrokeThickness="2"/>
-											<TextBlock Text="{Binding Cell.Gold}"/>
+											<TextBlock Text="{Binding Gold}"/>
 										</Panel>
-										<Panel IsVisible="{Binding Cell.Galeon}">
+										<Panel IsVisible="{Binding Galeon}">
 											<Rectangle Height="30" Width="30" Fill="Gold" Stroke="Black" StrokeThickness="2"/>
 											<TextBlock Text="Г"/>
 										</Panel>
@@ -123,24 +123,10 @@
 									   IsVisible="{Binding !!Cell.Gold}"/>
 						</WrapPanel>
 					</v:CellContainer>
-					<!--<ItemsControl ZIndex="10" Margin="4,10" Items="{Binding Cell.Pirates}">-->
-					<!--	<ItemsControl.ItemsPanel>-->
-					<!--		<ItemsPanelTemplate>-->
-					<!--			<UniformGrid Rows="2" Columns="3"/>-->
-					<!--		</ItemsPanelTemplate>-->
-					<!--	</ItemsControl.ItemsPanel>-->
-					<!--	<ItemsControl.ItemTemplate>-->
-					<!--		<DataTemplate>-->
-					<!--			<Button Height="18" Width="18"-->
-					<!--					Classes="Pirate"-->
-					<!--					Classes.IsSelected="{Binding Cell.IsSelected}"/>-->
-					<!--		</DataTemplate>-->
-					<!--	</ItemsControl.ItemTemplate>-->
-					<!--</ItemsControl>-->
-					<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+					<!--<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 						<TextBlock Text="{Binding Cell.Row}" Margin="5,0"/>
 						<TextBlock Text="{Binding Cell.Column}" Margin="5,0"/>
-					</WrapPanel>
+					</WrapPanel>-->
 				</Panel>
 			</v:CellContainer>
 		</ControlTemplate>

@@ -16,8 +16,8 @@ namespace Jackal.ViewModels
     {
         static CellViewModel()
         {
-            Height = 64;
-            Width = Map.Type == MapType.Quadratic ? 64 : 56;
+            Height = Map.Type == MapType.Quadratic ? 64 : 73;
+            Width = 64;
             
 
             if (Map.Type == MapType.Quadratic)

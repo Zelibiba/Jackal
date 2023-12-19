@@ -42,7 +42,7 @@ namespace Jackal.Models.Cells
                                                             new(+1,-1),
                                                             new(+1,+1),
                                                             new(-1,+1) },
-                    _ => throw new ArgumentException()
+                    _ => throw new ArgumentException("arrowType")
                 };
             }
             else
@@ -68,14 +68,14 @@ namespace Jackal.Models.Cells
 
                     ArrowType.Hex4a => new Coordinates[] { new(-1, 0),
                                                            new(+1, 0),
-                                                           new( 0,+1),
-                                                           new( 0,-1) },
+                                                           new(-1,+1),
+                                                           new(+1,-1) },
 
                     ArrowType.Hex4b => new Coordinates[] { new(-1, 0),
                                                            new(+1, 0),
                                                            new(-1,+1),
                                                            new( 0,-1) },
-                    _ => throw new ArgumentException()
+                    _ => throw new ArgumentException("arrowType")
                 };
 
             }

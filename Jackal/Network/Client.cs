@@ -65,6 +65,7 @@ namespace Jackal.Network
                     for (int i = 0; i < count; i++)
                         players[i] = _reader.ReadPlayer();
                     int seed = _reader.ReadInt32();
+                    MapType mapType = _reader.ReadMapType();
 
                     count = _reader.ReadInt32();
                     int[][] operations = new int[count][];
@@ -77,7 +78,7 @@ namespace Jackal.Network
                     }
 
                     _blockAction = true;
-                    _SetContent(new GameViewModel(players, seed, operations));
+                    _SetContent(new GameViewModel(players, seed, mapType, operations));
                     _blockAction = false;
                 }
 
@@ -118,7 +119,11 @@ namespace Jackal.Network
                             RunInUIThread(() => _viewModel.UpdatePlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.DeletePlayer:
-                            RunInUIThread(() => _viewModel?.DeletePlayer(_reader.ReadInt32())); break;
+                            RunInUIThread(() => _viewModel?.DeletePlayer(_reader.ReadInt32()));
+                            break;
+                        case NetMode.ChangeMapeType:
+                            RunInUIThread(() => _viewModel?.ChangeMapType(_reader.ReadMapType()));
+                            break;
                         case NetMode.StartGame:
                             int count = _reader.ReadInt32();
                             Player[] players = new Player[count];
@@ -129,8 +134,9 @@ namespace Jackal.Network
                             }
 
                             int seed = _reader.ReadInt32();
+                            MapType mapType = _reader.ReadMapType();
                             Task.Delay(200).Wait();
-                            _SetContent(new GameViewModel(players: players, seed: seed));
+                            _SetContent(new GameViewModel(players, seed, mapType));
                             break;
                         case NetMode.MovePirate:
                             int index = _reader.ReadInt32();
@@ -201,16 +207,24 @@ namespace Jackal.Network
             _writer.Write(number);
             _writer.Flush();
         }
-        public static void StartGame(Player[] mixedPlayers, int seed)
+        public static void ChangeMapType(bool isHexagonal)
+        {
+            MapType mapType = isHexagonal ? MapType.Hexagonal : MapType.Quadratic;
+            _writer.Write(NetMode.ChangeMapeType);
+            _writer.Write(mapType);
+            _writer.Flush();
+        }
+        public static void StartGame(Player[] mixedPlayers, int seed, MapType mapType)
         {
             _writer.Write(NetMode.StartGame);
             _writer.Write(mixedPlayers.Length);
             foreach (Player player in mixedPlayers)
                 _writer.Write(player.Team);
             _writer.Write(seed);
+            _writer.Write(mapType);
             _writer.Flush();
 
-            Dispatcher.UIThread.InvokeAsync(() => _SetContent(new GameViewModel(players: mixedPlayers, seed: seed)));
+            Dispatcher.UIThread.InvokeAsync(() => _SetContent(new GameViewModel(mixedPlayers, seed, mapType)));
         }
 
         public static void MovePirate(Pirate pirate, Cell targetCell)

@@ -15,7 +15,9 @@ namespace Jackal.Models
         White = 1,
         Yellow = 2,
         Red = 4,
-        Black = 8
+        Black = 8,
+        Green = 16,
+        Purple = 32,
     }
 
     /// <summary>
@@ -39,6 +41,7 @@ namespace Jackal.Models
         GetPlayer,
         UpdatePlayer,
         DeletePlayer,
+        ChangeMapeType,
         StartGame,
         MovePirate,
         MoveShip,

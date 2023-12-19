@@ -24,14 +24,9 @@ namespace Jackal.Models.Cells
         public override void SetSelectableCoords(Map map)
         {
             _mapCoords.Clear();
-            foreach (Cell cell in map)
-            {
-                if (cell is SeaCell || cell is ShipCell || cell.Coords == Coords) continue;
-                _mapCoords.Add(cell.Coords);
-            }
+            _mapCoords.AddRange(map.GroundCoordinates().Where(coords => coords != Coords));
             _horseCoords.Clear();
-            foreach (Coordinates coords in map.AdjacentCellsCoords(this, HorseCell.HorseCoordsPattern))
-                _horseCoords.Add(coords);
+            _horseCoords.AddRange(map.AdjacentCellsCoords(this, HorseCell.HorseCoordsPattern));
         }
 
         public override MovementResult AddPirate(Pirate pirate, int delay = 0)

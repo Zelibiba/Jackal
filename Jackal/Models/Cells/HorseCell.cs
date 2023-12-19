@@ -39,8 +39,7 @@ namespace Jackal.Models.Cells
         public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            foreach (Coordinates coords in map.AdjacentCellsCoords(this, HorseCoordsPattern))
-                SelectableCoords.Add(coords);
+            SelectableCoords.AddRange(map.AdjacentCellsCoords(this, HorseCoordsPattern));
         }
     }
 }

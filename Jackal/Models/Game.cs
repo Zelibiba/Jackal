@@ -168,12 +168,8 @@ namespace Jackal.Models
         /// <param name="players">Упорядоченный список игроков.</param>
         /// <param name="seed">Сид для генерации карты.</param>
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
-        public static void CreateMap(IEnumerable<Player> players, int seed, bool autosave = true)
+        public static void CreateMap(IEnumerable<Player> players, int seed, MapType mapType, bool autosave = true)
         {
-            MapType type;
-            type = MapType.Quadratic;
-            //type = MapType.Hexagonal;
-
             #region инициализация игроков с командами
             foreach (Player player in players)
             {
@@ -197,9 +193,9 @@ namespace Jackal.Models
             }
             #endregion
 
-            #region создание паттерна клеток и кораблей
+            #region создание паттерна клеток
             List<string> pattern;
-            if (type == MapType.Quadratic)
+            if (mapType == MapType.Quadratic)
             {
                 pattern = new List<string>(117);
                 for (int i = 0; i < 18; i++)
@@ -274,12 +270,11 @@ namespace Jackal.Models
             }
             else
             {
-                pattern = new List<string>(127);
-                for (int i = 0; i < 21; i++)
+                pattern = new List<string>(133);
+                for (int i = 0; i < 22; i++)
                     pattern.Add("field");
                 for (int i = 0; i < 2; i++)
                 {
-                    pattern.Add("horse");
                     pattern.Add("gun");
                     pattern.Add("cannabis");
                     pattern.Add("balloon");
@@ -287,6 +282,7 @@ namespace Jackal.Models
                 }
                 for (int i = 0; i < 3; i++)
                 {
+                    pattern.Add("horse");
                     pattern.Add("pit");
                     pattern.Add("jungle");
                 }
@@ -296,16 +292,15 @@ namespace Jackal.Models
                     pattern.Add("crocodile");
                     pattern.Add("cave");
                 }
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 7; i++)
                     pattern.Add("lake");
-
 
                 for (int i = 0; i < 5; i++)
                 {
                     pattern.Add("arrow_h1");
                     pattern.Add("arrow_h2");
                 }
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     pattern.Add("arrow_h3a");
                     pattern.Add("arrow_h3b");
@@ -355,7 +350,7 @@ namespace Jackal.Models
             #endregion
 
             #region создание карты
-            Map = new Map(type, seed);
+            Map = new Map(mapType, seed);
             foreach (Coordinates coords in Map.AllCoordinates())
                 Map.Add(new SeaCell(coords.Row, coords.Column));
 
@@ -443,39 +438,60 @@ namespace Jackal.Models
             #endregion
 
             #region Создание кораблей
-            if (Players.Count == 3 && type == MapType.Quadratic)
+            if (Players.Count == 3 && mapType == MapType.Quadratic)
             {
-                Map.ShipPlacements[1].InitialCoordinates = new(4,  0);
+                Map.ShipPlacements[1].InitialCoordinates = new(8,  0);
                 Map.ShipPlacements[3].InitialCoordinates = new(8, 12);
             }
             Map.SetShipToPlayer(0, Players[0]);
-            switch (Players.Count)
+            if (mapType == MapType.Quadratic)
             {
-                case 2:
-                    Map.SetShipToPlayer(2, Players[1]);
-                    break;
-                case 3:
-                    Map.SetShipToPlayer(1, Players[1]);
-                    Map.SetShipToPlayer(3, Players[2]);
-                    break;
-                case 4:
-                    Map.SetShipToPlayer(1, Players[1]);
-                    Map.SetShipToPlayer(2, Players[2]);
-                    Map.SetShipToPlayer(3, Players[3]);
-                    break;
+                switch (Players.Count)
+                {
+                    case 2: Map.SetShipToPlayer(2, Players[1]); break;
+                    case 3: Map.SetShipToPlayer(1, Players[1]);
+                            Map.SetShipToPlayer(3, Players[2]); break;
+                    case 4: Map.SetShipToPlayer(1, Players[1]);
+                            Map.SetShipToPlayer(2, Players[2]);
+                            Map.SetShipToPlayer(3, Players[3]); break;
+                }
+            }
+            else
+            {
+                switch (Players.Count)
+                {
+                    case 2: Map.SetShipToPlayer(3, Players[1]); break;
+                    case 3: Map.SetShipToPlayer(2, Players[1]);
+                            Map.SetShipToPlayer(4, Players[2]); break;
+                    case 4: Map.SetShipToPlayer(1, Players[1]);
+                            Map.SetShipToPlayer(3, Players[2]);
+                            Map.SetShipToPlayer(4, Players[3]); break;
+                    case 5: Map.SetShipToPlayer(1, Players[1]);
+                            Map.SetShipToPlayer(2, Players[2]);
+                            Map.SetShipToPlayer(4, Players[3]);
+                            Map.SetShipToPlayer(5, Players[4]); break;
+                    case 6: Map.SetShipToPlayer(1, Players[1]);
+                            Map.SetShipToPlayer(2, Players[2]);
+                            Map.SetShipToPlayer(3, Players[3]);
+                            Map.SetShipToPlayer(4, Players[4]);
+                            Map.SetShipToPlayer(5, Players[5]); break;
+                }
             }
             #endregion
 
-            Map[1, 6] = new EarthQuakeCell(1, 6);
-            //Map[5, 6] = new Cell(5, 6,"Field");
-            //Map[8,11] = new HorseCell(8,11);
-            //Players[1].Bottles = 1;
+            Map[1, 6] = new PitCell(1, 6);
+            Map[1, 7] = new PitCell(1, 7);
+            Map[1, 9] = new PitCell(1, 9);
+            Map[11, 6] = new CannabisCell(11, 6);
+            //Map[2, 6] = new ResidentCell(2, 6, ResidentType.Missioner);
+            //Map[11, 6] = new RumCell(11, 6);
+            //Players[0].Bottles = 1;
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
 
             if (autosave)
-                SaveOperator.StartAutosave(Players, seed);
+                SaveOperator.StartAutosave(Players, seed, mapType);
 
             CurrentPlayerNumber = Players.Count - 1;
             NextPlayer();
@@ -527,33 +543,33 @@ namespace Jackal.Models
             CheckRumBlock();
 
             if (CurrentPlayer.CannabisStarter)
-            {
                 EndCannabis();
-                return;
-            }
-
-            CurrentPlayer.Turn = false;
-            CurrentPlayerNumber++;
-            CurrentPlayer.Turn = true;
-
-            SelectedPirate = null;
-            SelectedShip = null;
-
-            // проверка на возможность споить миссионера или пятницу
-            foreach (Pirate pirate in CurrentPlayer.Pirates)
-                pirate.DefineDrinkingOpportynities(Map);
-
-            #region Проверка на победителя
-            if (!_hasWinner && _ListAllies.Count > 1)
+            // Из-за того, что в любом случае должна пройти проверка на невозможность хода.
+            else
             {
-                (int, List<Player>)[] orderedAllies = _orderedAllies.ToArray();
-                if (orderedAllies[0].Item1 > orderedAllies[1].Item1 + CurrentGold + HiddenGold)
+                CurrentPlayer.Turn = false;
+                CurrentPlayerNumber++;
+                CurrentPlayer.Turn = true;
+
+                SelectedPirate = null;
+                SelectedShip = null;
+
+                // проверка на возможность споить миссионера или пятницу
+                foreach (Pirate pirate in CurrentPlayer.Pirates)
+                    pirate.DefineDrinkingOpportynities(Map);
+
+                #region Проверка на победителя
+                if (!_hasWinner && _ListAllies.Count > 1)
                 {
-                    _hasWinner = true;
-                    Dispatcher.UIThread.InvokeAsync(() => SetWinner?.Invoke(orderedAllies[0].Item2)).Wait();
+                    (int, List<Player>)[] orderedAllies = _orderedAllies.ToArray();
+                    if (orderedAllies[0].Item1 > orderedAllies[1].Item1 + CurrentGold + HiddenGold)
+                    {
+                        _hasWinner = true;
+                        Dispatcher.UIThread.InvokeAsync(() => SetWinner?.Invoke(orderedAllies[0].Item2)).Wait();
+                    }
                 }
+                #endregion
             }
-            #endregion
 
             // если нет доступных ходов - переход к другому игроку
             if (!CurrentPlayer.Pirates.Any(pirate => !pirate.IsBlocked ||
@@ -960,9 +976,8 @@ namespace Jackal.Models
             {
                 if (SelectedShip.IsFriendlyTo(cell.Pirates[0]))
                 {
-                    SelectedShip.Pirates.AddRange(cell.Pirates);
-                    foreach (Pirate pirate in cell.Pirates)
-                        pirate.Cell = SelectedShip;
+                    foreach(Pirate pirate in cell.Pirates)
+                        SelectedShip.AddPirate(pirate);
                     cell.Pirates.Clear();
                 }
                 else
@@ -1091,7 +1106,6 @@ namespace Jackal.Models
             Players[^1].SetPiratesAndShip(bufferPirates, bufferShip, blockRum);
 
             CurrentPlayer.CannabisStarter = false;
-            CheckRumBlock();
         }
 
         /// <summary>

@@ -8,6 +8,14 @@ namespace Jackal.Models
 {
     public class Coordinates
     {
+        static Coordinates()
+        {
+            if (Map.Type == MapType.Quadratic)
+                _Abs = coord => Math.Max(Math.Abs(coord.Row), Math.Abs(coord.Column));
+            else
+                _Abs = coord => Math.Max(Math.Max(Math.Abs(coord.Row), Math.Abs(coord.Column)),
+                                         Math.Abs(-coord.Row - coord.Column));
+        }
         public Coordinates(int row, int column)
         {
             Row = row;
@@ -17,10 +25,8 @@ namespace Jackal.Models
         public int Row { get; }
         public int Column { get; }
 
-        public int Distance()
-        {
-            return Math.Max(Math.Abs(Row), Math.Abs(Column));
-        }
+        readonly static Func<Coordinates, int> _Abs;
+        public int Abs() => _Abs(this);
 
         public static Coordinates operator +(Coordinates a, Coordinates b)
         {

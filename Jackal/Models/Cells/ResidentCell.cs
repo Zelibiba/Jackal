@@ -21,15 +21,14 @@ namespace Jackal.Models.Cells
             base.Open();
             Player owner = Pirates[0].Owner;
             Player manager = Pirates[0].Manager;
-            switch (_type)
+            Pirate pirate = _type switch
             {
-                case ResidentType.Ben:
-                    AddPirate(new Ben(owner, manager), 0); break;
-                case ResidentType.Friday:
-                    AddPirate(new Friday(owner, manager), 0); break;
-                case ResidentType.Missioner:
-                    AddPirate(new Missioner(owner, manager), 0); break;
-            }
+                ResidentType.Ben => new Ben(owner, manager),
+                ResidentType.Friday => new Friday(owner, manager),
+                ResidentType.Missioner => new Missioner(owner, manager),
+                _ => throw new NotImplementedException()
+            };
+            AddPirate(pirate, 0);
         }
     }
 }

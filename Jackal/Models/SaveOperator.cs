@@ -22,7 +22,7 @@ namespace Jackal.Models
 
         static public List<int[]> Operations { get; private set; }
 
-        public static void StartAutosave(IEnumerable<Player> players, int seed)
+        public static void StartAutosave(IEnumerable<Player> players, int seed, MapType mapType)
         {
             try
             {
@@ -37,6 +37,7 @@ namespace Jackal.Models
 
             _writer?.WriteLine();
             _writer?.WriteLine("seed: " + seed);
+            _writer?.WriteLine(string.Format("map type: {0}({1})", (int)mapType, mapType));
             _writer?.WriteLine();
             _writer?.Flush();
 
@@ -121,7 +122,7 @@ namespace Jackal.Models
             _writer?.Flush();
         }
 
-        public static (Player[], int, List<int[]>) ReadSave(string filename)
+        public static (Player[], int, MapType, List<int[]>) ReadSave(string filename)
         {
             _file = new FileStream(filename, FileMode.Open, FileAccess.Read);
             StreamReader reader = new StreamReader(_file);
@@ -144,6 +145,8 @@ namespace Jackal.Models
             reader.ReadLine();
             words = reader.ReadLine().Trim().Split(' ');
             int seed = int.Parse(words[1]);
+            string word = reader.ReadLine().Split(':')[1];
+            MapType mapType = (MapType)int.Parse(word[..word.IndexOf('(')]);
 
             List<int[]> operations = new List<int[]>();
             reader.ReadLine();
@@ -161,7 +164,7 @@ namespace Jackal.Models
             reader.Close();
             _file.Close();
 
-            return (players, seed, operations);
+            return (players, seed, mapType, operations);
         }
     }
 }

@@ -70,15 +70,9 @@ namespace Jackal.Models.Cells
         public override void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            foreach (Coordinates coord in map.AdjacentCellsCoords(this, Directions))
-                SelectableCoords.Add(coord);
-
+            SelectableCoords.AddRange(map.AdjacentCellsCoords(this, Directions));
             MovableCoords.Clear();
-            foreach (Coordinates coords in ShipRegion)
-            {
-                if ((coords - Coords).Distance() <= 1 && coords != Coords)
-                    MovableCoords.Add(coords);
-            }
+            MovableCoords.AddRange(ShipRegion.Where(coords => (coords - Coords).Abs() <= 1 && coords != Coords));
         }
 
         public override bool CanBeSelectedBy(Pirate pirate) => pirate.Cell is SeaCell || IsFriendlyTo(pirate);
@@ -91,7 +85,10 @@ namespace Jackal.Models.Cells
                 pirate.Galeon = false;
             }
             else
+            {
+                pirate.Cell = this;
                 pirate.Kill();
+            }
 
             return MovementResult.End;
         }

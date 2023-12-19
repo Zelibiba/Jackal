@@ -120,21 +120,21 @@ namespace Jackal.Models
                 #region Определение характеристик кораблей
                 ShipPlacements = new ShipPlacement[6]
                 {
-                    new(new Coordinates[] { new(+1, 0), new(+1,-1) }, 4),
-                    new(new Coordinates[] { new( 0,+1), new(+1, 0) }, 4),
-                    new(new Coordinates[] { new(-1,+1), new( 0,+1) }, 4),
-                    new(new Coordinates[] { new(-1, 0), new(-1,+1) }, 4),
-                    new(new Coordinates[] { new( 0,-1), new(-1, 0) }, 4),
-                    new(new Coordinates[] { new(+1,-1), new( 0,-1) }, 4)
+                    new(new Coordinates[] { new(+1, 0), new(+1,-1) }, 6),
+                    new(new Coordinates[] { new( 0,+1), new(+1, 0) }, 6),
+                    new(new Coordinates[] { new(-1,+1), new( 0,+1) }, 6),
+                    new(new Coordinates[] { new(-1, 0), new(-1,+1) }, 6),
+                    new(new Coordinates[] { new( 0,-1), new(-1, 0) }, 6),
+                    new(new Coordinates[] { new(+1,-1), new( 0,-1) }, 6)
                 };
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 6; i++)
                 {
-                    ShipPlacements[0].Region[i] = new(0, i + 9);
-                    ShipPlacements[1].Region[i] = new(i + 2, 5 - i);
-                    ShipPlacements[2].Region[i] = new(9 + i, 0);
-                    ShipPlacements[3].Region[i] = new(14, 2 + i);
-                    ShipPlacements[3].Region[i] = new(12 - i, 9 + i);
-                    ShipPlacements[3].Region[i] = new(5 - i, 14);
+                    ShipPlacements[0].Region[i] = new(0, 13 - i);
+                    ShipPlacements[1].Region[i] = new(1 + i, 6 - i);
+                    ShipPlacements[2].Region[i] = new(8 + i, 0);
+                    ShipPlacements[3].Region[i] = new(14, 1 + i);
+                    ShipPlacements[4].Region[i] = new(13 - i, 8 + i);
+                    ShipPlacements[5].Region[i] = new(6 - i, 14);
                 }
                 foreach (ShipPlacement shipPlacement in ShipPlacements)
                 {
@@ -236,10 +236,12 @@ namespace Jackal.Models
 
                 for (int column = min + 1; column < max; column++)
                 {
-                    if (row == 1 && (column == min + 1 || column == max - 1)) continue;
-                    if (row == RowsCount / 2 && (column == min + 1 || column == max - 1)
-                        && Type == MapType.Hexagonal) continue;
-                    if (row == RowsCount - 2 && (column == min + 1 || column == max - 1)) continue;
+                    if (row == 1 && (column == min + 1 || column == max - 1)
+                        && Type == MapType.Quadratic) continue;
+                    //if (row == RowsCount / 2 && (column == min + 1 || column == max - 1)
+                    //    && Type == MapType.Hexagonal) continue;
+                    if (row == RowsCount - 2 && (column == min + 1 || column == max - 1)
+                        && Type == MapType.Quadratic) continue;
                     result.Add(new(row, column));
                 }
             }

@@ -48,6 +48,8 @@ namespace Jackal.ViewModels
                                                      .Select(players => players.First().IsControllable && !players.First().IsReady);
             CreateAllyCommand = ReactiveCommand.Create<bool>(CreateAlly, canCreateAlly);
 
+            this.WhenAnyValue(vm => vm.IsHexagonal)
+                .Subscribe(x => Client.ChangeMapType(x));
 
             IsServerHolder = Server.IsServerHolder;
             IP = ip ?? Server.IP;
@@ -56,6 +58,7 @@ namespace Jackal.ViewModels
         public bool IsServerHolder { get; }
         public string IP { get; }
 
+        [Reactive] public bool IsHexagonal { get; set; }
 
         public ReactiveCommand<Unit, Unit> StartGameCommand { get; }
         void StartGame()
@@ -92,7 +95,8 @@ namespace Jackal.ViewModels
             }
             int seed = rand.Next();
 
-            Client.StartGame(mixedPlayers, seed);
+            MapType mapType = IsHexagonal ? MapType.Hexagonal : MapType.Quadratic;
+            Client.StartGame(mixedPlayers, seed, mapType);
         }
         public ReactiveCommand<bool, Unit> ChangeWatcherCommand { get; }
         void ChangeWatcher(bool isWatcher)
@@ -146,5 +150,6 @@ namespace Jackal.ViewModels
         {
             Players.Remove(Players.First(playerVM => playerVM.Player.Index == index));
         }
+        public void ChangeMapType(MapType mapType) => IsHexagonal = mapType == MapType.Hexagonal;
     }
 }

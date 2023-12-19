@@ -26,7 +26,7 @@ namespace Jackal.ViewModels
         readonly IDisposable _disPirates;
 
 
-        public GameViewModel(IEnumerable<Player>? players, int seed, IEnumerable<int[]>? operations = null)
+        public GameViewModel(IEnumerable<Player>? players, int seed, MapType mapType, IEnumerable<int[]>? operations = null)
         {
             Activator = new ViewModelActivator();
             this.WhenActivated(disposable =>
@@ -34,7 +34,7 @@ namespace Jackal.ViewModels
                 _disPlayers.DisposeWith(disposable);
             });
 
-            Game.CreateMap(players, seed, autosave: operations == null);
+            Game.CreateMap(players, seed, mapType, autosave: operations == null);
             Game.ReadOperations(operations ?? new List<int[]>());
             Game.StartPirateAnimation = (pirateIndex, cellIndex, kill) =>
             {

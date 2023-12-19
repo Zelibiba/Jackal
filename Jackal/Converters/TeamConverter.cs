@@ -23,6 +23,10 @@ namespace Jackal.Converters
                 case "Black":
                     return Brush.Parse("#FF3A3A3A");
                 case "Green":
+                    return Brush.Parse("#00FF1D");
+                case "Purple":
+                    return Brush.Parse("#7700FF");
+                case "Ben":
                     return Brush.Parse("Green");
                 case "Friday":
                     return Brush.Parse("Brown");

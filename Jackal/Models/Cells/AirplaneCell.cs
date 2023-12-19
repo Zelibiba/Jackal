@@ -26,10 +26,10 @@ namespace Jackal.Models.Cells
 
             if (pirate.TargetCell == this)
                 SelectableCoords.RemoveAll(coords => coords == Coords);
-            else if (IsActive && (Pirates.Count == 0 || (pirate.TargetCell.Coords - Coords).Distance() > 1))
+            else if (IsActive && (Pirates.Count == 0 || (pirate.TargetCell.Coords - Coords).Abs() > 1))
             {
                 IsActive = false;
-                SelectableCoords.RemoveAll(coords => (coords - Coords).Distance() > 1 || coords == Coords);
+                SelectableCoords.RemoveAll(coords => (coords - Coords).Abs() > 1 || coords == Coords);
             }
         }
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
@@ -43,11 +43,7 @@ namespace Jackal.Models.Cells
             if (IsActive)
             {
                 SelectableCoords.Clear();
-                foreach(Cell cell in map)
-                {
-                    if (cell is SeaCell || cell is ShipCell) continue;
-                    SelectableCoords.Add(cell.Coords);
-                }
+                SelectableCoords.AddRange(map.GroundCoordinates());
             }
             else
                 base.SetSelectableCoords(map);

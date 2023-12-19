@@ -16,7 +16,7 @@ namespace Jackal.Network
     {
         static bool _canselListening;
         static TcpListener _server;
-        static IPAddress ip => Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork)[1];
+        static IPAddress ip => Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Last();
         public static string IP => ip.ToString();
         static Task _listening;
         public static bool IsServerHolder { get; private set; }

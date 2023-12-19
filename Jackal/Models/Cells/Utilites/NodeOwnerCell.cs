@@ -53,6 +53,7 @@ namespace Jackal.Models.Cells.Utilites
         }
         public override void SetSelectableCoords(Map map)
         {
+            base.SetSelectableCoords(map);
             foreach (Cell cell in Nodes)
                 cell.SetSelectableCoords(map);
         }
