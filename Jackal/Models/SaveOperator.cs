@@ -17,16 +17,17 @@ namespace Jackal.Models
     /// </summary>
     public static class SaveOperator
     {
-        static FileStream _file;
-        static StreamWriter _writer;
+        static FileStream? _file;
+        static StreamWriter? _writer;
 
-        static public List<int[]> Operations { get; private set; }
+        static public List<int[]>? Operations { get; private set; }
 
         public static void StartAutosave(IEnumerable<Player> players, int seed, MapType mapType)
         {
+            string filename = Path.Combine(Properties.SavesFolder, "autosave.txt");
             try
             {
-                _file = new FileStream("..//..//..//saves//autosave.txt", FileMode.Create, FileAccess.Write);
+                _file = new FileStream(filename, FileMode.Create, FileAccess.Write);
                 _writer = new StreamWriter(_file);
             }
             catch (IOException) { return; }

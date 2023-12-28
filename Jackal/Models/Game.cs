@@ -479,13 +479,6 @@ namespace Jackal.Models
             }
             #endregion
 
-            Map[1, 6] = new PitCell(1, 6);
-            Map[1, 7] = new PitCell(1, 7);
-            Map[1, 9] = new PitCell(1, 9);
-            Map[11, 6] = new CannabisCell(11, 6);
-            //Map[2, 6] = new ResidentCell(2, 6, ResidentType.Missioner);
-            //Map[11, 6] = new RumCell(11, 6);
-            //Players[0].Bottles = 1;
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -989,25 +982,6 @@ namespace Jackal.Models
 
             Deselect(false);
             SwapCells(SelectedShip, cell);
-
-            // обновить достигаемые координаты для побережья
-            int index1 = Array.FindIndex(SelectedShip.ShipRegion, coords => coords == SelectedShip.Coords);
-            int index2 = Array.FindIndex(SelectedShip.ShipRegion, coords => coords == cell.Coords);
-            int minIndex = Math.Max(Math.Min(index1, index2) - 1, 0);
-            int maxIndex = Math.Min(Math.Max(index1, index2) + 1, SelectedShip.ShipRegion.Length - 1);
-            if (Map.Type == MapType.Quadratic)
-            {
-                if (minIndex > 0) minIndex--;
-                if (maxIndex < SelectedShip.ShipRegion.Length - 1) maxIndex++;
-            }
-            for(int i = minIndex; i <= maxIndex; i++)
-            {
-                foreach (Coordinates direction in SelectedShip.Directions)
-                {
-                    Coordinates coords = SelectedShip.ShipRegion[i] + direction;
-                    Map[coords].SetSelectableCoords(Map);
-                }
-            }
 
             SelectedShip = null;
             NextPlayer();

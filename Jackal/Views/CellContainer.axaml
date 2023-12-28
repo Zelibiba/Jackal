@@ -15,6 +15,8 @@
 					  StrokeThickness="{Binding BorderThickness.Top, RelativeSource={RelativeSource TemplatedParent}}">
 					<Path.Data>
 						<MultiBinding Converter="{StaticResource ClipConverter}">
+							<TemplateBinding Property="MapType"/>
+							<TemplateBinding Property="Orientation"/>
 							<Binding Path="#Panel.Bounds.Width"/>
 							<Binding Path="#Panel.Bounds.Height"/>
 							<Binding Path="#Border.StrokeThickness"/>
@@ -26,6 +28,8 @@
 					  Background="{TemplateBinding Background}">
 					<Panel.Clip>
 						<MultiBinding Converter="{StaticResource ClipConverter}">
+							<TemplateBinding Property="MapType"/>
+							<TemplateBinding Property="Orientation"/>
 							<Binding Path="#Back.Bounds.Width"/>
 							<Binding Path="#Back.Bounds.Height"/>
 						</MultiBinding>

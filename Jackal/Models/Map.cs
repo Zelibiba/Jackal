@@ -160,7 +160,7 @@ namespace Jackal.Models
         /// <summary>
         /// Тип карты.
         /// </summary>
-        public static MapType Type { get; private set; }
+        public static MapType Type { get; set; } = MapType.Quadratic;
         /// <summary>
         /// Массив соответствия двойного и оригинального индексов.
         /// </summary>

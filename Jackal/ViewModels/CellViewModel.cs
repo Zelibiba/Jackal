@@ -16,11 +16,11 @@ namespace Jackal.ViewModels
     {
         static CellViewModel()
         {
-            Height = Map.Type == MapType.Quadratic ? 64 : 73;
+            Height = MapType == MapType.Quadratic ? 64 : 73;
             Width = 64;
             
 
-            if (Map.Type == MapType.Quadratic)
+            if (MapType == MapType.Quadratic)
             {
                 ComputeX = (row, column) => Width * column;
                 ComputeY = (row) => Height * row;
@@ -42,6 +42,8 @@ namespace Jackal.ViewModels
             this.WhenAnyValue(vm => vm.Cell.Row, ComputeY)
                 .ToPropertyEx(this, vm => vm.Y);
         }
+
+        public static MapType MapType => Map.Type;
 
         public Cell Cell { get; }
         [Reactive] public int ZIndex { get; set; }

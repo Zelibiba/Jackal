@@ -78,6 +78,7 @@ namespace Jackal.Network
                         _writer.Write(player);
 
                     _writer.Write(Game.Map.Seed);
+                    _writer.Write(Map.Type);
                     _writer.Flush();
 
                     Server.AddTask(() =>

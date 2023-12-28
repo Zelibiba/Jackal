@@ -93,7 +93,8 @@
 			<v:CellContainer Classes="Cell Usual"
 							 Classes.CanBeSelected="{Binding Cell.CanBeSelected}"
 							 Classes.IsSelected="{Binding Cell.IsSelected}"
-							 Classes.IsLightHousePicked="{Binding Cell.IsLightHousePicked}">
+							 Classes.IsLightHousePicked="{Binding Cell.IsLightHousePicked}"
+							 MapType="{Binding MapType}">
 				<Panel>
 					<Image Source="{Binding Cell.Image, Converter={StaticResource ImageConverter}}" IsVisible="{Binding Cell.IsPreOpened}"
 						   Stretch="UniformToFill">
@@ -115,7 +116,8 @@
 					</Button>
 					<v:CellContainer Classes="Gold Usual"
 									 Classes.Treasure="{Binding Cell.Treasure}"
-									 Classes.IsShip="{Binding Cell.IsShip}">
+									 Classes.IsShip="{Binding Cell.IsShip}"
+									 MapType="{Binding MapType}">
 						<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="2,0">
 							<TextBlock Text="Г" FontWeight="Bold" FontSize="20"
 									   IsVisible="{Binding Cell.Galeon}"/>

@@ -13,7 +13,7 @@
 	</UserControl.Styles>
 	<Grid ColumnDefinitions="auto,*">
 		<Viewbox Grid.Column="0" IsEnabled="{Binding IsEnabled}">
-			<Panel Name="MapControl" Height="{Binding MapHeight}" Width="{Binding MapWidth}">
+			<Panel Height="{Binding MapHeight}" Width="{Binding MapWidth}">
 				<ItemsControl Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
 							  Items="{Binding Cells}" Background="#FF00A5FF">
 					<ItemsControl.ItemsPanel>

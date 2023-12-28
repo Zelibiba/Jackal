@@ -207,9 +207,8 @@ namespace Jackal.Network
             _writer.Write(number);
             _writer.Flush();
         }
-        public static void ChangeMapType(bool isHexagonal)
+        public static void ChangeMapType(MapType mapType)
         {
-            MapType mapType = isHexagonal ? MapType.Hexagonal : MapType.Quadratic;
             _writer.Write(NetMode.ChangeMapeType);
             _writer.Write(mapType);
             _writer.Flush();

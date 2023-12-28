@@ -17,6 +17,7 @@ using Avalonia.Threading;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Jackal.Views;
+using Avalonia;
 
 namespace Jackal.ViewModels
 {
@@ -49,7 +50,12 @@ namespace Jackal.ViewModels
             CreateAllyCommand = ReactiveCommand.Create<bool>(CreateAlly, canCreateAlly);
 
             this.WhenAnyValue(vm => vm.IsHexagonal)
-                .Subscribe(x => Client.ChangeMapType(x));
+                .Subscribe(x =>
+                {
+                    MapType type = x ? MapType.Hexagonal : MapType.Quadratic;
+                    GameProperties.MapType = type;
+                    Client.ChangeMapType(type);
+                });
 
             IsServerHolder = Server.IsServerHolder;
             IP = ip ?? Server.IP;
@@ -58,7 +64,18 @@ namespace Jackal.ViewModels
         public bool IsServerHolder { get; }
         public string IP { get; }
 
+        public GameProperties GameProperties { get; } = new GameProperties();
+
+
+        /// <summary>
+        /// Флаг того, что тип карты - гексагональный.
+        /// </summary>
         [Reactive] public bool IsHexagonal { get; set; }
+        /// <summary>
+        /// Толщина границы CellContainer-а на кнопке смены типа карты.
+        /// </summary>
+        /// <remarks>Необходим для обновления формы CellContainer-а.</remarks>
+        [Reactive] public Thickness MapTypeButtonThickness { get; set; }
 
         public ReactiveCommand<Unit, Unit> StartGameCommand { get; }
         void StartGame()

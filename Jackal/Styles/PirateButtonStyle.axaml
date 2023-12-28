@@ -4,11 +4,11 @@
         <Border Padding="20">
 			<StackPanel>
 				<Button Content="NE"
-						Classes="PirBtn" IsEnabled="False"/>
+						Classes="PirBtn" IsEnabled="True"/>
 				<Button Content="B"
 						Classes="PirBtn"/>
 				<ToggleButton Content="NE"
-							  Classes="PirBtn" IsEnabled="False"/>
+							  Classes="PirBtn" IsEnabled="True"/>
 				<ToggleButton Content="TB"
 							  Classes="PirBtn"/>
 			</StackPanel>

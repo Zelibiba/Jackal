@@ -22,13 +22,7 @@ namespace Jackal.Converters
             string[] words = value.ToString().Split('_');
 
             Bitmap bitmap;
-            string path;
-#if DEBUG
-            path = Path.Combine("..", "..", "..", "Assets", "Images");
-#else
-            path = Path.Combine("Assets", "Images");
-#endif
-            path = Path.Combine(path, Map.Type.ToString(), words[0] + ".png");
+            string path = Path.Combine(Properties.ImageFolder, Map.Type.ToString(), words[0] + ".png");
             bitmap = new(path);
 
             if (words.Length == 1)

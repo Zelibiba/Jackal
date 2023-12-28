@@ -12,31 +12,20 @@ namespace Jackal.Converters
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            switch (value?.ToString())
+            return value?.ToString() switch
             {
-                case "White":
-                    return Brush.Parse("AntiqueWhite");
-                case "Yellow":
-                    return Brush.Parse("#FFECEC2C");
-                case "Red":
-                    return Brush.Parse("Red");
-                case "Black":
-                    return Brush.Parse("#FF3A3A3A");
-                case "Green":
-                    return Brush.Parse("#00FF1D");
-                case "Purple":
-                    return Brush.Parse("#7700FF");
-                case "Ben":
-                    return Brush.Parse("Green");
-                case "Friday":
-                    return Brush.Parse("Brown");
-                case "Missioner":
-                    return Brush.Parse("Blue");
-                case "DrunkMissioner":
-                    return Brush.Parse("LightBlue");
-                default:
-                    return Brush.Parse("Transparent");
-            }
+                "White" => Brush.Parse("AntiqueWhite"),
+                "Yellow" => Brush.Parse("#FFECEC2C"),
+                "Red" => Brush.Parse("Red"),
+                "Black" => Brush.Parse("#FF3A3A3A"),
+                "Green" => Brush.Parse("#00FF1D"),
+                "Purple" => Brush.Parse("#7700FF"),
+                "Ben" => Brush.Parse("Green"),
+                "Friday" => Brush.Parse("Brown"),
+                "Missioner" => Brush.Parse("Blue"),
+                "DrunkMissioner" => Brush.Parse("LightBlue"),
+                _ => Brush.Parse("Transparent")
+            };
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
