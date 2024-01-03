@@ -39,6 +39,8 @@ namespace Jackal.Models
             _writer?.WriteLine();
             _writer?.WriteLine("seed: " + properties.Seed);
             _writer?.WriteLine(string.Format("map type: {0}({1})", (int)properties.MapType, properties.MapType));
+            _writer?.WriteLine("size: " + properties.Size);
+            properties.WriteMapPattern(_writer);
             _writer?.WriteLine();
             _writer?.Flush();
 
@@ -123,7 +125,7 @@ namespace Jackal.Models
             _writer?.Flush();
         }
 
-        public static (Player[], int, MapType, List<int[]>) ReadSave(string filename)
+        public static (Player[], GameProperties, List<int[]>) ReadSave(string filename)
         {
             _file = new FileStream(filename, FileMode.Open, FileAccess.Read);
             StreamReader reader = new StreamReader(_file);
@@ -132,11 +134,10 @@ namespace Jackal.Models
 
             int playersCount = int.Parse(reader.ReadLine().Trim().Split(' ')[^1]);
             Player[] players = new Player[playersCount];
-            string[] words;
             for (int i = 0; i < playersCount; i++)
             {
                 string line = reader.ReadLine().Trim();
-                words = line.Split(' ');
+                string[] words = line.Split(' ');
                 players[i] = new Player(i, line.Split(',')[0],
                                         (Team)int.Parse(words[^2][..words[^2].IndexOf('(')]),
                                         isControllable: true)
@@ -144,10 +145,14 @@ namespace Jackal.Models
             }
 
             reader.ReadLine();
-            words = reader.ReadLine().Trim().Split(' ');
-            int seed = int.Parse(words[1]);
-            string word = reader.ReadLine().Split(':')[1];
-            MapType mapType = (MapType)int.Parse(word[..word.IndexOf('(')]);
+            GameProperties properties = new()
+            {
+                Seed = int.Parse(reader.ReadLine().Split(':')[1].Trim()),
+                MapType = (MapType)int.Parse(reader.ReadLine().Split(':')[1].Trim().Split('(')[0]),
+                Size = int.Parse(reader.ReadLine().Split(':')[1].Trim()),
+            };
+            properties.ReadMapPattern(reader, false);
+
 
             List<int[]> operations = new List<int[]>();
             reader.ReadLine();
@@ -165,7 +170,7 @@ namespace Jackal.Models
             reader.Close();
             _file.Close();
 
-            return (players, seed, mapType, operations);
+            return (players, properties, operations);
         }
     }
 }

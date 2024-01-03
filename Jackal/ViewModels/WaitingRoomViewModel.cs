@@ -84,7 +84,7 @@ namespace Jackal.ViewModels
         public ReactiveCommand<Unit, Unit> StartGameCommand { get; }
         void StartGame()
         {
-            if (!ReadMapPattern())
+            if (!GameProperties.ReadMapPattern())
                 return;
 
             Random rand = new();
@@ -121,39 +121,7 @@ namespace Jackal.ViewModels
 
             Client.StartGame(mixedPlayers, GameProperties);
         }
-        bool ReadMapPattern()
-        {
-            string filename = GameProperties.PatternNames[GameProperties.PatternName];
-            bool mainFix = filename == "fix";
-            if (filename == "fix" || filename == "var")
-                filename = GameProperties.MapType.ToString();
-            try
-            {
-                filename = Path.Combine(Properties.MapPatternsFolder, filename + ".txt");
-                FileStream? file = new(filename, FileMode.Open, FileAccess.Read);
-                StreamReader reader = new(file);
 
-                Dictionary<string, (int, char)> mapPattern = new();
-                while (!reader.EndOfStream)
-                {
-                    string[] words = reader.ReadLine().Split(':');
-                    words[1] = words[1].Trim();
-                    char param = ' ';
-                    if (mainFix)
-                        param = '=';
-                    else if (words[1][0] < '0' || words[1][0] > '9')
-                    {
-                        param = words[1][0];
-                        words[1] = words[1].Remove(0, 1);
-                    }
-                    int count = int.Parse(words[1]);
-                    mapPattern[words[0]] = (count, param);
-                }
-                GameProperties.MapPattern = mapPattern;
-            }
-            catch { return false; }
-            return true;
-        }
         public ReactiveCommand<bool, Unit> ChangeWatcherCommand { get; }
         void ChangeWatcher(bool isWatcher)
         {

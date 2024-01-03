@@ -49,8 +49,8 @@ namespace Jackal.ViewModels
             if (result?[0] == null)
                 return;
 
-            (Player[], int, MapType,List<int[]>) data = SaveOperator.ReadSave(result[0]);
-            //Content = new GameViewModel(data.Item1, data.Item2, data.Item3, data.Item4);
+            (Player[], GameProperties,List<int[]>) data = SaveOperator.ReadSave(result[0]);
+            Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
         public void Cansel()
         {
