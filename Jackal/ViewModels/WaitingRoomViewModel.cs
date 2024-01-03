@@ -133,16 +133,21 @@ namespace Jackal.ViewModels
                 FileStream? file = new(filename, FileMode.Open, FileAccess.Read);
                 StreamReader reader = new(file);
 
-                Dictionary<string, (int count, bool fix)> mapPattern = new();
+                Dictionary<string, (int, char)> mapPattern = new();
                 while (!reader.EndOfStream)
                 {
                     string[] words = reader.ReadLine().Split(':');
                     words[1] = words[1].Trim();
-                    bool fix = words[1].StartsWith('=');
-                    if (fix) words[1] = words[1].Remove(0, 1);
-                    fix = fix || mainFix;
+                    char param = ' ';
+                    if (mainFix)
+                        param = '=';
+                    else if (words[1][0] < '0' || words[1][0] > '9')
+                    {
+                        param = words[1][0];
+                        words[1] = words[1].Remove(0, 1);
+                    }
                     int count = int.Parse(words[1]);
-                    mapPattern[words[0]] = (count, fix);
+                    mapPattern[words[0]] = (count, param);
                 }
                 GameProperties.MapPattern = mapPattern;
             }

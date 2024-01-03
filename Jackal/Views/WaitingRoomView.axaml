@@ -65,7 +65,7 @@
 								  Items="{Binding GameProperties.PatternNames.Keys}" SelectedItem="{Binding GameProperties.PatternName}">
 						</ComboBox>
 						<NumericUpDown Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" IsEnabled="{Binding !IsFixed}"
-									   Value="{Binding GameProperties.Size}"/>
+									   Value="{Binding GameProperties.Size}" Minimum="3" Maximum="20"/>
 					</Grid>
 				</Grid>
 			</HeaderedContentControl>

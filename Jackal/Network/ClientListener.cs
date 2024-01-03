@@ -81,7 +81,7 @@ namespace Jackal.Network
                     foreach (Player player in Game.Players)
                         _writer.Write(player);
 
-                    _writer.Write(Game.Properties, withPattern: true);
+                    _writer.Write(_gameProperties, withPattern: true);
                     _writer.Flush();
 
                     Server.AddTask(() =>

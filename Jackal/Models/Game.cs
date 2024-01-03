@@ -33,10 +33,6 @@ namespace Jackal.Models
         /// Представляяет собой массив клеток типа <see cref="Cell"/>.
         /// </remarks>
         public static Map Map { get; private set; }
-        /// <summary>
-        /// Параметры создания карты.
-        /// </summary>
-        public static GameProperties Properties { get; private set; }
 
         /// <summary>
         /// Лист игроков.
@@ -134,6 +130,10 @@ namespace Jackal.Models
         public static bool CanChangeSelection => !(PirateInMotion || PirateIsDrunk || earthQuake.IsActive || lightHouse.IsActive);
 
         /// <summary>
+        /// Делегат для обновления параметров <see cref="HiddenGold"/>, <see cref="CurrentGold"/> и <see cref="LostGold"/> в интерфейсе.
+        /// </summary>
+        public static Action? UpdateGoldParams;
+        /// <summary>
         /// Счётчик спрятанного золота.
         /// </summary>
         /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
@@ -146,7 +146,7 @@ namespace Jackal.Models
                 __hiddenGold = value;
             }
         }
-        static int __hiddenGold = 40;
+        static int __hiddenGold = 0;
         /// <summary>
         /// Счётчик видимого золота на карте.
         /// </summary>
@@ -174,8 +174,6 @@ namespace Jackal.Models
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
         public static void CreateMap(IEnumerable<Player> players, GameProperties properties, bool autosave = true)
         {
-            Properties = properties;
-
             #region инициализация игроков с командами
             foreach (Player player in players)
             {
@@ -206,24 +204,29 @@ namespace Jackal.Models
             List<string> pattern = new();
 
             // учёт гарантированных клеток
-            foreach ((string name, (int count, bool fix)) in properties.MapPattern)
+            foreach ((string name, (int count, char param)) in properties.MapPattern)
             {
-                if (fix)
+                string[] massive = new string[count];
+                for (int i = 0; i < count; i++)
+                    massive[i] = name;
+                switch(param)
                 {
-                    for (int i = 0; i < count; i++)
-                        names.Add(name);
-                }
-                else
-                {
-                    for (int i = 0; i < count; i++)
-                        pattern.Add(name);
+                    case ' ': pattern.AddRange(massive); break;
+                    case '=': names.AddRange(massive); break;
+                    case '>': names.AddRange(massive);
+                              pattern.AddRange(massive); break;
+                    default: throw new ArgumentException(param.ToString());
                 }
             }
 
             // учёт вероятностных клеток
             Random rand = new(properties.Seed);
             while (names.Count != names.Capacity)
+            {
                 names.Add(pattern[rand.Next(pattern.Count)]);
+                if (names[^1] == "Galeon")
+                    pattern.RemoveAll(x => x == "Galeon");
+            }
 
             // проверка на одиночную пещеру
             if (names.Count(x => x == "Cave") == 1)
@@ -258,7 +261,6 @@ namespace Jackal.Models
                     case "Balloon":    Map[row, column] = new BalloonCell(row, column, ContinueMovePirate); break;
                     case "Jungle":     Map[row, column] = new JungleCell(row, column); break;
                     case "Cannabis":   Map[row, column] = new CannabisCell(row, column); break;
-                    case "Galeon":     Map[row, column] = new GoldCell(row, column, GoldType.Galeon); break;
                     case "Cannibal":   Map[row, column] = new CannibalCell(row, column); break;
                     case "Putana":     Map[row, column] = new FortressCell(row, column, true); break;
                     case "Airplane":   Map[row, column] = new AirplaneCell(row, column); break;
@@ -302,6 +304,9 @@ namespace Jackal.Models
                     case "Bottle":
                         int count = int.Parse(name.Split('_')[1]);
                         Map[row, column] = new BottleCell(row, column, count); break;
+                    case "Galeon": 
+                        Map[row, column] = new GoldCell(row, column, GoldType.Galeon);
+                        __hiddenGold += 3; break;
                     case "Gold":
                         GoldType gold = name.Split('_')[1] switch
                         {
@@ -312,7 +317,8 @@ namespace Jackal.Models
                             "5" => GoldType.Gold5,
                             _ => throw new Exception("Wrong random Gold Type")
                         };
-                        Map[row, column] = new GoldCell(row, column, gold); break;
+                        Map[row, column] = new GoldCell(row, column, gold);
+                        __hiddenGold += (int)gold; break;
                     default: throw new Exception("Wrong random cell");
                 }
             }
@@ -416,6 +422,7 @@ namespace Jackal.Models
         /// <param name="checkOnly">Флаг того, что необходима только проверка на бочку рома.</param>
         static void NextPlayer()
         {
+            UpdateGoldParams?.Invoke();
             CheckRumBlock();
 
             if (CurrentPlayer.CannabisStarter)
@@ -592,7 +599,7 @@ namespace Jackal.Models
             }
             else
             {
-                if (cell is LightHouseCell)
+                if (cell == lightHouse.Lighthouse)
                 {
                     cell.CanBeSelected = false;
                     foreach (Cell c in lightHouse.SelectedCells)
@@ -601,7 +608,7 @@ namespace Jackal.Models
                         if (CurrentPlayer.IsControllable)
                         {
                             c.CanBeSelected = false;
-                            c.ChangeGrayStatus();
+                            c.ChangeGrayStatus(stayGray: true);
                         }
                     }
                     lightHouse.IsActive = false;
@@ -922,8 +929,8 @@ namespace Jackal.Models
         {
             lightHouse.IsActive = true;
             lightHouse.Lighthouse = LightHouse;
-            IEnumerable<Cell> closedCells = Map.Where(cell => !cell.IsOpened);
-            lightHouse.SelectedCells = new(Math.Min(closedCells.Count(), 4));
+            Cell[] closedCells = Map.Where(cell => !cell.IsOpened).ToArray();
+            lightHouse.SelectedCells = new(Math.Min(closedCells.Length, 4));
             if (CurrentPlayer.IsControllable)
             {
                 foreach (Cell cell in closedCells)

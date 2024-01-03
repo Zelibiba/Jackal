@@ -30,12 +30,12 @@ namespace Jackal
 
         public static GameProperties ReadGameProperties(this BinaryReader reader)
         {
-            Dictionary<string, (int count, bool fix)> pattern = new();
+            Dictionary<string, (int, char)> pattern = new();
             if (reader.ReadBoolean())
             {
                 int count = reader.ReadInt32();
                 for (int i = 0; i < count; i++)
-                    pattern.Add(reader.ReadString(), (reader.ReadInt32(), reader.ReadBoolean()));
+                    pattern.Add(reader.ReadString(), (reader.ReadInt32(), reader.ReadChar()));
             }
 
             return new GameProperties()
@@ -57,7 +57,7 @@ namespace Jackal
                 {
                     writer.Write(name);
                     writer.Write(value.count);
-                    writer.Write(value.fix);
+                    writer.Write(value.param);
                 }
             }
             writer.Write(properties.Seed);

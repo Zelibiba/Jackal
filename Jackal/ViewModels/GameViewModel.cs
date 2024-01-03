@@ -53,6 +53,12 @@ namespace Jackal.ViewModels
             };
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
+            Game.UpdateGoldParams = () =>
+            {
+                HiddenGold = Game.HiddenGold;
+                CurrentGold = Game.CurrentGold;
+                LostGold = Game.LostGold;
+            };
             Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",
                                                                               players.Count() > 1 ? "ям" : "ю",
                                                                               string.Join('\n', players.Select(p => p.Name))));
@@ -100,16 +106,7 @@ namespace Jackal.ViewModels
         public void SelectCell(Cell cell)
         {
             if (Game.PreSelectCell(cell))
-            {
-                Task.Run(() =>
-                {
-                    Game.SelectCell(cell);
-
-                    HiddenGold = Game.HiddenGold;
-                    CurrentGold = Game.CurrentGold;
-                    LostGold = Game.LostGold;
-                });
-            }
+                Task.Run(() => Game.SelectCell(cell));
         }
         public void SelectPirate(Pirate pirate)
         {

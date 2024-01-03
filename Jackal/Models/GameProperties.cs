@@ -38,7 +38,7 @@ namespace Jackal.Models
         /// <summary>
         /// Словарь паттерна ячеек.
         /// </summary>
-        public Dictionary<string, (int count, bool fix)> MapPattern { get; set; } = new();
+        public Dictionary<string, (int count, char param)> MapPattern { get; set; } = new();
 
         [Reactive] public int Size { get; set; } = 11;
         public void NormaliseSize()

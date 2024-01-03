@@ -60,9 +60,10 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Метод смены тона изображения на чёрно-белый и обратно.
         /// </summary>
-        public void ChangeGrayStatus()
+        /// <param name="stayGray">Остаться серым, если уже серый.</param>
+        public void ChangeGrayStatus(bool stayGray = false)
         {
-            if (IsGray)
+            if (IsGray && !stayGray)
                 Image = Image[0..^5];
             else
                 Image += "_gray";
