@@ -27,7 +27,8 @@ namespace Jackal.ViewModels
             }
             else
             {
-                ComputeX = (row, column) => Width * column + (row - 7) * (Width / 2);
+                int c = (Map.RowsCount - 1) / 2;
+                ComputeX = (row, column) => Width * column + (row - c) * (Width / 2);
                 ComputeY = (row) => Height * 3 / 4 * row;
             }
         }

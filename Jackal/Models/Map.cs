@@ -22,15 +22,14 @@ namespace Jackal.Models
         /// <inheritdoc cref="Map" path="/summary"/>
         /// </summary>
         /// <param name="mapSize">Размер квадратного массива.</param>
-        public Map(MapType type, int seed)
+        public Map(GameProperties properties)
         {
-            Seed = seed;
+            Type = properties.MapType;
 
-            Type = type;
-            if (type == MapType.Quadratic)
+            if (Type == MapType.Quadratic)
             {
-                RowsCount = 13;
-                ColumnsCount = 13;
+                RowsCount = properties.Size + 2;
+                ColumnsCount = properties.Size + 2;
                 _indexes = new int?[RowsCount, ColumnsCount];
                 for (int i = 0; i < RowsCount; i++)
                 {
@@ -52,17 +51,17 @@ namespace Jackal.Models
                 #region Определение характеристик кораблей
                 ShipPlacements = new ShipPlacement[4]
                 {
-                    new(new Coordinates[] { new(+1, 0) }, 9),
-                    new(new Coordinates[] { new(0, +1) }, 9),
-                    new(new Coordinates[] { new(-1, 0) }, 9),
-                    new(new Coordinates[] { new(0, -1) }, 9)
+                    new(new Coordinates[] { new(+1, 0) }, properties.Size - 2),
+                    new(new Coordinates[] { new(0, +1) }, properties.Size - 2),
+                    new(new Coordinates[] { new(-1, 0) }, properties.Size - 2),
+                    new(new Coordinates[] { new(0, -1) }, properties.Size - 2)
                 };
-                for (int i = 0; i < 9; i++)
+                for (int i = 0; i < properties.Size - 2; i++)
                 {
                     ShipPlacements[0].Region[i] = new(0, i + 2);
                     ShipPlacements[1].Region[i] = new(i + 2, 0);
-                    ShipPlacements[2].Region[i] = new(12, i + 2);
-                    ShipPlacements[3].Region[i] = new(i + 2, 12);
+                    ShipPlacements[2].Region[i] = new(properties.Size + 1, i + 2);
+                    ShipPlacements[3].Region[i] = new(i + 2, properties.Size + 1);
                 }
                 foreach (ShipPlacement shipPlacement in ShipPlacements)
                 {
@@ -73,37 +72,23 @@ namespace Jackal.Models
             }
             else
             {
-                RowsCount = 15;
-                ColumnsCount = 15;
+                RowsCount = 2 * properties.Size + 1;
+                ColumnsCount = 2 * properties.Size + 1;
                 _indexes = new int?[RowsCount, ColumnsCount];
-                (int min, int max)[] rowSizes = new (int min, int max)[15]
-                {
-                    (7, 14),
-                    (6, 14),
-                    (5, 14),
-                    (4, 14),
-                    (3, 14),
-                    (2, 14),
-                    (1, 14),
-                    (0, 14),
-                    (0, 13),
-                    (0, 12),
-                    (0, 11),
-                    (0, 10),
-                    (0,  9),
-                    (0,  8),
-                    (0,  7)
-                };
+                (int min, int max)[] rowSizes = new (int min, int max)[RowsCount];
+                for (int i = 0; i < properties.Size + 1; i++)
+                    rowSizes[i] = (properties.Size - i, 2 * properties.Size);
+                for (int i = properties.Size + 1; i < RowsCount; i++)
+                    rowSizes[i] = (0, 3 * properties.Size - i);
+
+                int I = 0;
                 for(int i = 0; i < RowsCount; i++)
                 {
-                    int min = rowSizes[i].min;
-                    int max = rowSizes[i].max;
-                    int sum = rowSizes[..i].Sum(sizes => sizes.max - sizes.min + 1);
                     int j = 0;
-                    for (; j < min; j++)
+                    for (; j < rowSizes[i].min; j++)
                         _indexes[i, j] = null;
-                    for (; j <= max; j++)
-                        _indexes[i, j] = sum + j - min;
+                    for (; j <= rowSizes[i].max; j++)
+                        _indexes[i, j] = I++;
                     for (; j < ColumnsCount; j++)
                         _indexes[i, j] = null;
                 }
@@ -120,21 +105,21 @@ namespace Jackal.Models
                 #region Определение характеристик кораблей
                 ShipPlacements = new ShipPlacement[6]
                 {
-                    new(new Coordinates[] { new(+1, 0), new(+1,-1) }, 6),
-                    new(new Coordinates[] { new( 0,+1), new(+1, 0) }, 6),
-                    new(new Coordinates[] { new(-1,+1), new( 0,+1) }, 6),
-                    new(new Coordinates[] { new(-1, 0), new(-1,+1) }, 6),
-                    new(new Coordinates[] { new( 0,-1), new(-1, 0) }, 6),
-                    new(new Coordinates[] { new(+1,-1), new( 0,-1) }, 6)
+                    new(new Coordinates[] { new(+1, 0), new(+1,-1) }, properties.Size - 1),
+                    new(new Coordinates[] { new( 0,+1), new(+1, 0) }, properties.Size - 1),
+                    new(new Coordinates[] { new(-1,+1), new( 0,+1) }, properties.Size - 1),
+                    new(new Coordinates[] { new(-1, 0), new(-1,+1) }, properties.Size - 1),
+                    new(new Coordinates[] { new( 0,-1), new(-1, 0) }, properties.Size - 1),
+                    new(new Coordinates[] { new(+1,-1), new( 0,-1) }, properties.Size - 1)
                 };
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < properties.Size - 1; i++)
                 {
-                    ShipPlacements[0].Region[i] = new(0, 13 - i);
-                    ShipPlacements[1].Region[i] = new(1 + i, 6 - i);
-                    ShipPlacements[2].Region[i] = new(8 + i, 0);
-                    ShipPlacements[3].Region[i] = new(14, 1 + i);
-                    ShipPlacements[4].Region[i] = new(13 - i, 8 + i);
-                    ShipPlacements[5].Region[i] = new(6 - i, 14);
+                    ShipPlacements[0].Region[i] = new(0, 2 * properties.Size - 1 - i);
+                    ShipPlacements[1].Region[i] = new(1 + i, properties.Size - 1 - i);
+                    ShipPlacements[2].Region[i] = new(properties.Size + 1 + i, 0);
+                    ShipPlacements[3].Region[i] = new(2 * properties.Size, 1 + i);
+                    ShipPlacements[4].Region[i] = new(2 * properties.Size - 1 - i, properties.Size + 1 + i);
+                    ShipPlacements[5].Region[i] = new(properties.Size - 1 - i, 2 * properties.Size);
                 }
                 foreach (ShipPlacement shipPlacement in ShipPlacements)
                 {
@@ -143,9 +128,21 @@ namespace Jackal.Models
                 }
                 #endregion
             }
+
+            for (int row = 0; row < RowsCount; row++)
+            {
+                for (int column = 0; column < ColumnsCount; column++)
+                {
+                    if (_indexes[row, column] != null)
+                        Add(new SeaCell(row, column));
+                }
+            }
         }
 
-        public readonly int Seed;
+        /// <summary>
+        /// Тип карты.
+        /// </summary>
+        public static MapType Type { get; private set; } = MapType.Quadratic;
         /// <summary>
         /// Количество строк.
         /// </summary>
@@ -157,10 +154,6 @@ namespace Jackal.Models
         /// <remarks><inheritdoc cref="RowsCount" path="/remarks"/></remarks>
         public static int ColumnsCount { get; private set; }
 
-        /// <summary>
-        /// Тип карты.
-        /// </summary>
-        public static MapType Type { get; set; } = MapType.Quadratic;
         /// <summary>
         /// Массив соответствия двойного и оригинального индексов.
         /// </summary>
@@ -189,23 +182,6 @@ namespace Jackal.Models
                                                                          && _indexes[coords.Row, coords.Column] != null);
         }
 
-        /// <summary>
-        /// Возвращает лист координат всех клеток карты.
-        /// </summary>
-        /// <returns></returns>
-        public List<Coordinates> AllCoordinates()
-        {
-            List<Coordinates> result = new();
-            for (int row = 0; row < RowsCount; row++)
-            {
-                for (int column = 0; column < ColumnsCount; column++)
-                {
-                    if (_indexes[row, column] != null)
-                        result.Add(new(row, column));
-                }
-            }
-            return result;
-        }
         /// <summary>
         /// Возвращает лист координат всех земляных клеток карты.
         /// </summary>
@@ -236,12 +212,9 @@ namespace Jackal.Models
 
                 for (int column = min + 1; column < max; column++)
                 {
-                    if (row == 1 && (column == min + 1 || column == max - 1)
-                        && Type == MapType.Quadratic) continue;
-                    //if (row == RowsCount / 2 && (column == min + 1 || column == max - 1)
-                    //    && Type == MapType.Hexagonal) continue;
-                    if (row == RowsCount - 2 && (column == min + 1 || column == max - 1)
-                        && Type == MapType.Quadratic) continue;
+                    if (Type == MapType.Quadratic &&
+                        (row == 1 || row == RowsCount - 2) && (column == min + 1 || column == max - 1))
+                        continue;
                     result.Add(new(row, column));
                 }
             }

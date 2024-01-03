@@ -27,14 +27,46 @@ namespace Jackal
             writer.Write((int)allianceIdentifier);
         }
 
-        public static MapType ReadMapType(this BinaryReader reader)
+
+        public static GameProperties ReadGameProperties(this BinaryReader reader)
         {
-            return (MapType)reader.ReadInt32();
+            Dictionary<string, (int count, bool fix)> pattern = new();
+            if (reader.ReadBoolean())
+            {
+                int count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                    pattern.Add(reader.ReadString(), (reader.ReadInt32(), reader.ReadBoolean()));
+            }
+
+            return new GameProperties()
+            {
+                Seed = reader.ReadInt32(),
+                MapType = (MapType)reader.ReadInt32(),
+                PatternName = reader.ReadString(),
+                Size = reader.ReadInt32(),
+                MapPattern = pattern,
+            };
         }
-        public static void Write(this BinaryWriter writer, MapType mapType)
+        public static void Write(this BinaryWriter writer, GameProperties properties, bool withPattern = false)
         {
-            writer.Write((int)mapType);
+            writer.Write(withPattern);
+            if (withPattern)
+            {
+                writer.Write(properties.MapPattern.Count);
+                foreach ((string name, var value) in properties.MapPattern)
+                {
+                    writer.Write(name);
+                    writer.Write(value.count);
+                    writer.Write(value.fix);
+                }
+            }
+            writer.Write(properties.Seed);
+            writer.Write((int)properties.MapType);
+            writer.Write(properties.PatternName);
+            writer.Write(properties.Size);
         }
+
+
 
         public static Player ReadPlayer(this BinaryReader reader, bool isControllable = false)
         {

@@ -18,6 +18,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Jackal.Views;
 using Avalonia;
+using System.IO;
 
 namespace Jackal.ViewModels
 {
@@ -50,13 +51,21 @@ namespace Jackal.ViewModels
             CreateAllyCommand = ReactiveCommand.Create<bool>(CreateAlly, canCreateAlly);
 
             this.WhenAnyValue(vm => vm.IsHexagonal)
-                .Subscribe(x =>
-                {
-                    MapType type = x ? MapType.Hexagonal : MapType.Quadratic;
-                    GameProperties.MapType = type;
-                    Client.ChangeMapType(type);
+                .Skip(1)
+                .Subscribe(x => {
+                    GameProperties.MapType = x ? MapType.Hexagonal : MapType.Quadratic;
+                    GameProperties.NormaliseSize();
                 });
+            this.WhenAnyValue(vm => vm.GameProperties.PatternName)
+                .Subscribe(x => {
+                    IsFixed = x == "Фиксированный";
+                    if (IsFixed) GameProperties.NormaliseSize();
+                    else Client.ChangeGameProperties(GameProperties);
+                });
+            this.WhenAnyValue(vm => vm.GameProperties.Size)
+                .Subscribe(x => Client.ChangeGameProperties(GameProperties));
 
+            GameProperties = new();
             IsServerHolder = Server.IsServerHolder;
             IP = ip ?? Server.IP;
         }
@@ -64,22 +73,20 @@ namespace Jackal.ViewModels
         public bool IsServerHolder { get; }
         public string IP { get; }
 
-        public GameProperties GameProperties { get; } = new GameProperties();
-
-
+        [Reactive] public GameProperties GameProperties { get; private set; }
         /// <summary>
         /// Флаг того, что тип карты - гексагональный.
         /// </summary>
         [Reactive] public bool IsHexagonal { get; set; }
-        /// <summary>
-        /// Толщина границы CellContainer-а на кнопке смены типа карты.
-        /// </summary>
-        /// <remarks>Необходим для обновления формы CellContainer-а.</remarks>
-        [Reactive] public Thickness MapTypeButtonThickness { get; set; }
+        [Reactive] public bool IsFixed { get; private set; }
+
 
         public ReactiveCommand<Unit, Unit> StartGameCommand { get; }
         void StartGame()
         {
+            if (!ReadMapPattern())
+                return;
+
             Random rand = new();
             List<Player> players = Players.Select(vm => vm.Player).ToList();
             Player[] mixedPlayers = new Player[players.Count];
@@ -110,10 +117,37 @@ namespace Jackal.ViewModels
                 mixedPlayers[I] = players[index];
                 players.RemoveAt(index);
             }
-            int seed = rand.Next();
+            GameProperties.Seed = rand.Next();
 
-            MapType mapType = IsHexagonal ? MapType.Hexagonal : MapType.Quadratic;
-            Client.StartGame(mixedPlayers, seed, mapType);
+            Client.StartGame(mixedPlayers, GameProperties);
+        }
+        bool ReadMapPattern()
+        {
+            string filename = GameProperties.PatternNames[GameProperties.PatternName];
+            bool mainFix = filename == "fix";
+            if (filename == "fix" || filename == "var")
+                filename = GameProperties.MapType.ToString();
+            try
+            {
+                filename = Path.Combine(Properties.MapPatternsFolder, filename + ".txt");
+                FileStream? file = new(filename, FileMode.Open, FileAccess.Read);
+                StreamReader reader = new(file);
+
+                Dictionary<string, (int count, bool fix)> mapPattern = new();
+                while (!reader.EndOfStream)
+                {
+                    string[] words = reader.ReadLine().Split(':');
+                    words[1] = words[1].Trim();
+                    bool fix = words[1].StartsWith('=');
+                    if (fix) words[1] = words[1].Remove(0, 1);
+                    fix = fix || mainFix;
+                    int count = int.Parse(words[1]);
+                    mapPattern[words[0]] = (count, fix);
+                }
+                GameProperties.MapPattern = mapPattern;
+            }
+            catch { return false; }
+            return true;
         }
         public ReactiveCommand<bool, Unit> ChangeWatcherCommand { get; }
         void ChangeWatcher(bool isWatcher)
@@ -167,6 +201,9 @@ namespace Jackal.ViewModels
         {
             Players.Remove(Players.First(playerVM => playerVM.Player.Index == index));
         }
-        public void ChangeMapType(MapType mapType) => IsHexagonal = mapType == MapType.Hexagonal;
+        public void ChangeGameProperties(GameProperties properties)
+        {
+            GameProperties = properties;
+        }
     }
 }

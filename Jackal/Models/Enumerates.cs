@@ -41,7 +41,7 @@ namespace Jackal.Models
         GetPlayer,
         UpdatePlayer,
         DeletePlayer,
-        ChangeMapeType,
+        ChangeGameProperties,
         StartGame,
         MovePirate,
         MoveShip,
@@ -75,7 +75,8 @@ namespace Jackal.Models
         Angle4,
 
         Hex1,
-        Hex2,
+        Hex2a,
+        Hex2b,
         Hex3a,
         Hex3b,
         Hex3c,

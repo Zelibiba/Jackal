@@ -14,6 +14,7 @@ using System.Threading;
 using System.Reflection;
 using Jackal.Models.Pirates;
 using Jackal.Models.Cells;
+using System.Reflection.PortableExecutable;
 
 namespace Jackal.Network
 {
@@ -57,6 +58,7 @@ namespace Jackal.Network
                     int playerCount = _reader.ReadInt32();
                     for (int i = 0; i < playerCount; i++)
                         _viewModel.AddPlayer(_reader.ReadPlayer());
+                    _viewModel.ChangeGameProperties(_reader.ReadGameProperties());
                 }
                 else
                 {
@@ -64,8 +66,7 @@ namespace Jackal.Network
                     Player[] players = new Player[count];
                     for (int i = 0; i < count; i++)
                         players[i] = _reader.ReadPlayer();
-                    int seed = _reader.ReadInt32();
-                    MapType mapType = _reader.ReadMapType();
+                    GameProperties properties = _reader.ReadGameProperties();
 
                     count = _reader.ReadInt32();
                     int[][] operations = new int[count][];
@@ -78,7 +79,7 @@ namespace Jackal.Network
                     }
 
                     _blockAction = true;
-                    _SetContent(new GameViewModel(players, seed, mapType, operations));
+                    _SetContent(new GameViewModel(players, properties, operations));
                     _blockAction = false;
                 }
 
@@ -121,8 +122,8 @@ namespace Jackal.Network
                         case NetMode.DeletePlayer:
                             RunInUIThread(() => _viewModel?.DeletePlayer(_reader.ReadInt32()));
                             break;
-                        case NetMode.ChangeMapeType:
-                            RunInUIThread(() => _viewModel?.ChangeMapType(_reader.ReadMapType()));
+                        case NetMode.ChangeGameProperties:
+                            RunInUIThread(() => _viewModel?.ChangeGameProperties(_reader.ReadGameProperties()));
                             break;
                         case NetMode.StartGame:
                             int count = _reader.ReadInt32();
@@ -132,11 +133,9 @@ namespace Jackal.Network
                                 Team team = _reader.ReadTeam();
                                 players[i] = _viewModel.Players.First(playerVM => playerVM.Player.Team == team).Player;
                             }
-
-                            int seed = _reader.ReadInt32();
-                            MapType mapType = _reader.ReadMapType();
+                            GameProperties properties = _reader.ReadGameProperties();
                             Task.Delay(200).Wait();
-                            _SetContent(new GameViewModel(players, seed, mapType));
+                            _SetContent(new GameViewModel(players, properties));
                             break;
                         case NetMode.MovePirate:
                             int index = _reader.ReadInt32();
@@ -207,23 +206,23 @@ namespace Jackal.Network
             _writer.Write(number);
             _writer.Flush();
         }
-        public static void ChangeMapType(MapType mapType)
+        public static void ChangeGameProperties(GameProperties properties)
         {
-            _writer.Write(NetMode.ChangeMapeType);
-            _writer.Write(mapType);
+            if (!Server.IsServerHolder) return;
+            _writer.Write(NetMode.ChangeGameProperties);
+            _writer.Write(properties);
             _writer.Flush();
         }
-        public static void StartGame(Player[] mixedPlayers, int seed, MapType mapType)
+        public static void StartGame(Player[] mixedPlayers, GameProperties properties)
         {
             _writer.Write(NetMode.StartGame);
             _writer.Write(mixedPlayers.Length);
             foreach (Player player in mixedPlayers)
                 _writer.Write(player.Team);
-            _writer.Write(seed);
-            _writer.Write(mapType);
+            _writer.Write(properties, withPattern: true);
             _writer.Flush();
 
-            Dispatcher.UIThread.InvokeAsync(() => _SetContent(new GameViewModel(mixedPlayers, seed, mapType)));
+            Dispatcher.UIThread.InvokeAsync(() => _SetContent(new GameViewModel(mixedPlayers, properties)));
         }
 
         public static void MovePirate(Pirate pirate, Cell targetCell)

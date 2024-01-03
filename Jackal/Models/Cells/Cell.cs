@@ -103,11 +103,7 @@ namespace Jackal.Models.Cells
         public virtual void SetSelectableCoords(Map map)
         {
             SelectableCoords.Clear();
-            foreach (Coordinates coords in map.AdjacentCellsCoords(this))
-            {
-                if (map[coords] is SeaCell) continue;
-                SelectableCoords.Add(coords);
-            }
+            SelectableCoords.AddRange(map.AdjacentCellsCoords(this));
         }
 
         /// <summary>

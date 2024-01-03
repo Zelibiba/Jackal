@@ -16,8 +16,8 @@ namespace Jackal.ViewModels
     {
         public MainMenuViewModel()
         {
-            //Content = this;
-            CreateServer(null);
+            Content = this;
+            //CreateServer(null);
 
             //(Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "спаивание миссионера.txt"));
             //(Player[], int, MapType, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "1.txt"));
@@ -35,11 +35,11 @@ namespace Jackal.ViewModels
         }
         public async Task ConnectToServer(object param)
         {
-            IPWindow dialog = new IPWindow();
-            string ip = await dialog.ShowDialog<string>(param as Window);
-            if (!string.IsNullOrEmpty(ip))
-                Client.Start(ip, SetContent);
-            //Client.Start(Server.IP, SetContent);
+            //IPWindow dialog = new IPWindow();
+            //string ip = await dialog.ShowDialog<string>(param as Window);
+            //if (!string.IsNullOrEmpty(ip))
+            //    Client.Start(ip, SetContent);
+            Client.Start(Server.IP, SetContent);
         }
         public async void LoadGame(object param)
         {
@@ -50,7 +50,7 @@ namespace Jackal.ViewModels
                 return;
 
             (Player[], int, MapType,List<int[]>) data = SaveOperator.ReadSave(result[0]);
-            Content = new GameViewModel(data.Item1, data.Item2, data.Item3, data.Item4);
+            //Content = new GameViewModel(data.Item1, data.Item2, data.Item3, data.Item4);
         }
         public void Cansel()
         {

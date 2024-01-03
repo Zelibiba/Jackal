@@ -34,13 +34,12 @@
 					IsVisible="{Binding IsServerHolder}"
 					Command="{Binding StartGameCommand}"/>
 			<HeaderedContentControl Header="Параметры карты" Margin="0,10"
-									BorderBrush="Black" BorderThickness="2"
+									BorderBrush="Black" BorderThickness="2" IsEnabled="{Binding IsServerHolder}"
 									Classes="GroupBox" MinWidth="410" HorizontalAlignment="Left">
 				<Grid ColumnDefinitions="90, *" Margin="6">
 					<WrapPanel Grid.Column="0" Orientation="Vertical">
-						<Label Content="Тип карты:"/>
+						<Label Content="Тип карты" HorizontalAlignment="Center"/>
 						<ToggleButton Classes="L" HorizontalAlignment="Center"
-									  IsEnabled="{Binding IsServerHolder}"
 									  IsChecked="{Binding IsHexagonal}">
 							<ToggleButton.Styles>
 								<Style Selector="ToggleButton.L /template/ ContentPresenter">
@@ -52,13 +51,21 @@
 						</ToggleButton>
 					</WrapPanel>
 					<Grid Grid.Column="1" RowDefinitions="*,*" ColumnDefinitions="Auto,*">
+						<Grid.Styles>
+							<Style Selector="ComboBox:disabled /template/ ContentControl#ContentPresenter TextBlock">
+								<Setter Property="Foreground" Value="Black"/>
+							</Style>
+							<Style Selector="NumericUpDown:disabled /template/ TextBox">
+								<Setter Property="Foreground" Value="Black"/>
+							</Style>
+						</Grid.Styles>
 						<Label Grid.Row="0" Grid.Column="0" Content="Распределение:" VerticalAlignment="Center"/>
 						<Label Grid.Row="1" Grid.Column="0" Content="Размер острова:" VerticalAlignment="Center"/>
-						<ComboBox Grid.Row="0" Grid.Column="1" SelectedIndex="0" VerticalAlignment="Center" HorizontalAlignment="Stretch">
-							<ComboBoxItem>Фиксированное</ComboBoxItem>
-							<ComboBoxItem>Вероятностное</ComboBoxItem>
+						<ComboBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+								  Items="{Binding GameProperties.PatternNames.Keys}" SelectedItem="{Binding GameProperties.PatternName}">
 						</ComboBox>
-						<NumericUpDown Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Value="11"/>
+						<NumericUpDown Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" IsEnabled="{Binding !IsFixed}"
+									   Value="{Binding GameProperties.Size}"/>
 					</Grid>
 				</Grid>
 			</HeaderedContentControl>
