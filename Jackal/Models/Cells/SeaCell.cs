@@ -25,22 +25,27 @@ namespace Jackal.Models.Cells
             set => Game.LostGold += 3;
         }
 
+        public override void SetSelectableCoords(Map map)
+        {
+            SelectableCoords.Clear();
+            SelectableCoords.AddRange(map.AdjacentCellsCoords(this).Where(coords => map[coords] is SeaCell or ShipCell));
+        }
+
+        public override bool CanBeSelectedBy(Pirate pirate)
+        {
+            return pirate.Cell is SeaCell || !pirate.Cell.IsStandable;
+        }
+        public override bool IsGoldFriendly(Pirate pirate)
+        {
+            return !pirate.Cell.IsStandable;
+        }
+
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
             MovementResult result = base.AddPirate(pirate, delay);
             pirate.Gold = false;
             pirate.Galeon = false;
             return result;
-        }
-
-        public override void SetSelectableCoords(Map map)
-        {
-            SelectableCoords.Clear();
-            foreach(Coordinates coords in map.AdjacentCellsCoords(this))
-            {
-                if (map[coords] is not SeaCell && map[coords] is not ShipCell) continue;
-                SelectableCoords.Add(coords);
-            }
         }
     }
 }

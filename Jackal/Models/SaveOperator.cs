@@ -22,7 +22,7 @@ namespace Jackal.Models
 
         static public List<int[]>? Operations { get; private set; }
 
-        public static void StartAutosave(IEnumerable<Player> players, int seed, MapType mapType)
+        public static void StartAutosave(IEnumerable<Player> players, GameProperties properties)
         {
             string filename = Path.Combine(Properties.SavesFolder, "autosave.txt");
             try
@@ -37,8 +37,8 @@ namespace Jackal.Models
                 _writer?.WriteLine(string.Format("    {0}, {1}({2}), {3}", player.Name, (int)player.Team, player.Team, (int)player.AllianceIdentifier));
 
             _writer?.WriteLine();
-            _writer?.WriteLine("seed: " + seed);
-            _writer?.WriteLine(string.Format("map type: {0}({1})", (int)mapType, mapType));
+            _writer?.WriteLine("seed: " + properties.Seed);
+            _writer?.WriteLine(string.Format("map type: {0}({1})", (int)properties.MapType, properties.MapType));
             _writer?.WriteLine();
             _writer?.Flush();
 

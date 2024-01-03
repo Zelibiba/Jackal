@@ -20,7 +20,6 @@ namespace Jackal.Network
         public static string IP => ip.ToString();
         static Task _listening;
         public static bool IsServerHolder { get; private set; }
-        public static bool PreapreToGame { get; set; }
 
         internal static List<ClientListener> Clients;
         static int _playerIndex;
@@ -36,7 +35,6 @@ namespace Jackal.Network
             _server = new TcpListener(ip, 10001);
             _canselListening = false;
             IsServerHolder = true;
-            PreapreToGame = true;
 
 
 

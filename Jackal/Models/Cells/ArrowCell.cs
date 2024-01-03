@@ -51,8 +51,11 @@ namespace Jackal.Models.Cells
                 {
                     ArrowType.Hex1 =>  new Coordinates[] { new(-1, 0) },
 
-                    ArrowType.Hex2 =>  new Coordinates[] { new(-1, 0),
+                    ArrowType.Hex2a => new Coordinates[] { new(-1, 0),
                                                            new(+1, 0) },
+
+                    ArrowType.Hex2b => new Coordinates[] { new(-1, 0),
+                                                           new(+1,-1) },
 
                     ArrowType.Hex3a => new Coordinates[] { new(-1, 0),
                                                            new(+1,-1),

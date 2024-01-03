@@ -32,6 +32,9 @@ namespace Jackal.Network
         NetMode _lastMode;
         bool _continueListening;
 
+        static bool _prepareToGame = true;
+        static GameProperties _gameProperties = new();
+
 
         internal ClientListener(TcpClient tcpClient, int index)
         {
@@ -53,8 +56,8 @@ namespace Jackal.Network
         {
             try
             {
-                _writer.Write(Server.PreapreToGame);
-                if (Server.PreapreToGame)
+                _writer.Write(_prepareToGame);
+                if (_prepareToGame)
                 {
                     _writer.Write(_players[0]);
                     _writer.Write(Server.Clients.Sum(client => client._players.Count) - 1);
@@ -65,6 +68,7 @@ namespace Jackal.Network
                         foreach (Player player in client._players)
                             _writer.Write(player);
                     }
+                    _writer.Write(_gameProperties);
                     _writer.Flush();
 
                     SendToOther(NetMode.NewPlayer, writer =>
@@ -77,8 +81,7 @@ namespace Jackal.Network
                     foreach (Player player in Game.Players)
                         _writer.Write(player);
 
-                    _writer.Write(Game.Map.Seed);
-                    _writer.Write(Map.Type);
+                    _writer.Write(Game.Properties, withPattern: true);
                     _writer.Flush();
 
                     Server.AddTask(() =>
@@ -154,7 +157,7 @@ namespace Jackal.Network
                             _writer.Write(_players[1]);
                             _writer.Flush();
                             SendToOther(NetMode.UpdatePlayer, writer =>
-                                    writer.Write(_players[1]));
+                                        writer.Write(_players[1]));
                         }
                         SendToOther(NetMode.UpdatePlayer, writer =>
                                     writer.Write(_players[0])); break;
@@ -167,27 +170,24 @@ namespace Jackal.Network
                         else
                             _players.RemoveAt(number);
                         break;
-                    case NetMode.ChangeMapeType:
-                        MapType maptype = _reader.ReadMapType();
-                        SendToOther(NetMode.ChangeMapeType, writer =>
-                        {
-                            writer.Write(maptype);
-                        }); break;
+                    case NetMode.ChangeGameProperties:
+                        _gameProperties = _reader.ReadGameProperties();
+                        SendToOther(NetMode.ChangeGameProperties, writer =>
+                                    writer.Write(_gameProperties)
+                        ); break;
                     case NetMode.StartGame:
-                        Server.PreapreToGame = false;
+                        _prepareToGame = false;
                         int count = _reader.ReadInt32();
                         Team[] mixedTeams = new Team[count];
                         for (int i = 0; i < count; i++)
                             mixedTeams[i] = _reader.ReadTeam();
-                        int mapSeed = _reader.ReadInt32();
-                        MapType mapType = (MapType)_reader.ReadInt32();
+                        _gameProperties = _reader.ReadGameProperties();
                         SendToOther(NetMode.StartGame, writer =>
                         {
                             writer.Write(count);
                             foreach (Team team in mixedTeams)
                                 writer.Write(team);
-                            writer.Write(mapSeed);
-                            writer.Write(mapType);
+                            writer.Write(_gameProperties, withPattern: true);
                         }); break;
                     case NetMode.MovePirate:
                         int index = _reader.ReadInt32();
@@ -221,7 +221,7 @@ namespace Jackal.Network
                                     writer.Write(index)); break;
                 }
             }
-            catch (Exception ex) { }
+            catch { }
         }
 
         void Close()
