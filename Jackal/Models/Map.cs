@@ -235,7 +235,7 @@ namespace Jackal.Models
         public Cell this[int row, int column]
         {
             get => this[(int)_indexes[row, column]];
-            set
+            private set
             {
                 this[(int)_indexes[row, column]] = value;
             }
@@ -243,10 +243,18 @@ namespace Jackal.Models
         public Cell this[Coordinates coords]
         {
             get => this[coords.Row, coords.Column];
-            set
+            private set
             {
                 this[coords.Row, coords.Column] = value;
             }
+        }
+        /// <summary>
+        /// Метод задаёт новую клетку на координатах, которые она имеет.
+        /// </summary>
+        /// <param name="cell"></param>
+        public void SetCell(Cell cell)
+        {
+            this[cell.Coords] = cell;
         }
         public new int IndexOf(Cell cell) => (int)_indexes[cell.Row, cell.Column];
 
@@ -271,7 +279,7 @@ namespace Jackal.Models
         public void SetShipToPlayer(int shipIndex, Player player)
         {
             ShipPlacement shipPlacement = ShipPlacements[shipIndex];
-            this[shipPlacement.InitialCoordinates] = new ShipCell(shipPlacement, player);
+            SetCell(new ShipCell(shipPlacement, player));
         }
     }
 }

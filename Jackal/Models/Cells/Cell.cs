@@ -293,9 +293,7 @@ namespace Jackal.Models.Cells
         /// <param name="delay">Миллисекунды паузы для ожидания анимации.</param>
         public virtual MovementResult AddPirate(Pirate pirate, int delay = 0)
         {
-            Game.OnStartPirateAnimation(pirate, this);
-            if (delay > 0)
-                Task.Delay(delay).Wait();
+            Game.OnStartPirateAnimation(pirate, this, delay);
 
             Pirates.Add(pirate);    // Сначала добавить пирата, потом убрать врагов (для корректной работы AirplaneCell)
             pirate.Cell = this;

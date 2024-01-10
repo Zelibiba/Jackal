@@ -1,11 +1,5 @@
 ﻿Airplane:	1
-Arrow_q1a:	3
-Arrow_q1s:	3
-Arrow_q2a:	3
-Arrow_q2s:	3
-Arrow_q3:	3
-Arrow_q4a:	3
-Arrow_q4s:	3
+Arrow:		3
 Balloon:	2
 Bottle_1:	3
 Bottle_2:	2

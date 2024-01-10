@@ -48,6 +48,8 @@ namespace Jackal.Network
                 _cancellationTokenSource = new CancellationTokenSource();
                 _SetContent = SetContent;
 
+                if (Properties.Version != _reader.ReadString())
+                    throw new Exception("Версия клиента не соответсвтвует версии сервера!");
 
                 bool preapreToGame = _reader.ReadBoolean();
                 if (preapreToGame)

@@ -20,5 +20,7 @@
 				HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
 				Command="{Binding LoadGame}"
 				CommandParameter="{Binding $parent[Window]}"/>
+		<Label Content="{Binding Version}" Margin="30"
+			   HorizontalAlignment="Center"/>
 	</StackPanel>
 </UserControl>

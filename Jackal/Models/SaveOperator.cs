@@ -40,6 +40,7 @@ namespace Jackal.Models
             _writer?.WriteLine("seed: " + properties.Seed);
             _writer?.WriteLine(string.Format("map type: {0}({1})", (int)properties.MapType, properties.MapType));
             _writer?.WriteLine("size: " + properties.Size);
+            _writer?.WriteLine();
             properties.WriteMapPattern(_writer);
             _writer?.WriteLine();
             _writer?.Flush();
@@ -151,11 +152,12 @@ namespace Jackal.Models
                 MapType = (MapType)int.Parse(reader.ReadLine().Split(':')[1].Trim().Split('(')[0]),
                 Size = int.Parse(reader.ReadLine().Split(':')[1].Trim()),
             };
+            reader.ReadLine();
             properties.ReadMapPattern(reader, false);
 
 
             List<int[]> operations = new List<int[]>();
-            reader.ReadLine();
+            //reader.ReadLine();
             while(true)
             {
                 if(reader.EndOfStream)
@@ -163,7 +165,6 @@ namespace Jackal.Models
                 string line = reader.ReadLine().Split('|')[0].Trim();
                 if (string.IsNullOrEmpty(line))
                     break;
-
                 operations.Add(line.Split("  ").Select(str => int.Parse(str)).ToArray());
             }
 

@@ -8,19 +8,24 @@ using System.Threading.Tasks;
 namespace Jackal
 {
     /// <summary>
-    /// Класс с указание путей для различных файлов.
+    /// Класс с указанием версии и путей для различных файлов.
     /// </summary>
     public static class Properties
     {
+        /// <summary>
+        /// Версия программы.
+        /// </summary>
+        public static string Version => "1.0.0";
+
         static Properties()
         {
-            string mainFolder = Environment.CurrentDirectory;
+            string mainFolder = AppContext.BaseDirectory;
 #if DEBUG
-            mainFolder = Path.Combine("..", "..", "..");
+            mainFolder = Path.Combine(mainFolder, "..", "..", "..");
 #endif
             ImageFolder = Path.Combine(mainFolder, "Assets", "Images");
             MapPatternsFolder = Path.Combine(mainFolder, "Assets", "Map Patterns");
-            SavesFolder = Path.Combine(mainFolder, "saves");
+            SavesFolder = Path.Combine(mainFolder, "Saves");
         }
         /// <summary>
         /// Путь до папки с изображениями клеток.

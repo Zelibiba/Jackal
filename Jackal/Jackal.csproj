@@ -23,6 +23,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove=".gitignore" />
+    <None Remove="Assets\Map patterns\Gold_rush.txt" />
     <None Remove="Assets\Map patterns\Hexagonal.txt" />
     <None Remove="Assets\Map patterns\Quadratic.txt" />
   </ItemGroup>

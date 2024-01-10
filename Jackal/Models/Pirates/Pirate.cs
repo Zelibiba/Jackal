@@ -316,7 +316,7 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public void Kill()
         {
-            Game.OnStartPirateAnimation(this, Cell, kill: true);
+            Game.OnStartPirateAnimation(this, Cell, 0, kill: true);
             Game.Pirates.Remove(this);
 
             TargetCell = null;

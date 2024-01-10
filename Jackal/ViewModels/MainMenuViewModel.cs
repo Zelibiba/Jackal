@@ -17,12 +17,14 @@ namespace Jackal.ViewModels
         public MainMenuViewModel()
         {
             Content = this;
+
             //CreateServer(null);
 
-            //(Player[], int, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "спаивание миссионера.txt"));
-            //(Player[], int, MapType, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "1.txt"));
-            //Content = new GameViewModel(data.Item1, data.Item2, data.Item3, data.Item4);
+            //(Player[], GameProperties, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "autosave.txt"));
+            //Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
+
+        public string Version => "Версия:    " + Properties.Version;
 
         [Reactive] public ViewModelBase Content { get; private set; }
         ViewModelBase GetContent() => Content;
@@ -46,7 +48,7 @@ namespace Jackal.ViewModels
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Directory = Properties.SavesFolder;
             string[]? result = await dialog.ShowAsync(param as Window);
-            if (result?[0] == null)
+            if (result?.Length == 0 || result?[0] == null)
                 return;
 
             (Player[], GameProperties,List<int[]>) data = SaveOperator.ReadSave(result[0]);

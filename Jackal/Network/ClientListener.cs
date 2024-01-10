@@ -56,6 +56,7 @@ namespace Jackal.Network
         {
             try
             {
+                _writer.Write(Properties.Version);
                 _writer.Write(_prepareToGame);
                 if (_prepareToGame)
                 {

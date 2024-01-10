@@ -15,18 +15,18 @@ namespace Jackal.ViewModels
         public PirateViewModel(Pirate pirate, CellViewModel[] cellsVM)
         {
             Pirate = pirate;
-            CellVM = cellsVM.First(cellVM => cellVM.Cell.ShipTeam == pirate.Team);
+            CellVM = cellsVM.First(cellVM => cellVM.Cell.Coords == pirate.Cell.Coords);
             Index = CellVM.GetIndex();
 
             this.WhenAnyValue(vm => vm.Index, vm => vm.CellVM.X,
-                              (i, x) => x + i % 3 * (Size + 1) + 4)
+                              (i, x) => x + i % 3 * (_size + 1) + 4)
                               .ToPropertyEx(this, vm => vm.X);
             this.WhenAnyValue(vm => vm.Index, vm => vm.CellVM.Y,
-                              (i, y) => y + i / 3 * (Size + 1) + 16)
+                              (i, y) => y + i / 3 * (_size + 1) + 16)
                               .ToPropertyEx(this, vm => vm.Y);
         }
 
-        public int Size => 18;
+        static readonly int _size = 18;
         public Pirate Pirate { get; }
         [Reactive] public CellViewModel CellVM { get; private set; }
         public void SetCell(CellViewModel cellVM)

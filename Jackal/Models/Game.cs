@@ -203,19 +203,36 @@ namespace Jackal.Models
             List<string> names = new(coords.Count);
             List<string> pattern = new();
 
-            // учёт гарантированных клеток
+            // учёт гарантированных клеток и подготовка вероятностных клеток
             foreach ((string name, (int count, char param)) in properties.MapPattern)
             {
-                string[] massive = new string[count];
-                for (int i = 0; i < count; i++)
-                    massive[i] = name;
-                switch(param)
+                // развертывание типа стрелок
+                string[] cells;
+                if (name == "Arrow")
                 {
-                    case ' ': pattern.AddRange(massive); break;
-                    case '=': names.AddRange(massive); break;
-                    case '>': names.AddRange(massive);
-                              pattern.AddRange(massive); break;
-                    default: throw new ArgumentException(param.ToString());
+                    cells = properties.MapType == MapType.Quadratic ?
+                        new string[] { "q1a", "q1s", "q2a", "q2s", "q3", "q4a", "q4s" } :
+                        new string[] { "h1", "h2a", "h2b", "h3a", "h3b", "h3c" };
+                    for (int i = 0; i < cells.Length; i++)
+                        cells[i] = "Arrow_" + cells[i];
+                }
+                else
+                    cells = new string[] { name };
+
+                foreach (string _name in cells)
+                {
+                    string[] massive = new string[count];
+                    for (int i = 0; i < count; i++)
+                        massive[i] = _name;
+                    switch (param)
+                    {
+                        case ' ': pattern.AddRange(massive); break;
+                        case '=': names.AddRange(massive); break;
+                        case '>':
+                            names.AddRange(massive);
+                            pattern.AddRange(massive); break;
+                        default: throw new ArgumentException(param.ToString());
+                    }
                 }
             }
 
@@ -251,31 +268,31 @@ namespace Jackal.Models
                 names.RemoveAt(index);
                 switch (name.Split('_')[0])
                 {
-                    case "Field":      Map[row, column] = new Cell(row, column, "Field"); break;
-                    case "Horse":      Map[row, column] = new HorseCell(row, column); break;
-                    case "Rum":        Map[row, column] = new RumCell(row, column); break;
-                    case "Lake":       Map[row, column] = new LakeCell(row, column, ContinueMovePirate); break;
-                    case "Pit":        Map[row, column] = new PitCell(row, column); break;
-                    case "Crocodile":  Map[row, column] = new CrocodileCell(row, column, ContinueMovePirate); break;
-                    case "Fortress":   Map[row, column] = new FortressCell(row, column, false); break;
-                    case "Balloon":    Map[row, column] = new BalloonCell(row, column, ContinueMovePirate); break;
-                    case "Jungle":     Map[row, column] = new JungleCell(row, column); break;
-                    case "Cannabis":   Map[row, column] = new CannabisCell(row, column); break;
-                    case "Cannibal":   Map[row, column] = new CannibalCell(row, column); break;
-                    case "Putana":     Map[row, column] = new FortressCell(row, column, true); break;
-                    case "Airplane":   Map[row, column] = new AirplaneCell(row, column); break;
-                    case "Friday":     Map[row, column] = new ResidentCell(row, column, ResidentType.Friday); break;
-                    case "Missioner":  Map[row, column] = new ResidentCell(row, column, ResidentType.Missioner); break;
-                    case "Ben":        Map[row, column] = new ResidentCell(row, column, ResidentType.Ben); break;
-                    case "EarthQuake": Map[row, column] = new EarthQuakeCell(row, column); break;
-                    case "Carramba":   Map[row, column] = new Cell(row, column, "Field"); break;
-                    case "LightHouse": Map[row, column] = new LightHouseCell(row, column); break;
+                    case "Field":      Map.SetCell(new Cell(row, column, "Field")); break;
+                    case "Horse":      Map.SetCell(new HorseCell(row, column)); break;
+                    case "Rum":        Map.SetCell(new RumCell(row, column)); break;
+                    case "Lake":       Map.SetCell(new LakeCell(row, column, ContinueMovePirate)); break;
+                    case "Pit":        Map.SetCell(new PitCell(row, column)); break;
+                    case "Crocodile":  Map.SetCell(new CrocodileCell(row, column, ContinueMovePirate)); break;
+                    case "Fortress":   Map.SetCell(new FortressCell(row, column, false)); break;
+                    case "Balloon":    Map.SetCell(new BalloonCell(row, column, ContinueMovePirate)); break;
+                    case "Jungle":     Map.SetCell(new JungleCell(row, column)); break;
+                    case "Cannabis":   Map.SetCell(new CannabisCell(row, column)); break;
+                    case "Cannibal":   Map.SetCell(new CannibalCell(row, column)); break;
+                    case "Putana":     Map.SetCell(new FortressCell(row, column, true)); break;
+                    case "Airplane":   Map.SetCell(new AirplaneCell(row, column)); break;
+                    case "Friday":     Map.SetCell(new ResidentCell(row, column, ResidentType.Friday)); break;
+                    case "Missioner":  Map.SetCell(new ResidentCell(row, column, ResidentType.Missioner)); break;
+                    case "Ben":        Map.SetCell(new ResidentCell(row, column, ResidentType.Ben)); break;
+                    case "EarthQuake": Map.SetCell(new EarthQuakeCell(row, column)); break;
+                    case "Carramba":   Map.SetCell(new Cell(row, column, "Field")); break;
+                    case "LightHouse": Map.SetCell(new LightHouseCell(row, column)); break;
                     case "Cave":
-                        Map[row, column] = new CaveCell(row, column, ContinueMovePirate);
+                        Map.SetCell(new CaveCell(row, column, ContinueMovePirate));
                         caveCells.Add(Map[row, column] as CaveCell); break;
                     case "Gun":
                         int rotation = rand.Next(Map.Type == MapType.Quadratic ? 4 : 6);
-                        Map[row, column] = new GunCell(row, column, rotation, ContinueMovePirate); break;
+                        Map.SetCell(new GunCell(row, column, rotation, ContinueMovePirate)); break;
                     case "Arrow":
                         rotation = rand.Next(Map.Type == MapType.Quadratic ? 4 : 6);
                         ArrowType arrowType = name.Split('_')[1] switch
@@ -297,15 +314,15 @@ namespace Jackal.Models
                             "h4b" => ArrowType.Hex4b,
                             _ => throw new Exception("Wrong random ArrowType")
                         };
-                        Map[row, column] = new ArrowCell(row, column, arrowType, rotation, ContinueMovePirate); break;
+                        Map.SetCell(new ArrowCell(row, column, arrowType, rotation, ContinueMovePirate)); break;
                     case "Maze":
                         int size = int.Parse(name.Split('_')[1]);
-                        Map[row, column] = new MazeCell(row, column, size);break;
+                        Map.SetCell(new MazeCell(row, column, size));break;
                     case "Bottle":
                         int count = int.Parse(name.Split('_')[1]);
-                        Map[row, column] = new BottleCell(row, column, count); break;
+                        Map.SetCell(new BottleCell(row, column, count)); break;
                     case "Galeon": 
-                        Map[row, column] = new GoldCell(row, column, GoldType.Galeon);
+                        Map.SetCell(new GoldCell(row, column, GoldType.Galeon));
                         __hiddenGold += 3; break;
                     case "Gold":
                         GoldType gold = name.Split('_')[1] switch
@@ -317,7 +334,7 @@ namespace Jackal.Models
                             "5" => GoldType.Gold5,
                             _ => throw new Exception("Wrong random Gold Type")
                         };
-                        Map[row, column] = new GoldCell(row, column, gold);
+                        Map.SetCell(new GoldCell(row, column, gold));
                         __hiddenGold += (int)gold; break;
                     default: throw new Exception("Wrong random cell");
                 }
@@ -721,8 +738,11 @@ namespace Jackal.Models
         /// <summary>
         /// Метод запуска анимации перемещения пирата.
         /// </summary>
+        /// <param name="pirate">Перемещаемый пират.</param>
         /// <param name="cell">Клетка, куда перемещается пират.</param>
-        public static void OnStartPirateAnimation(Pirate pirate, Cell cell, bool kill = false)
+        /// <param name="delay">Задержка в миллисекундах для синхронизации с анимацией.</param>
+        /// <param name="kill">Флаг того, что пират убит, и нужно очистить за ним.</param>
+        public static void OnStartPirateAnimation(Pirate pirate, Cell cell, int delay, bool kill = false)
         {
             if (StartPirateAnimation != null)
             {
@@ -730,6 +750,8 @@ namespace Jackal.Models
                 int pirateIndex = Pirates.IndexOf(pirate);
                 int cellIndex = Map.IndexOf(cell);
                 StartPirateAnimation(pirateIndex, cellIndex, kill);
+                if (delay > 0)
+                    Task.Delay(delay).Wait();
             }
         }
         /// <summary>
