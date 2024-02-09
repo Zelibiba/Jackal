@@ -30,13 +30,13 @@ namespace Jackal.Converters
             if (words[1] == "gray")
             {
                 SKBitmap SkBitmap;
-                using(MemoryStream stream = new())
+                using (MemoryStream stream = new())
                 {
                     bitmap.Save(stream);
                     stream.Position = 0;
                     SkBitmap = SKBitmap.Decode(stream);
                 }
-                using (SKCanvas canvas=new(SkBitmap))
+                using (SKCanvas canvas = new(SkBitmap))
                 {
                     using (SKPaint paint = new())
                     {

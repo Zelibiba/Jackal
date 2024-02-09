@@ -38,7 +38,7 @@ namespace Jackal.ViewModels
         public void ChangeAlliance()
         {
             if (Player.AllianceIdentifier == AllianceIdentifier.None)
-                Player.AllianceIdentifier = AllianceIdentifier.Blue;
+                Player.AllianceIdentifier = AllianceIdentifier.Green;
             else
                 Player.AllianceIdentifier--;
         }
@@ -48,7 +48,6 @@ namespace Jackal.ViewModels
                 Player.Team = Team.White;
             else
                 Player.Team = (Team)(2 * (int)Player.Team);
-
         }
         public void SetReady()
         {

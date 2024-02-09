@@ -20,7 +20,7 @@ namespace Jackal.ViewModels
 
             //CreateServer(null);
 
-            //(Player[], GameProperties, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "saves", "autosave.txt"));
+            //(Player[], GameProperties, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Properties.SavesFolder, "test.txt"));
             //Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
 

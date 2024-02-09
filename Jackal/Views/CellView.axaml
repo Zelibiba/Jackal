@@ -119,8 +119,8 @@
 									 Classes.IsShip="{Binding Cell.IsShip}"
 									 MapType="{Binding MapType}">
 						<WrapPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="2,0">
-							<TextBlock Text="Г" FontWeight="Bold" FontSize="20"
-									   IsVisible="{Binding Cell.Galeon}"/>
+							<TextBlock Text="{Binding Galeon}" FontWeight="Bold" FontSize="20"
+									   IsVisible="{Binding !!Cell.Galeon}"/>
 							<TextBlock Text="{Binding Cell.Gold}" FontWeight="Bold" FontSize="20"
 									   IsVisible="{Binding !!Cell.Gold}"/>
 						</WrapPanel>

@@ -18,18 +18,18 @@ namespace Jackal.ViewModels
         {
             Height = MapType == MapType.Quadratic ? 64 : 73;
             Width = 64;
-            
+
 
             if (MapType == MapType.Quadratic)
             {
-                ComputeX = (row, column) => Width * column;
-                ComputeY = (row) => Height * row;
+                ComputeX = (coords) => Width * coords.Column;
+                ComputeY = (coords) => Height * coords.Row;
             }
             else
             {
                 int c = (Map.RowsCount - 1) / 2;
-                ComputeX = (row, column) => Width * column + (row - c) * (Width / 2);
-                ComputeY = (row) => Height * 3 / 4 * row;
+                ComputeX = (coords) => Width * coords.Column + (coords.Row - c) * (Width / 2);
+                ComputeY = (coords) => Height * 3 / 4 * coords.Row;
             }
         }
         public CellViewModel(Cell cell)
@@ -38,22 +38,29 @@ namespace Jackal.ViewModels
             ZIndex = 1;
             _piratePlaces = new();
 
-            this.WhenAnyValue(vm => vm.Cell.Row, vm => vm.Cell.Column, ComputeX)
+            this.WhenAnyValue(vm => vm.Cell.Galeon)
+                .Select(galeon => string.Concat(Enumerable.Repeat("Г", galeon)))
+                .ToPropertyEx(this, vm => vm.Galeon);
+
+
+            this.WhenAnyValue(vm => vm.Cell.Coords, ComputeX)
                 .ToPropertyEx(this, vm => vm.X);
-            this.WhenAnyValue(vm => vm.Cell.Row, ComputeY)
+            this.WhenAnyValue(vm => vm.Cell.Coords, ComputeY)
                 .ToPropertyEx(this, vm => vm.Y);
         }
+
+        [ObservableAsProperty] public string Galeon { get; }
 
         public static MapType MapType => Map.Type;
 
         public Cell Cell { get; }
         [Reactive] public int ZIndex { get; set; }
-        
+
         public static int Height { get; }
         public static int Width { get; }
 
-        readonly static Func<int, int, int> ComputeX;
-        readonly static Func<int, int> ComputeY;
+        readonly static Func<Coordinates, int> ComputeX;
+        readonly static Func<Coordinates, int> ComputeY;
         [ObservableAsProperty] public int X { get; }
         [ObservableAsProperty] public int Y { get; }
 

@@ -31,17 +31,17 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Конструктор пирата.
         /// </summary>
+        /// <param name="cell">Клетка, на которой располагается создаваемый пират.</param>
         /// <param name="owner">Игрок, который владеет данным пиратом.</param>
         /// <param name="manager">Игрок, который управляет данным пиратом.</param>
         /// <param name="image">Цвет изображения пирата.</param>
         /// <param name="isFighter">Флаг того, что пират может сражаться и управлять кораблём.</param>
-        public Pirate(Player owner, Player? manager = null, string? image = null, bool isFighter = true)
+        public Pirate(Cell cell, Player owner, Player? manager = null, string? image = null, bool isFighter = true)
         {
             IsFighter = isFighter;
             Owner = owner;
             Manager = manager ?? owner;
             Manager.Pirates.Add(this);
-            Game.Pirates.Add(this);
             this.WhenAnyValue(p => p.Owner)
                 .Select(owner => owner.Team)
                 .ToPropertyEx(this, p => p.Team);
@@ -58,6 +58,7 @@ namespace Jackal.Models.Pirates
                 .Select(gold => gold > 0)
                 .ToPropertyEx(this, p => p.CanGrabGold);
             this.WhenAnyValue(p => p.Cell.Galeon)
+                .Select(galeon => galeon > 0)
                 .ToPropertyEx(this, p => p.CanGrabGaleon);
 
             this.WhenAnyValue(p => p.Gold)
@@ -78,14 +79,14 @@ namespace Jackal.Models.Pirates
                 {
                     if (!Cell.IsStandable)
                     {
-                        Cell.Galeon = false;
-                        StartCell.Galeon = true;
+                        Cell.Galeon--;
+                        StartCell.Galeon++;
                     }
                 });
 
             this.WhenAnyValue(p => p.Cell)
                 .Skip(1)
-                .Select(cell => cell is HorseCell || (cell is LakeCell && AtHorse))
+                .Select(cell => cell is HorseCell || (cell is LakeCell && AtHorse) || (cell is CrocodileCell && AtHorse))
                 .ToPropertyEx(this, p => p.AtHorse);
             this.WhenAnyValue(p => p.Cell)
                 .Skip(1)
@@ -107,14 +108,18 @@ namespace Jackal.Models.Pirates
                         _loopDict[cell] = 1;
                 });
 
-            this.WhenAnyValue(p => p.Cell, p => p.Manager.Bottles, p => p.Manager.Ally.Bottles, p => p.Manager.IsRumBlocked, p => p.IsDrunk,
-                (cell, bottles, altBottles, isRumBlocked, isDrunk) => cell is ITrapCell && (bottles > 0 || altBottles > 0) && !isRumBlocked && !isDrunk)
+            this.WhenAnyValue(p => p.Cell, p => p.Manager.CanUseRum, p => p.Manager.IsRumBlocked, p => p.IsDrunk,
+                (cell, canUseRum, isRumBlocked, isDrunk) => cell is ITrapCell && canUseRum && !isRumBlocked && !isDrunk)
                 .ToPropertyEx(this, p => p.CanDrinkRum);
 
             this.WhenAnyValue(p => p.Cell)
                 .Skip(1)
                 .Select(cell => cell.Number)
                 .ToPropertyEx(this, p => p.MazeNodeNumber);
+
+            // присвоение клетки после настройки всех реактивных связей
+            Cell = cell;
+            Game.Pirates.Add(this);
         }
 
         /// <summary>
@@ -271,7 +276,7 @@ namespace Jackal.Models.Pirates
             CanGiveRumToFriday = false;
             CanGiveRumToMissioner = false;
 
-            if (this is Friday || this is Missioner || Manager.Bottles == 0 && Manager.Ally.Bottles == 0 || Manager.IsRumBlocked)
+            if (this is Friday || this is Missioner || !Manager.CanUseRum || Manager.IsRumBlocked)
                 return;
 
             var cells = map.Cells(this).Concat(new Cell[] { Cell });
@@ -289,7 +294,7 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Метод рождает нового пирата рядом с данным пиратом.
         /// </summary>
-        public void GiveBirth() => Cell.AddPirate(new Pirate(Owner, Manager));
+        public void GiveBirth() => Cell.AddPirate(new Pirate(Cell, Owner, Manager));
 
         /// <summary>
         /// Флаг того, что пират заблокирован в яме, пещере или из-за бочки рома.
@@ -331,10 +336,10 @@ namespace Jackal.Models.Pirates
                 Game.LostGold++;
                 Cell.Gold = 0;
             }
-            else if(Cell.Galeon)
+            else if(Cell.Galeon > 0)
             {
                 Game.LostGold += 3;
-                Cell.Galeon = false;
+                Cell.Galeon = 0;
             }
         }
     }

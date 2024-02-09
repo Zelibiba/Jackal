@@ -19,7 +19,7 @@ namespace Jackal.Models.Cells.Utilites
             nodesSet.AutoRefresh(cell => cell.Gold)
                     .Subscribe(_ => Gold = Nodes.Sum(x => x.Gold));
             nodesSet.AutoRefresh(cell => cell.Galeon)
-                    .Subscribe(_ => Galeon = Nodes.Any(x => x.Galeon));
+                    .Subscribe(_ => Galeon = Nodes.Sum(x => x.Galeon));
 
             nodesSet.AutoRefresh(cell => cell.IsPreOpened)
                     .Subscribe(_ => IsPreOpened = Nodes.Any(x => x.IsPreOpened));

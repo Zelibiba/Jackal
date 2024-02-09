@@ -88,6 +88,7 @@ namespace Jackal.Network
             _listening.Wait();
             _processingMessages?.Wait();
             _server = null;
+            IsServerHolder = false;
             Clients.Clear();
         }
     }

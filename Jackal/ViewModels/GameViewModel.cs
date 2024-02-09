@@ -42,8 +42,8 @@ namespace Jackal.ViewModels
                 PirateViewModel pirateVM = Pirates[pirateIndex];
                 CellViewModel cellVM = Cells[cellIndex];
                 if (kill)
-                    cellVM.ClearIndex(pirateVM.Index);
-                else if (pirateVM.CellVM != cellVM)
+                    pirateVM.Kill();
+                else
                     pirateVM.SetCell(cellVM);
             };
             Game.SetCellZIndex = (cellIndex1, zIndex1, cellIndex2, zIndex2) =>
@@ -53,11 +53,12 @@ namespace Jackal.ViewModels
             };
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
-            Game.UpdateGoldParams = () =>
+            Game.UpdateHiddenParams = () =>
             {
                 HiddenGold = Game.HiddenGold;
                 CurrentGold = Game.CurrentGold;
                 LostGold = Game.LostGold;
+                HiddenBottles = Game.HiddenBottles;
             };
             Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",
                                                                               players.Count() > 1 ? "ям" : "ю",
@@ -80,6 +81,7 @@ namespace Jackal.ViewModels
                 .ToPropertyEx(this, vm => vm.IsPirateSelected);
 
             HiddenGold = Game.HiddenGold;
+            HiddenBottles = Game.HiddenBottles;
             IsEnabled = players.First().IsControllable;
         }
 
@@ -102,6 +104,7 @@ namespace Jackal.ViewModels
         [Reactive] public int HiddenGold { get; private set; }
         [Reactive] public int CurrentGold { get; private set; }
         [Reactive] public int LostGold { get; private set; }
+        [Reactive] public int HiddenBottles { get; private set; }
 
         public void SelectCell(Cell cell)
         {

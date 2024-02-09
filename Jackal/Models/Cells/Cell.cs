@@ -41,7 +41,7 @@ namespace Jackal.Models.Cells
             Number = number;
 
             this.WhenAnyValue(c => c.Gold, c => c.Galeon,
-                (gold, galeon) => gold > 0 || galeon)
+                (gold, galeon) => gold > 0 || galeon > 0)
                 .ToPropertyEx(this, c => c.Treasure);
         }
 
@@ -63,8 +63,11 @@ namespace Jackal.Models.Cells
         /// <param name="stayGray">Остаться серым, если уже серый.</param>
         public void ChangeGrayStatus(bool stayGray = false)
         {
-            if (IsGray && !stayGray)
-                Image = Image[0..^5];
+            if (IsGray)
+            {
+                if (!stayGray)
+                    Image = Image[0..^5];
+            }
             else
                 Image += "_gray";
         }
@@ -89,8 +92,7 @@ namespace Jackal.Models.Cells
         public virtual void SetCoordinates(int row, int column)
         {
             Coords = new(row, column);
-            this.RaisePropertyChanged(nameof(Row));
-            this.RaisePropertyChanged(nameof(Column));
+            this.RaisePropertyChanged(nameof(Coords));
         }
 
         /// <summary>
@@ -108,7 +110,7 @@ namespace Jackal.Models.Cells
         }
 
         /// <summary>
-        /// Список уровней лабиринта.
+        /// Список подклеток (уровней лабиринта или входов-выходов пещеры).
         /// </summary>
         public ObservableCollection<Cell> Nodes { get; }
         /// <summary>
@@ -118,6 +120,10 @@ namespace Jackal.Models.Cells
         /// В нелабиринтной клетке равняется 0.
         /// </remarks>
         public int Number { get; }
+        /// <summary>
+        /// Метод возвращает количество всех пиратов со всех подклеток (<see cref="Nodes"/>). 
+        /// </summary>
+        public int AllPiratesCount() => Nodes.Sum(cell => cell.Pirates.Count);
 
         /// <summary>
         /// Метод возвращает ту часть клетки, которая досягаема для выбранного пирата.
@@ -202,7 +208,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Флаг того, что на клетке находится Галеон.
         /// </summary>
-        [Reactive] public virtual bool Galeon { get; set; }
+        [Reactive] public virtual int Galeon { get; set; }
         /// <summary>
         /// Флаг того, что на клетке находится сокровище.
         /// </summary>
@@ -221,7 +227,7 @@ namespace Jackal.Models.Cells
         /// <summary>
         /// Команда, которая владеет данной клеткой.
         /// </summary>
-        protected virtual Team Team => Pirates.ElementAtOrDefault(0)?.Team ?? Team.None;
+        protected virtual Team Team => Pirates.Count > 0 ? Pirates[0].Team : Team.None;
         /// <summary>
         /// Флаг того, что на клетке не стоят вражеские пираты.
         /// </summary>
@@ -275,9 +281,11 @@ namespace Jackal.Models.Cells
                 }
                 else if (pirate.Galeon)
                 {
-                    Galeon = false;
-                    foreach (Pirate p in Pirates)
-                        p.Galeon = false;
+                    if (--Galeon == 0)
+                    {
+                        foreach (Pirate p in Pirates)
+                            p.Galeon = false;
+                    }
                 }
             }
             else
@@ -304,7 +312,7 @@ namespace Jackal.Models.Cells
             if (pirate.Gold)
                 Gold++;
             else if (pirate.Galeon)
-                Galeon = true;
+                Galeon++;
 
             if (!IsOpened)
                 Open();

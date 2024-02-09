@@ -17,6 +17,7 @@ namespace Jackal.Converters
             if (x == AllianceIdentifier.None) return Brush.Parse("Lavender");
             if (x == AllianceIdentifier.Red) return Brush.Parse("#ff7d7d");
             if (x == AllianceIdentifier.Blue) return Brush.Parse("#55b6ff");
+            if (x == AllianceIdentifier.Green) return Brush.Parse("#6BFF92");
             throw new NotImplementedException();
         }
 

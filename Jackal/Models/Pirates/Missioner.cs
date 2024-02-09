@@ -10,7 +10,7 @@ namespace Jackal.Models.Pirates
 {
     public class Missioner : Pirate
     {
-        public Missioner(Player owner, Player manager) : base(owner, manager, image: "Missioner", isFighter: false) { }
+        public Missioner(Cell cell, Player owner, Player manager) : base(cell, owner, manager, image: "Missioner", isFighter: false) { }
 
         public override bool CanDrinkRum => false;
         public override bool CanHaveSex => false;
@@ -23,7 +23,7 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public void ConverToPirate()
         {
-            Ben ben = new(Owner, Manager, image: "DrunkMissioner");
+            Ben ben = new(Cell, Owner, Manager, image: "DrunkMissioner");
             if (Cell is CaveExitCell exit)
                 exit.AddDrunkMissioner(ben);
             else

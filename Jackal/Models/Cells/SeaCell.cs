@@ -19,9 +19,9 @@ namespace Jackal.Models.Cells
             get => 0;
             set => Game.LostGold++;
         }
-        public override bool Galeon
+        public override int Galeon
         {
-            get => false;
+            get => 0;
             set => Game.LostGold += 3;
         }
 

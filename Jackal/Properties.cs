@@ -15,7 +15,7 @@ namespace Jackal
         /// <summary>
         /// Версия программы.
         /// </summary>
-        public static string Version => "1.0.0";
+        public static string Version => "1.0.4";
 
         static Properties()
         {

@@ -76,26 +76,38 @@
 						<ColumnDefinition Width="10"/>
 						<ColumnDefinition Width="*" MinWidth="250"/>
 					</Grid.ColumnDefinitions>
-					<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="5" IsEnabled="{Binding IsEnabled}">
+					<Border Grid.Column="0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" Padding="6,3" IsEnabled="{Binding IsEnabled}">
 						<WrapPanel Orientation="Vertical" IsEnabled="{Binding IsPirateSelected}">
-							<ToggleButton Content="g" Classes="PirBtn" HotKey="g"
+							<ToggleButton Classes="PirBtn" HotKey="g"
 										  IsEnabled="{Binding SelectedPirate.CanGrabGold}" IsChecked="{Binding SelectedPirate.Gold, Mode=OneWay}"
-										  Command="{Binding GrabTreasure}" CommandParameter="gold"/>
-							<ToggleButton Content="G" Classes="PirBtn" Margin="0,5"
+										  Command="{Binding GrabTreasure}" CommandParameter="gold">
+								<Image Source="/Assets/Images/Buttons/gold.png"/>
+							</ToggleButton>
+							<ToggleButton Content="G" Classes="PirBtn"
 										  IsEnabled="{Binding SelectedPirate.CanGrabGaleon}" IsChecked="{Binding SelectedPirate.Galeon, Mode=OneWay}"
-										  Command="{Binding GrabTreasure}" CommandParameter="galeon"/>
+										  Command="{Binding GrabTreasure}" CommandParameter="galeon">
+								<Image Source="/Assets/Images/Buttons/galeon.png"/>
+							</ToggleButton>
 							<Button Content="r" Classes="PirBtn" HotKey="r"
 									IsEnabled="{Binding SelectedPirate.CanDrinkRum}"
-									Command="{Binding GetPirateDrunk}" CommandParameter="pirate"/>
-							<Button Content="B" Classes="PirBtn" Margin="0,5"
-									IsEnabled="{Binding SelectedPirate.CanHaveSex}"
-									Command="{Binding PirateBirth}"/>
-							<Button Content="F" Classes="PirBtn"
+									Command="{Binding GetPirateDrunk}" CommandParameter="pirate">
+								<Image Source="/Assets/Images/Buttons/bottle.png"/>
+							</Button>
+							<Button Classes="PirBtn"
 									IsEnabled="{Binding SelectedPirate.CanGiveRumToFriday}"
-									Command="{Binding GetPirateDrunk}" CommandParameter="friday"/>
-							<Button Content="M" Classes="PirBtn" Margin="0,5,0,0"
+									Command="{Binding GetPirateDrunk}" CommandParameter="friday">
+								<Image Source="/Assets/Images/Buttons/friday.png"/>
+							</Button>
+							<Button Classes="PirBtn"
 									IsEnabled="{Binding SelectedPirate.CanGiveRumToMissioner}"
-									Command="{Binding GetPirateDrunk}" CommandParameter="missioner"/>
+									Command="{Binding GetPirateDrunk}" CommandParameter="missioner">
+								<Image Source="/Assets/Images/Buttons/missioner.png"/>
+							</Button>
+							<Button Content="B" Classes="PirBtn"
+									IsEnabled="{Binding SelectedPirate.CanHaveSex}"
+									Command="{Binding PirateBirth}">
+								<Image Source="/Assets/Images/Buttons/putana.png"/>
+							</Button>
 						</WrapPanel>
 					</Border>
 					<ItemsControl Grid.Column="2" Items="{Binding Players}" BorderBrush="Black" BorderThickness="1">
@@ -107,7 +119,7 @@
 					</ItemsControl>
 				</Grid>
 				<Grid Margin="10"
-					  RowDefinitions="*,*,*" ColumnDefinitions="auto,auto">
+					  RowDefinitions="*,*,*,20,*" ColumnDefinitions="auto,auto">
 					<Grid.Styles>
 						<Style Selector="TextBlock">
 							<Setter Property="FontSize" Value="20"/>
@@ -119,6 +131,8 @@
 					<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentGold}" FontWeight="Bold"/>
 					<TextBlock Grid.Row="2" Grid.Column="0" Text="Потерянное золото:"/>
 					<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LostGold}" FontWeight="Bold"/>
+					<TextBlock Grid.Row="4" Grid.Column="0" Text="Неоткрытый ром:"/>
+					<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding HiddenBottles}" FontWeight="Bold"/>
 				</Grid>
 			</StackPanel>
 			<Button DockPanel.Dock="Bottom" Margin="10"

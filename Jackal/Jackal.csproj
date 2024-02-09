@@ -18,14 +18,20 @@
 	<NSHighResolutionCapable>true</NSHighResolutionCapable>
 	<Platforms>AnyCPU;ARM32;ARM64</Platforms>
 	<UseAppHost>true</UseAppHost>
+	<ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove=".gitignore" />
+    <None Remove="Assets\Icon.ico" />
     <None Remove="Assets\Map patterns\Gold_rush.txt" />
     <None Remove="Assets\Map patterns\Hexagonal.txt" />
     <None Remove="Assets\Map patterns\Quadratic.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,5 +49,9 @@
     <PackageReference Include="System.Resources.Extensions" Version="7.0.0" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
 	<PackageReference Include="Dotnet.Bundle" Version="*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\Images\Buttons\" />
   </ItemGroup>
 </Project>

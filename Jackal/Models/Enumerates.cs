@@ -27,7 +27,8 @@ namespace Jackal.Models
     {
         None,
         Red,
-        Blue
+        Blue,
+        Green
     }
 
     /// <summary>

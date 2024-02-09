@@ -6,7 +6,7 @@
 		xmlns:v="using:Jackal.Views"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="500"
         x:Class="Jackal.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Icon.ico"
         Title="Jackal"
 		Width="1000"
 		Height="500"

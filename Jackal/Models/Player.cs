@@ -52,6 +52,13 @@ namespace Jackal.Models
                    .ToCollection()
                    .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
                    .ToPropertyEx(this, p => p.IsEnoughtPirates);
+
+            Allies = new ObservableCollection<Player>();
+            Allies.ToObservableChangeSet()
+                  .AutoRefresh(player => player.Bottles)
+                  .ToCollection()
+                  .Select(players => players.Any(p => p.Bottles > 0))
+                  .ToPropertyEx(this, player => player.CanUseRum);
         }
 
         /// <summary>
@@ -83,14 +90,26 @@ namespace Jackal.Models
         /// </summary>
         public Team Alliance { get; private set; }
         /// <summary>
+        /// Список игроков в альянсе.
+        /// </summary>
+        /// <remarks>Необходим для совместного пользования ромом. Первый элемент - сам игрок.
+        public ObservableCollection<Player> Allies { get; private set; }
+        /// <summary>
         /// Метод задаёт альянс для игрока.
         /// </summary>
         /// <param name="alliance">Задаваемый альянс.</param>
         /// <param name="Allies">Список игроков в альянсе.</param>
-        public void SetAlliance(Team alliance, IEnumerable<Player> Allies) 
+        public void SetAlliance(Team alliance, IEnumerable<Player> allies)
         {
             Alliance = alliance;
-            Ally = Allies.FirstOrDefault(player => player != this) ?? new Player();
+            Player[] _Allies = new Player[allies.Count()];
+            _Allies[0] = this;
+            int i = 1;
+            foreach (Player player in allies.Except(_Allies))
+                _Allies[i++] = player;
+
+            Allies.Clear();
+            Allies.AddRange(_Allies);
         }
 
         /// <summary>
@@ -141,7 +160,7 @@ namespace Jackal.Models
             Ship = ship;
             ManagedShip = ship;
             for (int i = 0; i < 3; i++)
-                ship.AddPirate(new Pirate(this));
+                ship.AddPirate(new Pirate(ship, this));
         }
 
         /// <summary>
@@ -158,15 +177,21 @@ namespace Jackal.Models
         /// </summary>
         [Reactive] public int Bottles { get; set; }
         /// <summary>
-        /// Союзник в альянсе.
+        /// Флаг того, что у альянса данного игрока есть бутылка.
         /// </summary>
-        /// <remarks>Необходим для совместного пользования ромом. Если союзника нет, то стоит заглушка <see cref="Player.Player"/></remarks>
-        public Player Ally { get; private set; }
-        
+        [ObservableAsProperty] public bool CanUseRum { get; }
         /// <summary>
-        /// Флаг того, что с этого игрока начался ход конопли.
+        /// Метод уменьшает количество бутылок у альянса на одну.
         /// </summary>
-        public bool CannabisStarter { get; set; }
+        public void UseBottle()
+        {
+            Allies.First(p => p.Bottles > 0).Bottles--;
+        }
+
+        /// <summary>
+        /// Число разов того, что с этого игрока начался ход конопли.
+        /// </summary>
+        public int CannabisIndex { get; set; } = 0;
         /// <summary>
         /// Флаг того, что игрок может пользоваться ромом.
         /// </summary>
@@ -193,7 +218,7 @@ namespace Jackal.Models
         /// <inheritdoc cref="SetPiratesAndShip(IEnumerable{Pirate}, ShipCell, bool)" path="/summary"/>
         /// </summary>
         /// <param name="soursePlayer">Игрок, предоставляющий пиратов и корабль для копирования.</param>
-        /// <param name="blockRum"></param>
+        /// <param name="blockRum">Флаг блокировки рома <see cref="IsRumBlocked"/>.</param>
         public void SetPiratesAndShip(Player soursePlayer, bool blockRum)
         {
             SetPiratesAndShip(soursePlayer.Pirates, soursePlayer.ManagedShip, blockRum);

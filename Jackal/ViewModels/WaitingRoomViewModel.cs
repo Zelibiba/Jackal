@@ -66,11 +66,10 @@ namespace Jackal.ViewModels
                 .Subscribe(x => Client.ChangeGameProperties(GameProperties));
 
             GameProperties = new();
-            IsServerHolder = Server.IsServerHolder;
             IP = ip ?? Server.IP;
         }
         public ObservableCollection<PlayerAdderViewModel> Players { get; }
-        public bool IsServerHolder { get; }
+        public bool IsServerHolder => Server.IsServerHolder;
         public string IP { get; }
 
         [Reactive] public GameProperties GameProperties { get; private set; }
@@ -85,37 +84,49 @@ namespace Jackal.ViewModels
         void StartGame()
         {
             if (!GameProperties.ReadMapPattern())
+            {
+                MessageBox.Show("Невозможно прочесть файл паттерна карты!");
                 return;
+            }
 
             Random rand = new();
             List<Player> players = Players.Select(vm => vm.Player).ToList();
             Player[] mixedPlayers = new Player[players.Count];
+
+            int index = players.FindIndex(p => p.Team == Team.White);
+            if (index < 0)
+                index = rand.Next(players.Count);
+            mixedPlayers[0] = players[index];
+            players.RemoveAt(index);
+
             int I = 0;
-            if (players.Count == 4)
+            for (int i = 1; i < mixedPlayers.Length; i++)
             {
-                mixedPlayers[0] = players.Find(player => player.Team == Team.White);
-                players.Remove(mixedPlayers[0]);
-                I = 1;
-                if (mixedPlayers[0].AllianceIdentifier != AllianceIdentifier.None)
+                if (mixedPlayers[0].AllianceIdentifier == AllianceIdentifier.None)
                 {
-                    int index = rand.Next(players.Count);
-                    while (players[index].AllianceIdentifier == mixedPlayers[0].AllianceIdentifier)
-                        index = rand.Next(players.Count);
-                    mixedPlayers[1] = players[index];
-                    players.RemoveAt(index);
-                    mixedPlayers[2] = players.Find(player => player.AllianceIdentifier == mixedPlayers[0].AllianceIdentifier);
-                    players.Remove(mixedPlayers[2]);
-                    mixedPlayers[3] = players[0];
-                    I = 4;
-                }
-            }
-            for (; I < mixedPlayers.Length; I++)
-            {
-                int index = players.FindIndex(player => player.Team == Team.White);
-                if (index < 0)
                     index = rand.Next(players.Count);
-                mixedPlayers[I] = players[index];
-                players.RemoveAt(index);
+                    mixedPlayers[i] = players[index];
+                    players.RemoveAt(index);
+                }
+                else
+                {
+                    Player? player = players.FirstOrDefault(p => !mixedPlayers[..i].Any(pl => pl.AllianceIdentifier == p.AllianceIdentifier));
+                    if (player != null)
+                    {
+                        List<Player> alliedPlayers = players.FindAll(p => p.AllianceIdentifier == player.AllianceIdentifier);
+                        player = alliedPlayers[rand.Next(alliedPlayers.Count)];
+                        mixedPlayers[i] = player;
+                        players.Remove(player);
+                    }
+                    else
+                    {
+                        if (I == 0) I = i;
+                        List<Player> alliedPlayers = players.FindAll(p => p.AllianceIdentifier == mixedPlayers[i - I].AllianceIdentifier);
+                        player = alliedPlayers[rand.Next(alliedPlayers.Count)];
+                        mixedPlayers[i] = player;
+                        players.Remove(player);
+                    }
+                }
             }
             GameProperties.Seed = rand.Next();
 

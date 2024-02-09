@@ -57,9 +57,9 @@ namespace Jackal.Models.Cells
                 Game.CurrentGold--;
             }
         }
-        public override bool Galeon
+        public override int Galeon
         {
-            get => false;
+            get => 0;
             set
             {
                 _owner.Gold += 3;

@@ -11,7 +11,7 @@ namespace Jackal.Models.Pirates
 {
     public class Friday : Pirate
     {
-        public Friday(Player owner, Player manager) : base(owner, manager, image: "Friday", isFighter: false) { }
+        public Friday(Cell cell, Player owner, Player manager) : base(cell, owner, manager, image: "Friday", isFighter: false) { }
 
         public override bool CanDrinkRum => false;
         public override bool CanHaveSex => false;

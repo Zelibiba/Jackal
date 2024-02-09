@@ -118,7 +118,7 @@ namespace Jackal.Models
         public static void GetBirth(Pirate pirate)
         {
             int index = PirateIndex(pirate);
-            int[] operation = new int[] { (int)Actions.DrinkRum, index };
+            int[] operation = new int[] { (int)Actions.GetBirth, index };
             Operations?.Add(operation);
 
             WriteOperation(operation);
@@ -157,7 +157,6 @@ namespace Jackal.Models
 
 
             List<int[]> operations = new List<int[]>();
-            //reader.ReadLine();
             while(true)
             {
                 if(reader.EndOfStream)

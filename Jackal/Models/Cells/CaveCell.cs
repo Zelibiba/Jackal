@@ -81,7 +81,7 @@ namespace Jackal.Models.Cells
                 HitPirates(pirate, allPirates: true);
 
                 // если есть возможность взять монетку
-                if (!pirate.Treasure && (Gold > 0 || Galeon))
+                if (!pirate.Treasure && (Gold > 0 || Galeon > 0))
                     return TreasureCell.AddPirate(pirate);
 
                 return Enter.AddPirate(pirate, delay);
@@ -105,9 +105,9 @@ namespace Jackal.Models.Cells
             get => Pirates.Count > 0 ? Exit.Gold : 0;
             set => Exit.Gold = value;
         }
-        public override bool Galeon
+        public override int Galeon
         {
-            get => Pirates.Count > 0 ? Exit.Galeon : false;
+            get => Pirates.Count > 0 ? Exit.Galeon : 0;
             set => Exit.Galeon = value;
         }
 

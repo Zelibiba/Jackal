@@ -132,7 +132,7 @@ namespace Jackal.Models
         /// <summary>
         /// Делегат для обновления параметров <see cref="HiddenGold"/>, <see cref="CurrentGold"/> и <see cref="LostGold"/> в интерфейсе.
         /// </summary>
-        public static Action? UpdateGoldParams;
+        public static Action? UpdateHiddenParams;
         /// <summary>
         /// Счётчик спрятанного золота.
         /// </summary>
@@ -165,6 +165,7 @@ namespace Jackal.Models
             }
         }
         static int __lostGold;
+        public static int HiddenBottles { get; set; } = 0;
 
         /// <summary>
         /// Метод инициализирует игру.
@@ -239,11 +240,7 @@ namespace Jackal.Models
             // учёт вероятностных клеток
             Random rand = new(properties.Seed);
             while (names.Count != names.Capacity)
-            {
                 names.Add(pattern[rand.Next(pattern.Count)]);
-                if (names[^1] == "Galeon")
-                    pattern.RemoveAll(x => x == "Galeon");
-            }
 
             // проверка на одиночную пещеру
             if (names.Count(x => x == "Cave") == 1)
@@ -320,7 +317,8 @@ namespace Jackal.Models
                         Map.SetCell(new MazeCell(row, column, size));break;
                     case "Bottle":
                         int count = int.Parse(name.Split('_')[1]);
-                        Map.SetCell(new BottleCell(row, column, count)); break;
+                        Map.SetCell(new BottleCell(row, column, count));
+                        HiddenBottles += count; break;
                     case "Galeon": 
                         Map.SetCell(new GoldCell(row, column, GoldType.Galeon));
                         __hiddenGold += 3; break;
@@ -385,6 +383,9 @@ namespace Jackal.Models
             }
             #endregion
 
+            //Map.SetCell(new CannabisCell(1, 6));
+            //Map.SetCell(new CannabisCell(11, 6));
+            //Map[1, 5].AddPirate(new Missioner(Map[1, 5], Players[1], Players[1]));
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -439,10 +440,10 @@ namespace Jackal.Models
         /// <param name="checkOnly">Флаг того, что необходима только проверка на бочку рома.</param>
         static void NextPlayer()
         {
-            UpdateGoldParams?.Invoke();
+            UpdateHiddenParams?.Invoke();
             CheckRumBlock();
 
-            if (CurrentPlayer.CannabisStarter)
+            if (CurrentPlayer.CannabisIndex > 0)
                 EndCannabis();
             // Из-за того, что в любом случае должна пройти проверка на невозможность хода.
             else
@@ -818,6 +819,7 @@ namespace Jackal.Models
             }
             if(!cell.CanBeSelectedBy(SelectedPirate))
             {
+                OnStartPirateAnimation(SelectedPirate, cell, pirateDelay);
                 SelectedPirate.Kill();
                 return MovementResult.End;
             }
@@ -939,8 +941,8 @@ namespace Jackal.Models
             {
                 foreach (Cell cell in Map)
                     cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
-                                         cell.Gold == 0 && !cell.Galeon &&
-                                         cell.Pirates.Count == 0;
+                                         cell.Gold == 0 && cell.Galeon == 0 &&
+                                         cell.AllPiratesCount() == 0;
             }
         }
         /// <summary>
@@ -974,7 +976,7 @@ namespace Jackal.Models
             CheckRumBlock();
             CurrentPlayer.Turn = false;
             CurrentPlayerNumber++;
-            CurrentPlayer.CannabisStarter = true;
+            CurrentPlayer.CannabisIndex++;
             CurrentPlayerNumber++;
             CurrentPlayer.Turn = true;
         }
@@ -986,24 +988,14 @@ namespace Jackal.Models
             Pirate[] bufferPirates = Players[0].Pirates.ToArray();
             ShipCell bufferShip = Players[0].ManagedShip;
 
-            bool blockRum = Players.Count(player => player.CannabisStarter) > 1;
+            bool blockRum = Players.Count(player => player.CannabisIndex > 0) > 1;
             for (int i = 0; i < Players.Count - 1; i++)
                 Players[i].SetPiratesAndShip(Players[i + 1], blockRum);
             Players[^1].SetPiratesAndShip(bufferPirates, bufferShip, blockRum);
 
-            CurrentPlayer.CannabisStarter = false;
+            CurrentPlayer.CannabisIndex--;
         }
 
-        /// <summary>
-        /// Метод уменьшает на 1 количество бутылок рома у игрока или его союзника.
-        /// </summary>
-        static void DecreaseBottles()
-        {
-            if (CurrentPlayer.Bottles > 0)
-                CurrentPlayer.Bottles--;
-            else
-                CurrentPlayer.Ally.Bottles--;
-        }
         /// <summary>
         /// Метод спаивания какого-либо юнита.
         /// </summary>
@@ -1030,7 +1022,7 @@ namespace Jackal.Models
         static void GetPirateDrunk()
         {
             PirateIsDrunk = true;
-            DecreaseBottles();
+            CurrentPlayer.UseBottle();
             Deselect(false);
             SelectedPirate.IsDrunk = true;
             if (CurrentPlayer.IsControllable)
@@ -1041,7 +1033,7 @@ namespace Jackal.Models
         /// </summary>
         static void GetFridayDrunk()
         {
-            DecreaseBottles();
+            CurrentPlayer.UseBottle();
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToFriday = false;
 
@@ -1068,7 +1060,7 @@ namespace Jackal.Models
         /// </summary>
         static void GetMissionerDrunk()
         {
-            DecreaseBottles();
+            CurrentPlayer.UseBottle();
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToMissioner = false;
 

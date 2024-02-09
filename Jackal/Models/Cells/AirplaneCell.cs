@@ -13,12 +13,14 @@ namespace Jackal.Models.Cells
         public AirplaneCell(int row, int column) : base(row, column, "Airplane")
         {
             IsActive = true;
+            _altSelectableCoordinates = new();
         }
 
         /// <summary>
         /// Флаг того, что самолёт может быть использован.
         /// </summary>
         public bool IsActive { get; private set; }
+        List<Coordinates> _altSelectableCoordinates;
 
         public override void RemovePirate(Pirate pirate, bool withGold = true)
         {
@@ -29,7 +31,8 @@ namespace Jackal.Models.Cells
             else if (IsActive && (Pirates.Count == 0 || (pirate.TargetCell.Coords - Coords).Abs() > 1))
             {
                 IsActive = false;
-                SelectableCoords.RemoveAll(coords => (coords - Coords).Abs() > 1 || coords == Coords);
+                SelectableCoords.Clear();
+                SelectableCoords.AddRange(_altSelectableCoordinates);
             }
         }
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
@@ -42,6 +45,9 @@ namespace Jackal.Models.Cells
         {
             if (IsActive)
             {
+                SelectableCoords.Clear();
+                base.SetSelectableCoords(map);
+                _altSelectableCoordinates.AddRange(SelectableCoords);
                 SelectableCoords.Clear();
                 SelectableCoords.AddRange(map.GroundCoordinates());
             }

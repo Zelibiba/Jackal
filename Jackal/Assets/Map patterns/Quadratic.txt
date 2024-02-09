@@ -29,6 +29,6 @@ Maze_4:		2
 Maze_5:		1
 Pit:		3
 Ben:		1
-Friday:		=1
-Missioner:	=1
+Friday:		1
+Missioner:	1
 Rum:		4

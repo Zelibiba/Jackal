@@ -28,15 +28,21 @@ namespace Jackal.ViewModels
 
         static readonly int _size = 18;
         public Pirate Pirate { get; }
-        [Reactive] public CellViewModel CellVM { get; private set; }
+        [Reactive] CellViewModel CellVM { get; set; }
         public void SetCell(CellViewModel cellVM)
         {
+            if (CellVM == cellVM) return;
+
             CellVM.ClearIndex(Index);
             CellVM = cellVM;
             Index = CellVM.GetIndex();
         }
+        public void Kill()
+        {
+            CellVM.ClearIndex(Index);
+        }
 
-        [Reactive] public int Index { get; private set; }
+        [Reactive] int Index { get; set; }
 
         [ObservableAsProperty] public int X { get; }
         [ObservableAsProperty] public int Y { get; }

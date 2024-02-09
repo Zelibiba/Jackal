@@ -23,9 +23,9 @@ namespace Jackal.Models.Cells
             Player manager = Pirates[0].Manager;
             Pirate pirate = _type switch
             {
-                ResidentType.Ben => new Ben(owner, manager),
-                ResidentType.Friday => new Friday(owner, manager),
-                ResidentType.Missioner => new Missioner(owner, manager),
+                ResidentType.Ben => new Ben(this, owner, manager),
+                ResidentType.Friday => new Friday(this, owner, manager),
+                ResidentType.Missioner => new Missioner(this, owner, manager),
                 _ => throw new NotImplementedException()
             };
             AddPirate(pirate, 0);

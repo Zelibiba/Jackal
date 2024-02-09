@@ -1,11 +1,5 @@
 ﻿Airplane:	0
-Arrow_q1a:	3
-Arrow_q1s:	3
-Arrow_q2a:	3
-Arrow_q2s:	3
-Arrow_q3:	3
-Arrow_q4a:	3
-Arrow_q4s:	3
+Arrow:		3
 Balloon:	2
 Bottle_1:	0
 Bottle_2:	0
@@ -35,6 +29,6 @@ Maze_4:		2
 Maze_5:		1
 Pit:		3
 Ben:		1
-Friday:		0
-Missioner:	0
+Friday:		1
+Missioner:	1
 Rum:		0

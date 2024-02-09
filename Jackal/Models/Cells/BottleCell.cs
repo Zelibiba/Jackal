@@ -21,6 +21,7 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
+            Game.HiddenBottles -= _count;
             int bottles = _count;
             Pirate pirate = Pirates[0];
             if (pirate is Friday)
