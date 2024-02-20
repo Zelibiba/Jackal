@@ -383,7 +383,7 @@ namespace Jackal.Models
             }
             #endregion
 
-            //Map.SetCell(new CannabisCell(1, 6));
+            Map.SetCell(new EarthQuakeCell(2,2));
             //Map.SetCell(new CannabisCell(11, 6));
             //Map[1, 5].AddPirate(new Missioner(Map[1, 5], Players[1], Players[1]));
 
@@ -785,14 +785,16 @@ namespace Jackal.Models
                     SelectPirate(SelectedPirate); break;
                 case MovementResult.EarthQuake:
                     SelectedPirate = null;
-                    StartEarthQuake();
+                    bool result = StartEarthQuake();
                     PirateInMotion = false;
+                    if (!result) NextPlayer();
                     break;
                 case MovementResult.LightHouse:
                     LightHouseCell lightHouse = SelectedPirate.Cell as LightHouseCell;
                     SelectedPirate = null;
-                    StartLightHouse(lightHouse);
+                    result = StartLightHouse(lightHouse);
                     PirateInMotion = false;
+                    if (!result) NextPlayer();
                     break;
                 case MovementResult.Cannabis:
                     SelectedPirate = null;
@@ -934,32 +936,44 @@ namespace Jackal.Models
         /// <summary>
         /// Метод запуска землетрясения.
         /// </summary>
-        static void StartEarthQuake()
+        /// <returns>True, если есть хотя бы 2 подходящих клетки.</returns>
+        static bool StartEarthQuake()
         {
+            Cell[] relevantCells = Map.Where(cell => cell is not SeaCell && cell is not ShipCell &&
+                                                     cell.Gold == 0 && cell.Galeon == 0 &&
+                                                     cell.AllPiratesCount() == 0)
+                                      .ToArray();
+            if (relevantCells.Length < 2)
+                return false;
+
             earthQuake.IsActive = true;
             if (CurrentPlayer.IsControllable)
             {
-                foreach (Cell cell in Map)
-                    cell.CanBeSelected = cell is not SeaCell && cell is not ShipCell &&
-                                         cell.Gold == 0 && cell.Galeon == 0 &&
-                                         cell.AllPiratesCount() == 0;
+                foreach (Cell cell in relevantCells)
+                    cell.CanBeSelected = true;
             }
+            return true;
         }
         /// <summary>
         /// Метод запуска хода маяка.
         /// </summary>
         /// <param name="LightHouse">Клетка маяка, вызвавшая этот ход маяка.</param>
-        static void StartLightHouse(LightHouseCell LightHouse)
+        /// <returns>True, если есть хотя бы одна неоктрытая клетка.</returns>
+        static bool StartLightHouse(LightHouseCell LightHouse)
         {
+            Cell[] closedCells = Map.Where(cell => !cell.IsOpened).ToArray();
+            if (closedCells.Length == 0)
+                return false;
+
             lightHouse.IsActive = true;
             lightHouse.Lighthouse = LightHouse;
-            Cell[] closedCells = Map.Where(cell => !cell.IsOpened).ToArray();
             lightHouse.SelectedCells = new(Math.Min(closedCells.Length, 4));
             if (CurrentPlayer.IsControllable)
             {
                 foreach (Cell cell in closedCells)
                     cell.CanBeSelected = true;
             }
+            return true;
         }
         /// <summary>
         /// Метод запуска хода конопли.
