@@ -103,12 +103,12 @@ namespace Jackal.Models.Cells
         public override int Gold
         {
             get => Pirates.Count > 0 ? Exit.Gold : 0;
-            set => Exit.Gold = value;
+            set => Exit.Gold--;
         }
         public override int Galeon
         {
             get => Pirates.Count > 0 ? Exit.Galeon : 0;
-            set => Exit.Galeon = value;
+            set => Exit.Galeon--;
         }
 
         public override void SetSelectableCoords(Map map)

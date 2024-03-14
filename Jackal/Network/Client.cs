@@ -270,8 +270,6 @@ namespace Jackal.Network
 
         static void Close()
         {
-            _reader?.Close();
-            _writer?.Close();
             _stream?.Close();
             _client?.Close();
             _cancellationTokenSource?.Dispose();

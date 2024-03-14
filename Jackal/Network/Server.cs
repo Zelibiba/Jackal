@@ -63,12 +63,10 @@ namespace Jackal.Network
         public static Task AddTask(Action action)
         {
             if (_processingMessages == null || _processingMessages.Status != TaskStatus.Running)
-            {
                 _processingMessages = Task.Run(action);
-                return _processingMessages;
-            }
             else
-                return _processingMessages.ContinueWith(_ => action());
+                _processingMessages = _processingMessages.ContinueWith(_ => action());
+            return _processingMessages;
         }
 
         static void Close()

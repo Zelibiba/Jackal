@@ -264,7 +264,7 @@ namespace Jackal.Models.Cells
         /// Метод убирает пирата с клетки.
         /// </summary>
         /// <param name="pirate">Пират, убираемый с клетки.</param>
-        /// <param name="withGold">Флаг указывает, учитывать ли уносимое пиратом золото.</param>
+        /// <param name="withGold">Флаг указывает, может ли пират унести золото.</param>
         public virtual void RemovePirate(Pirate pirate, bool withGold = true)
         {
             Pirates.Remove(pirate);
@@ -328,8 +328,8 @@ namespace Jackal.Models.Cells
         {
             if (pirate is Friday && ContainsMissioner || pirate is Missioner && ContainsFriday)
             {
-                while (Pirates.Count > 0)
-                    Pirates[0].Kill();
+                pirate.Kill();
+                Pirates.First(p => p is Friday || p is Missioner).Kill();
                 return;
             }
 
@@ -346,7 +346,7 @@ namespace Jackal.Models.Cells
                 foreach (Pirate pir in pirates)
                 {
                     pir.TargetCell = pir.Owner.Ship;
-                    RemovePirate(pir, withGold: false);
+                    pir.RemoveFromCell(withGold: false);
                     pir.Owner.Ship.AddPirate(pir, delay: 150);
                 }
             }

@@ -383,7 +383,7 @@ namespace Jackal.Models
             }
             #endregion
 
-            Map.SetCell(new EarthQuakeCell(2,2));
+            //Map.SetCell(new EarthQuakeCell(2,2));
             //Map.SetCell(new CannabisCell(11, 6));
             //Map[1, 5].AddPirate(new Missioner(Map[1, 5], Players[1], Players[1]));
 
@@ -576,7 +576,6 @@ namespace Jackal.Models
             else
             {
                 Deselect();
-                LogWriter.EarthQuake(earthQuake.SelectedCell, cell);
                 SwapCells(earthQuake.SelectedCell, cell);
                 earthQuake.DeselectCell();
                 earthQuake.IsActive = false;
@@ -761,7 +760,6 @@ namespace Jackal.Models
         /// <param name="cell">Клетка, куда перемещается пират.</param>
         static void StartMovePirate(Cell cell)
         {
-            LogWriter.MovePirate(SelectedPirate, cell);
             SaveOperator.MovePirate(SelectedPirate, cell);
             Client.MovePirate(SelectedPirate, cell);
 
@@ -867,6 +865,8 @@ namespace Jackal.Models
                     zIndex1 = 1;
                     zIndex2 = 1;
                 }
+                if (!start)
+                    Task.Delay(500).Wait();
                 SetCellZIndex(cell1Index, zIndex1, cell2Index, zIndex2);
             }
         }
@@ -876,7 +876,6 @@ namespace Jackal.Models
         /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
         static void MoveShip(Cell cell)
         {
-            LogWriter.MoveShip(cell);
             SaveOperator.MoveShip(cell);
             Client.SelectCell(NetMode.MoveShip, cell);
 
@@ -921,7 +920,6 @@ namespace Jackal.Models
             cell1.SetSelectableCoords(Map);
             cell2.SetSelectableCoords(Map);
 
-            Task.Delay(500).Wait();
             OnSetCellZIndex(cell1, cell2, false);
         }
 
@@ -1016,7 +1014,6 @@ namespace Jackal.Models
         /// <param name="type">Тип спаиваемого юнита. Для обычного пирата равен <see cref="ResidentType.Ben"/>.</param>
         public static void GetDrunk(ResidentType type)
         {
-            LogWriter.DrinkRum(type);
             SaveOperator.DrinkRum(SelectedPirate, type);
             Client.DrinkRum(SelectedPirate, type);
 
@@ -1105,7 +1102,6 @@ namespace Jackal.Models
             if (CurrentPlayer.IsControllable)
                 EnableInterface?.Invoke(false);
 
-            LogWriter.GetBirth();
             SaveOperator.GetBirth(SelectedPirate);
             Client.PirateBirth(SelectedPirate);
 

@@ -309,11 +309,12 @@ namespace Jackal.Models.Pirates
         /// <summary>
         /// Метод удаляет пирата с клетки, на которой он находится.
         /// </summary>
-        public void RemoveFromCell()
+        /// <param name="withGold">Флаг указывает, может ли пират унести золото.</param>
+        public void RemoveFromCell(bool withGold = true)
         {
             if (IsDrunk)
                 IsDrunk = false;
-            Cell.RemovePirate(this);
+            Cell.RemovePirate(this, withGold);
         }
 
         /// <summary>

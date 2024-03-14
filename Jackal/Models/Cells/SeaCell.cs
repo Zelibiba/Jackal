@@ -33,11 +33,11 @@ namespace Jackal.Models.Cells
 
         public override bool CanBeSelectedBy(Pirate pirate)
         {
-            return pirate.Cell is SeaCell || !pirate.Cell.IsStandable;
+            return (pirate.Cell is SeaCell || !pirate.Cell.IsStandable) && base.CanBeSelectedBy(pirate);
         }
         public override bool IsGoldFriendly(Pirate pirate)
         {
-            return !pirate.Cell.IsStandable;
+            return !pirate.Cell.IsStandable && base.IsGoldFriendly(pirate);
         }
 
         public override MovementResult AddPirate(Pirate pirate, int delay =0)

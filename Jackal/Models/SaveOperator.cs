@@ -49,7 +49,6 @@ namespace Jackal.Models
         }
         public static void Close()
         {
-            _writer?.Close();
             _file?.Close();
         }
 
