@@ -24,11 +24,11 @@ namespace Jackal.Network
         readonly List<Player> _players;
 
         readonly TcpClient _client;
-        readonly NetworkStream _stream;
-        readonly BinaryReader _reader;
-        readonly BinaryWriter _writer;
+        readonly NetLogStream _stream;
+        readonly BinaryLogReader _reader;
+        readonly BinaryLogWriter _writer;
         readonly CancellationTokenSource _cancellationTokenSource;
-        Task _listening;
+        readonly Task _listening;
         NetMode _lastMode;
         bool _continueListening;
 
@@ -44,9 +44,9 @@ namespace Jackal.Network
             };
 
             _client = tcpClient;
-            _stream = _client.GetStream();
-            _reader = new BinaryReader(_stream);
-            _writer = new BinaryWriter(_stream);
+            _stream = new(_client.GetStream(), _players[0].Name + ".log");
+            _reader = new(_stream);
+            _writer = new(_stream);
             _cancellationTokenSource = new CancellationTokenSource();
 
             _listening = Task.Run(ReceiveMessages);
@@ -56,8 +56,8 @@ namespace Jackal.Network
         {
             try
             {
-                _writer.Write(Properties.Version);
-                _writer.Write(_prepareToGame);
+                _writer.Write(Properties.Version, '\n');
+                _writer.Write(_prepareToGame, '\n');
                 if (_prepareToGame)
                 {
                     _writer.Write(_players[0]);
@@ -161,9 +161,9 @@ namespace Jackal.Network
                     SendToOther(NetMode.UpdatePlayer, writer =>
                                 writer.Write(_players[0])); break;
                 case NetMode.DeletePlayer:
-                    number = _reader.ReadInt32();
+                    number = _reader.ReadInt32('\n');
                     SendToOther(NetMode.DeletePlayer, writer =>
-                                writer.Write(_players[number].Index));
+                                writer.Write(_players[number].Index, '\n'));
                     if (number == 0)
                         _isWatcher = true;
                     else
@@ -192,32 +192,32 @@ namespace Jackal.Network
                     int index = _reader.ReadInt32();
                     bool gold = _reader.ReadBoolean();
                     bool galeon = _reader.ReadBoolean();
-                    Coordinates coords = _reader.ReadCoords();
+                    Coordinates coords = _reader.ReadCoords('\n');
                     SendToOther(NetMode.MovePirate, writer =>
                     {
                         writer.Write(index);
                         writer.Write(gold);
                         writer.Write(galeon);
-                        writer.Write(coords);
+                        writer.Write(coords, '\n');
                     }); break;
                 case NetMode.MoveShip:
                 case NetMode.EathQuake:
                 case NetMode.LightHouse:
-                    coords = _reader.ReadCoords();
+                    coords = _reader.ReadCoords('\n');
                     SendToOther(_lastMode, writer =>
-                                writer.Write(coords)); break;
+                                writer.Write(coords, '\n')); break;
                 case NetMode.DrinkRum:
                     index = _reader.ReadInt32();
-                    int type = _reader.ReadInt32();
+                    int type = _reader.ReadInt32('\n');
                     SendToOther(NetMode.DrinkRum, writer =>
                     {
                         writer.Write(index);
-                        writer.Write(type);
+                        writer.Write(type, '\n');
                     }); break;
                 case NetMode.PirateBirth:
-                    index = _reader.ReadInt32();
+                    index = _reader.ReadInt32('\n');
                     SendToOther(NetMode.PirateBirth, writer =>
-                                writer.Write(index)); break;
+                                writer.Write(index, '\n')); break;
             }
         }
 
@@ -241,7 +241,7 @@ namespace Jackal.Network
             _listening.Wait();
         }
 
-        void SendToOther(NetMode netMode, Action<BinaryWriter> messageFunc)
+        void SendToOther(NetMode netMode, Action<BinaryLogWriter> messageFunc)
         {
             foreach(ClientListener client in Server.Clients)
             {

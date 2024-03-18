@@ -57,12 +57,14 @@ namespace Jackal.ViewModels
                     GameProperties.NormaliseSize();
                 });
             this.WhenAnyValue(vm => vm.GameProperties.PatternName)
+                .Skip(1)
                 .Subscribe(x => {
                     IsFixed = x == "Фиксированный";
                     if (IsFixed) GameProperties.NormaliseSize();
                     else Client.ChangeGameProperties(GameProperties);
                 });
             this.WhenAnyValue(vm => vm.GameProperties.Size)
+                .Skip(1)
                 .Subscribe(x => Client.ChangeGameProperties(GameProperties));
 
             GameProperties = new();
