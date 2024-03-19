@@ -58,8 +58,6 @@ namespace Jackal.Network
             finally { Close(); }
         }
 
-        public static int GetPlayerIndex() => _playerIndex++;
-
         public static Task AddTask(Action action)
         {
             if (_processingMessages == null || _processingMessages.Status != TaskStatus.Running)

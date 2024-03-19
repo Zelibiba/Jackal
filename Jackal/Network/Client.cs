@@ -51,13 +51,12 @@ namespace Jackal.Network
                 if (Properties.Version != _reader.ReadString('\n'))
                     throw new Exception("Версия клиента не соответсвтвует версии сервера!");
 
-                _stream.WriteLog("Prepare to game:");
-                bool preapreToGame = _reader.ReadBoolean('\n');
-                if (preapreToGame)
+                _stream.WriteLog("Game is started: ");
+                if (!_reader.ReadBoolean('\n'))
                 {
                     _viewModel = new WaitingRoomViewModel(_ip);
                     _SetContent(_viewModel);
-                    _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true));
+                    _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true), 0);
                     int playerCount = _reader.ReadInt32();
                     for (int i = 0; i < playerCount; i++)
                         _viewModel.AddPlayer(_reader.ReadPlayer());
@@ -116,7 +115,7 @@ namespace Jackal.Network
                             RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer()));
                             break;
                         case NetMode.GetPlayer:
-                            int number = _reader.ReadInt32();
+                            int number = _reader.ReadInt32() - 1;
                             RunInUIThread(() => _viewModel.AddPlayer(_reader.ReadPlayer(isControllable: true), number));
                             break;
                         case NetMode.UpdatePlayer:
@@ -193,21 +192,20 @@ namespace Jackal.Network
         /// <summary>
         /// Информирует сервер об удалении игрока.
         /// </summary>
-        /// <param name="number">Индекс игрока в альянсе. 0 - главный игрок, 1 - дублёр.</param>
-        public static void DeletePlayer(int number)
+        /// <param name="index">Индекс игрока.</param>
+        public static void DeletePlayer(int index)
         {
             _writer.Write(NetMode.DeletePlayer);
-            _writer.Write(number, '\n');
+            _writer.Write(index, '\n');
             _writer.Flush();
         }
         /// <summary>
         /// Информирует сервер о запросе на получение игрока.
         /// </summary>
         /// <param name="number">Индекс игрока в альянсе. 0 - главный игрок, 1 - дублёр.</param>
-        public static void GetPlayer(int number)
+        public static void GetPlayer()
         {
             _writer.Write(NetMode.GetPlayer);
-            _writer.Write(number, '\n');
             _writer.Flush();
         }
         public static void ChangeGameProperties(GameProperties properties)

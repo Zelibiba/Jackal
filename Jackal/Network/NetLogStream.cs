@@ -8,8 +8,16 @@ using System.Threading.Tasks;
 
 namespace Jackal.Network
 {
+    /// <summary>
+    /// Класс сетевого потока с логированием. Наследует <see cref="NetworkStream"/>.
+    /// </summary>
     public class NetLogStream : NetworkStream
     {
+        /// <summary>
+        /// Класс сетевого потока. Наследует <see cref="NetworkStream"/>.
+        /// </summary>
+        /// <param name="stream">Основной поток.</param>
+        /// <param name="filename">Путь к файлу лога.</param>
         public NetLogStream(NetworkStream stream, string? filename) : base(stream.Socket, true)
         {
             if (filename == null)
@@ -26,17 +34,23 @@ namespace Jackal.Network
         }
 
         readonly FileStream? _file;
+        /// <summary>
+        /// Поток записи в лог.
+        /// </summary>
         public StreamWriter? Writer { get; }
 
+        /// <summary>
+        /// Записывает сообщение в лог.
+        /// </summary>
         public void WriteLog(string message)
         {
             Writer?.Write(message);
             Writer?.Write(' ');
         }
-        public void NewLogLine()
-        {
-            Writer?.Write('\n');
-        }
+        /// <summary>
+        /// Метод перехода на новую строчку в логе.
+        /// </summary>
+        public void NewLogLine() => Writer?.Write('\n');
 
         public override void Close()
         {

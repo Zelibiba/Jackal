@@ -36,15 +36,15 @@ namespace Jackal.ViewModels
             StartGameCommand = ReactiveCommand.Create(StartGame, canStartServer);
 
             IObservable<bool> canChangeWatcher = Players.ToObservableChangeSet()
-                                                        .AutoRefresh(playerVM => playerVM.Player.CanChangeWatcher)
+                                                        .AutoRefresh(playerVM => playerVM.Player.IsReady)
                                                         .Transform(playersVM => playersVM.Player)
                                                         .ToCollection()
-                                                        .Select(players => players.Count > 1 && players.First().CanChangeWatcher
+                                                        .Select(players => players.Count > 1 && !players.First().IsReady
                                                                            || !players.First().IsControllable);
             ChangeWatcherCommand = ReactiveCommand.Create<bool>(ChangeWatcher, canChangeWatcher);
 
             IObservable<bool> canCreateAlly = Players.ToObservableChangeSet()
-                                                     .AutoRefresh(playerVM => playerVM.Player.CanChangeWatcher)
+                                                     .AutoRefresh(playerVM => playerVM.Player.IsReady)
                                                      .Transform(playersVM => playersVM.Player)
                                                      .ToCollection()
                                                      .Select(players => players.First().IsControllable && !players.First().IsReady);
@@ -140,20 +140,20 @@ namespace Jackal.ViewModels
         {
             if (isWatcher)
             {
-                Client.DeletePlayer(0);
+                Client.DeletePlayer(Players[0].Player.Index);
                 Players.RemoveAt(0);
             }
             else
-                Client.GetPlayer(0);
+                Client.GetPlayer();
         }
         public ReactiveCommand<bool,Unit> CreateAllyCommand { get; }
         void CreateAlly(bool create)
         {
             if (create)
-                Client.GetPlayer(1);
+                Client.GetPlayer();
             else
             {
-                Client.DeletePlayer(1);
+                Client.DeletePlayer(Players[1].Player.Index);
                 Players.RemoveAt(1);
             }
         }
@@ -177,7 +177,7 @@ namespace Jackal.ViewModels
             if (index == -1)
                 Players.Add(new PlayerAdderViewModel(player));
             else 
-                Players.Insert(index, new PlayerAdderViewModel(player, index != 0));
+                Players.Insert(index, new PlayerAdderViewModel(player, index == 0));
         }
         public void UpdatePlayer(Player player)
         {

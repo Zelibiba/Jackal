@@ -16,10 +16,10 @@ namespace Jackal.ViewModels
 {
     public class PlayerAdderViewModel : ViewModelBase
     {
-        public PlayerAdderViewModel(Player player, bool isAlly = false)
+        public PlayerAdderViewModel(Player player, bool isControllable = false)
         {
             Player = player;
-            _isAlly = isAlly;
+            IsControllable = isControllable;
             if (IsControllable)
             {
                 this.WhenAnyValue(vm => vm.Player.Name, vm => vm.Player.Team, vm => vm.Player.AllianceIdentifier, vm => vm.Player.IsReady)
@@ -29,11 +29,7 @@ namespace Jackal.ViewModels
         }
 
         public Player Player { get; }
-        /// <summary>
-        /// Флаг того, что игрок - дублёр.
-        /// </summary>
-        readonly bool _isAlly;
-        public bool IsControllable => Player.IsControllable && !_isAlly;
+        public bool IsControllable { get; }
 
         public void ChangeAlliance()
         {

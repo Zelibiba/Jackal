@@ -72,6 +72,11 @@ namespace Jackal.Models
                                                                           select (allies.Sum(player => player.Gold), allies);
 
         /// <summary>
+        /// Флаг того, что игра стартовала.
+        /// </summary>
+        public static bool isStarted { get; private set; } = false;
+        
+        /// <summary>
         /// Коллекция всех пиратов в игре.
         /// </summary>
         /// <remarks>Необходима для их отображения в интерфейсе.</remarks>
@@ -175,6 +180,8 @@ namespace Jackal.Models
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
         public static void CreateMap(IEnumerable<Player> players, GameProperties properties, bool autosave = true)
         {
+            isStarted = true;
+
             #region инициализация игроков с командами
             foreach (Player player in players)
             {
