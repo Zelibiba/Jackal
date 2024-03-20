@@ -30,7 +30,7 @@ namespace Jackal.Network
         {
             if (_server != null) return;
 
-            _playerIndex = 0;
+            _playerIndex = 1;
             Clients = new List<ClientListener>();
             _server = new TcpListener(ip, 10001);
             _canselListening = false;
