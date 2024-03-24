@@ -158,8 +158,8 @@ namespace Jackal.Network
                             coords = _reader.ReadCoords('\n');
                             Game.SelectCell(coords); break;
                         case NetMode.DrinkRum:
-                            index = _reader.ReadInt32('\n');
-                            ResidentType type = (ResidentType)_reader.ReadInt32();
+                            index = _reader.ReadInt32();
+                            ResidentType type = (ResidentType)_reader.ReadInt32('\n');
                             Game.SelectPirate(index);
                             Game.GetDrunk(type);
                             break;
@@ -205,7 +205,7 @@ namespace Jackal.Network
         /// <param name="number">Индекс игрока в альянсе. 0 - главный игрок, 1 - дублёр.</param>
         public static void GetPlayer()
         {
-            _writer.Write(NetMode.GetPlayer);
+            _writer.Write(NetMode.GetPlayer, '\n');
             _writer.Flush();
         }
         public static void ChangeGameProperties(GameProperties properties)

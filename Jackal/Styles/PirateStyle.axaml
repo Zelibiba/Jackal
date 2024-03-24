@@ -20,33 +20,32 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate>
-					<Viewbox>
-						<Panel Height="20" Width="20">
-							<Panel.Styles>
-								<Style Selector="Line">
-									<Setter Property="Stroke" Value="Black"/>
-									<Setter Property="StrokeThickness" Value="2"/>
-									<Setter Property="IsVisible" Value="{Binding Pirate.IsBlocked}"/>
-								</Style>
-							</Panel.Styles>
-							<Ellipse Fill="Transparent" Stroke="Black" StrokeThickness="2"/>
-							<Ellipse Margin="2"
-									 Fill="{Binding Pirate.Image, Converter={StaticResource TeamConverter}}"
-									 Stroke="{Binding Pirate.Team, Converter={StaticResource TeamConverter}}" StrokeThickness="2"/>
-							<Line StartPoint="3,3" EndPoint="17,17"/>
-							<Line StartPoint="17,3" EndPoint="3,17"/>
-							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-									   Text="{Binding Pirate.MazeNodeNumber}" Foreground="#FF56ACA8" FontWeight="Bold" FontSize="15"
-									   IsVisible="{Binding !!Pirate.MazeNodeNumber}"/>
-						</Panel>
-					</Viewbox>
+					<Panel Height="20" Width="20">
+						<Panel.Styles>
+							<Style Selector="Line">
+								<Setter Property="Stroke" Value="Black"/>
+								<Setter Property="StrokeThickness" Value="2"/>
+								<Setter Property="IsVisible" Value="{Binding Pirate.IsBlocked}"/>
+							</Style>
+						</Panel.Styles>
+						<Ellipse Fill="Transparent" Stroke="Black" StrokeThickness="2"/>
+						<Ellipse Margin="2"
+								 Fill="{Binding Pirate.Image, Converter={StaticResource TeamConverter}}"
+								 Stroke="{Binding Pirate.Team, Converter={StaticResource TeamConverter}}" StrokeThickness="2"/>
+						<Line StartPoint="3,3" EndPoint="17,17"/>
+						<Line StartPoint="17,3" EndPoint="3,17"/>
+						<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+								   Text="{Binding Pirate.MazeNodeNumber}" Foreground="#FF56ACA8" FontWeight="Bold" FontSize="15"
+								   IsVisible="{Binding !!Pirate.MazeNodeNumber}"/>
+					</Panel>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
+		
 	</Style>
-	<Style Selector="Button.IsSelected">
+	<Style Selector="Button.CanBeSelected">
 		<Style.Animations>
-			<Animation Duration="0:0:0.3" IterationCount="INFINITE" PlaybackDirection ="Alternate">
+			<Animation Duration="0:0:0.7" IterationCount="INFINITE" PlaybackDirection ="Alternate">
 				<KeyFrame Cue="0%">
 					<Setter Property="Opacity" Value="0.6"/>
 				</KeyFrame>

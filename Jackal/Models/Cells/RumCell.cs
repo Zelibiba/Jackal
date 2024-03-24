@@ -9,7 +9,10 @@ namespace Jackal.Models.Cells
 {
     public class RumCell : Cell
     {
-        public RumCell(int row,int column) : base(row, column, "Rum") { }
+        public RumCell(int row, int column) : base(row, column, "Rum")
+        {
+            enterSound = Sounds.Rum;
+        }
 
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {

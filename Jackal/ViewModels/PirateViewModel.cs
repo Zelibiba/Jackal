@@ -24,6 +24,10 @@ namespace Jackal.ViewModels
             this.WhenAnyValue(vm => vm.Index, vm => vm.CellVM.Y,
                               (i, y) => y + i / 3 * (_size + 1) + 16)
                               .ToPropertyEx(this, vm => vm.Y);
+
+            this.WhenAnyValue(vm => vm.Pirate.Manager.Turn, vm => vm.Pirate.Manager.IsControllable, vm => vm.Pirate.IsEnabled,
+                             (turn, isControllable, isEnabled) => turn && isControllable && isEnabled)
+                             .ToPropertyEx(this, vm => vm.CanBeSelected);
         }
 
         static readonly int _size = 18;
@@ -46,5 +50,11 @@ namespace Jackal.ViewModels
 
         [ObservableAsProperty] public int X { get; }
         [ObservableAsProperty] public int Y { get; }
+
+        /// <summary>
+        /// Флаг того, что с пиратом можно взаимодействовать.
+        /// </summary>
+        /// <remarks>Необходим для анимации.</remarks>
+        [ObservableAsProperty] public bool CanBeSelected { get; }
     }
 }

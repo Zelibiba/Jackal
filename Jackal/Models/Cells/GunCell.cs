@@ -15,6 +15,7 @@ namespace Jackal.Models.Cells
             _continueMove = continueMove;
             Directions = new Coordinates[] { new(-1, 0) };
             _angle = (this as IOrientableCell).Rotate(rotation);
+            enterSound = Sounds.Gun;
         }
 
         readonly Func<Coordinates, MovementResult> _continueMove;

@@ -80,17 +80,24 @@ namespace Jackal.Models.Cells
         {
             if (IsFriendlyTo(pirate))
             {
+                enterSound = pirate.Treasure ? Sounds.GetGold : Sounds.Usual;
                 base.AddPirate(pirate, delay);
                 pirate.Gold = false;
                 pirate.Galeon = false;
             }
             else
             {
+                Game.AudioPlayer?.Play(Sounds.Kill);
                 pirate.Cell = this;
                 pirate.Kill();
             }
 
             return MovementResult.End;
+        }
+        public void AddHittedPirate(Pirate pirate)
+        {
+            enterSound = Sounds.Hit;
+            base.AddPirate(pirate, delay: 150);
         }
     }
 }

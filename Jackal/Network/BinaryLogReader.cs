@@ -136,9 +136,9 @@ namespace Jackal.Network
                               isControllable)
             {
                 AllianceIdentifier = ReadAllianceIdentifier(),
-                IsReady = ReadBoolean(),
                 Gold = ReadInt32(),
-                Bottles = ReadInt32('\n')
+                Bottles = ReadInt32(),
+                IsReady = ReadBoolean('\n'),
             };
         }
         /// <summary>

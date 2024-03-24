@@ -23,6 +23,7 @@ namespace Jackal.Models.Pirates
         /// </summary>
         public void ConverToPirate()
         {
+            Game.AudioPlayer?.Play(Sounds.DrunkMissioner);
             Ben ben = new(Cell, Owner, Manager, image: "DrunkMissioner");
             if (Cell is CaveExitCell exit)
                 exit.AddDrunkMissioner(ben);

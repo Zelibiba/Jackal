@@ -14,6 +14,7 @@ namespace Jackal.Models.Cells
             if (count < 1 || count > 3)
                 throw new ArgumentException("Wrong bottles count!");
             _count = count;
+            enterSound = Sounds.Bottles; 
         }
 
         readonly int _count;
@@ -21,6 +22,7 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
+            enterSound = Sounds.Usual;
             Game.HiddenBottles -= _count;
             int bottles = _count;
             Pirate pirate = Pirates[0];

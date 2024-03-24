@@ -19,6 +19,7 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
+
             Player owner = Pirates[0].Owner;
             Player manager = Pirates[0].Manager;
             Pirate pirate = _type switch
@@ -26,9 +27,16 @@ namespace Jackal.Models.Cells
                 ResidentType.Ben => new Ben(this, owner, manager),
                 ResidentType.Friday => new Friday(this, owner, manager),
                 ResidentType.Missioner => new Missioner(this, owner, manager),
+            };
+            enterSound = _type switch
+            {
+                ResidentType.Ben => Sounds.Ben,
+                ResidentType.Friday => Sounds.Friday,
+                ResidentType.Missioner => Sounds.Missioner,
                 _ => throw new NotImplementedException()
             };
             AddPirate(pirate, 0);
+            enterSound = Sounds.Usual;
         }
     }
 }

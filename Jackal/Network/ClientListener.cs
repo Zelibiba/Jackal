@@ -56,8 +56,8 @@ namespace Jackal.Network
             {
                 _writer.Write(Properties.Version, '\n');
                 _stream.WriteLog("Game is started: ");
-                _writer.Write(Game.isStarted, '\n');
-                if (!Game.isStarted)
+                _writer.Write(Game.IsStarted, '\n');
+                if (!Game.IsStarted)
                 {
                     _players.Add(new(_mainIndex, _host, Team.White));
                     _writer.Write(_players[0]);
@@ -132,7 +132,7 @@ namespace Jackal.Network
                     if (_players.Count == 0)
                         _players.Add(new(_mainIndex, _host, Team.White));
                     else
-                        _players.Add(new(-_mainIndex, _players[0].Name, SetAllyTeam(_players[0].Team)) 
+                        _players.Add(new(-_mainIndex, _players[0].Name, _players[0].GetAllyTeam())
                                     { AllianceIdentifier = _players[0].AllianceIdentifier });
 
                     _writer.Write(NetMode.GetPlayer);
@@ -147,10 +147,7 @@ namespace Jackal.Network
                                 writer.Write(_players[0]));
                     if (_players.Count == 2)
                     {
-                        _players[1].Name = _players[0].Name;
-                        _players[1].Team = SetAllyTeam(_players[0].Team);
-                        _players[1].AllianceIdentifier = _players[0].AllianceIdentifier;
-                        _players[1].IsReady = _players[0].IsReady;
+                        _players[1].Copy(_players[0], alliedTeam: true);
                         _writer.Write(NetMode.UpdatePlayer);
                         _writer.Write(_players[1]);
                         _writer.Flush();
@@ -244,13 +241,6 @@ namespace Jackal.Network
                 messageFunc(client._writer);
                 client._writer.Flush();
             }
-        }
-
-
-        Team SetAllyTeam(Team team)
-        {
-            if ((int)team * 2 > 32) return (Team)((int)team / 32);
-            else return (Team)((int)team * 2);
         }
     }
 }

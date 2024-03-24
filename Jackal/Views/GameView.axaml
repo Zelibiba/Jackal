@@ -61,8 +61,8 @@
 					</ItemsControl.Styles>
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<Button Height="{Binding Size}" Width="{Binding Size}"
-									Classes="Pirate"/>
+							<Button Classes="Pirate"
+									Classes.CanBeSelected="{Binding CanBeSelected}"/>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>
@@ -118,6 +118,10 @@
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>
 				</Grid>
+				<WrapPanel Orientation="Horizontal" Margin="10">
+					<TextBlock Text="Тип карты: " FontSize="20"/>
+					<TextBlock Text="{Binding MapPatternName}" FontSize="20"/>
+				</WrapPanel>
 				<Grid Margin="10"
 					  RowDefinitions="*,*,*,20,*" ColumnDefinitions="auto,auto">
 					<Grid.Styles>

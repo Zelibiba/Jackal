@@ -26,7 +26,7 @@ namespace Jackal.ViewModels
         readonly IDisposable _disPirates;
 
 
-        public GameViewModel(IEnumerable<Player>? players, GameProperties properties, IEnumerable<int[]>? operations = null)
+        public GameViewModel(IEnumerable<Player> players, GameProperties properties, IEnumerable<int[]>? operations = null)
         {
             Activator = new ViewModelActivator();
             this.WhenActivated(disposable =>
@@ -53,7 +53,7 @@ namespace Jackal.ViewModels
             };
             Game.EnableInterface = (isEnabled) => IsEnabled = isEnabled;
             Game.DeselectPirate = () => SelectedPirate = Pirate.Empty;
-            Game.UpdateHiddenParams = () =>
+            Game.UpdateCollectablesParams = () =>
             {
                 HiddenGold = Game.HiddenGold;
                 CurrentGold = Game.CurrentGold;
@@ -63,8 +63,8 @@ namespace Jackal.ViewModels
             Game.SetWinner = (players) => Views.MessageBox.Show(string.Format("Ура победител{0}:\n{1} !",
                                                                               players.Count() > 1 ? "ям" : "ю",
                                                                               string.Join('\n', players.Select(p => p.Name))));
+            
             SelectedPirate = Pirate.Empty;
-
             Cells = (from cell in Game.Map
                      select new CellViewModel(cell)).ToArray();
 
@@ -82,6 +82,7 @@ namespace Jackal.ViewModels
 
             HiddenGold = Game.HiddenGold;
             HiddenBottles = Game.HiddenBottles;
+            MapPatternName = properties.PatternName;
             IsEnabled = players.First().IsControllable;
         }
 
@@ -101,6 +102,7 @@ namespace Jackal.ViewModels
         [Reactive] public Pirate SelectedPirate { get; set; }
         [ObservableAsProperty] public bool IsPirateSelected { get; }
 
+        public string MapPatternName { get; }
         [Reactive] public int HiddenGold { get; private set; }
         [Reactive] public int CurrentGold { get; private set; }
         [Reactive] public int LostGold { get; private set; }

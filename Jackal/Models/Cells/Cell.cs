@@ -39,6 +39,7 @@ namespace Jackal.Models.Cells
             Nodes = new ObservableCollection<Cell> { this };
             IsStandable = isStandable;
             Number = number;
+            enterSound = Sounds.Usual;
 
             this.WhenAnyValue(c => c.Gold, c => c.Galeon,
                 (gold, galeon) => gold > 0 || galeon > 0)
@@ -71,6 +72,10 @@ namespace Jackal.Models.Cells
             else
                 Image += "_gray";
         }
+        /// <summary>
+        /// Звук, возникающий при добавлении пирата на эту клетку.
+        /// </summary>
+        protected Sounds enterSound;
 
         /// <summary>
         /// Строка клетки.
@@ -233,7 +238,7 @@ namespace Jackal.Models.Cells
         /// </summary>
         /// <param name="pirate">Выбранный пират.</param>
         /// <returns>True, если на клетке есть враги.</returns>
-        public virtual bool IsFriendlyTo(Pirate pirate) => (pirate.Alliance | Team.None).HasFlag(Team);
+        public bool IsFriendlyTo(Pirate pirate) => (pirate.Alliance | Team.None).HasFlag(Team);
 
         /// <summary>
         /// Флаг того, что на клетке находится Миссионер.
@@ -301,6 +306,8 @@ namespace Jackal.Models.Cells
         /// <param name="delay">Миллисекунды паузы для ожидания анимации.</param>
         public virtual MovementResult AddPirate(Pirate pirate, int delay = 0)
         {
+            Game.AudioPlayer?.Play(pirate.AtAirplane ? Sounds.Airplane : 
+                                   pirate.AtHorse ? Sounds.Horse : enterSound);
             Game.OnStartPirateAnimation(pirate, this, delay);
 
             Pirates.Add(pirate);    // Сначала добавить пирата, потом убрать врагов (для корректной работы AirplaneCell)
@@ -328,6 +335,7 @@ namespace Jackal.Models.Cells
         {
             if (pirate is Friday && ContainsMissioner || pirate is Missioner && ContainsFriday)
             {
+                Game.AudioPlayer?.Play(Sounds.FridayMissioner);
                 pirate.Kill();
                 Pirates.First(p => p is Friday || p is Missioner).Kill();
                 return;
@@ -339,15 +347,19 @@ namespace Jackal.Models.Cells
                 foreach (Pirate pir in Pirates.Take(Pirates.Count - (allPirates ? 0 : 1)))
                 {
                     if (pir is Friday friday)
+                    {
                         friday.SetNewOwner(pirate.Owner, pirate.Manager);
+                        Game.AudioPlayer?.Play(Sounds.Ok);
+                    }
                     else
                         pirates.Add(pir);
                 }
                 foreach (Pirate pir in pirates)
                 {
-                    pir.TargetCell = pir.Owner.Ship;
+                    ShipCell ship = pir.Owner.Ship;
+                    pir.TargetCell = ship;
                     pir.RemoveFromCell(withGold: false);
-                    pir.Owner.Ship.AddPirate(pir, delay: 150);
+                    ship.AddHittedPirate(pir);
                 }
             }
         }

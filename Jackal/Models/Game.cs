@@ -21,10 +21,12 @@ namespace Jackal.Models
     /// </summary>
     public static class Game
     {
+        public static AudioPlayer? AudioPlayer { get; private set; }
+
         /// <summary>
         /// Количество миллисекунд анимации пирата.
         /// </summary>
-        public static readonly int pirateDelay = 300;
+        static readonly int pirateDelay = 300;
 
         /// <summary>
         /// Карта.
@@ -33,6 +35,43 @@ namespace Jackal.Models
         /// Представляяет собой массив клеток типа <see cref="Cell"/>.
         /// </remarks>
         public static Map Map { get; private set; }
+        /// <summary>
+        /// Делегат для обновления параметров <see cref="HiddenGold"/>, <see cref="CurrentGold"/> и <see cref="LostGold"/> в интерфейсе.
+        /// </summary>
+        public static Action? UpdateCollectablesParams;
+        /// <summary>
+        /// Счётчик спрятанного золота.
+        /// </summary>
+        /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
+        public static int HiddenGold
+        {
+            get => __hiddenGold;
+            set
+            {
+                CurrentGold += __hiddenGold - value;
+                __hiddenGold = value;
+            }
+        }
+        static int __hiddenGold = 0;
+        /// <summary>
+        /// Счётчик видимого золота на карте.
+        /// </summary>
+        public static int CurrentGold { get; set; }
+        /// <summary>
+        /// Счётчик потерянного золота.
+        /// </summary>
+        /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
+        public static int LostGold
+        {
+            get => __lostGold;
+            set
+            {
+                CurrentGold += __lostGold - value;
+                __lostGold = value;
+            }
+        }
+        static int __lostGold;
+        public static int HiddenBottles { get; set; } = 0;
 
         /// <summary>
         /// Лист игроков.
@@ -74,14 +113,13 @@ namespace Jackal.Models
         /// <summary>
         /// Флаг того, что игра стартовала.
         /// </summary>
-        public static bool isStarted { get; private set; } = false;
+        public static bool IsStarted { get; private set; } = false;
         
         /// <summary>
         /// Коллекция всех пиратов в игре.
         /// </summary>
         /// <remarks>Необходима для их отображения в интерфейсе.</remarks>
         public static ObservableCollection<Pirate> Pirates { get; } = new();
-
         /// <summary>
         /// Пират, выбранный на текущий момент.
         /// </summary>
@@ -95,14 +133,8 @@ namespace Jackal.Models
             {
                 if (__selectedPirate != value)
                 {
-                    if (__selectedPirate != null)
-                        __selectedPirate.IsSelected = false;
-
                     __selectedPirate = value;
-
-                    if (__selectedPirate != null)
-                        __selectedPirate.IsSelected = true;
-                    else
+                    if (__selectedPirate == null)
                         DeselectPirate?.Invoke();
                 }
             }
@@ -112,12 +144,6 @@ namespace Jackal.Models
         /// Флаг того, что какой-то пират выбран.
         /// </summary>
         static bool IsPirateSelected => SelectedPirate != null;
-
-        /// <summary>
-        /// Корабль, выбранный на текущий момент.
-        /// </summary>
-        static ShipCell? SelectedShip { get; set; }
-
         /// <summary>
         /// Флаг того, что некоторый пират начал ходить.
         /// </summary>
@@ -135,42 +161,10 @@ namespace Jackal.Models
         public static bool CanChangeSelection => !(PirateInMotion || PirateIsDrunk || earthQuake.IsActive || lightHouse.IsActive);
 
         /// <summary>
-        /// Делегат для обновления параметров <see cref="HiddenGold"/>, <see cref="CurrentGold"/> и <see cref="LostGold"/> в интерфейсе.
+        /// Корабль, выбранный на текущий момент.
         /// </summary>
-        public static Action? UpdateHiddenParams;
-        /// <summary>
-        /// Счётчик спрятанного золота.
-        /// </summary>
-        /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
-        public static int HiddenGold
-        {
-            get => __hiddenGold;
-            set
-            {
-                CurrentGold += __hiddenGold - value;
-                __hiddenGold = value;
-            }
-        }
-        static int __hiddenGold = 0;
-        /// <summary>
-        /// Счётчик видимого золота на карте.
-        /// </summary>
-        public static int CurrentGold { get; set; }
-        /// <summary>
-        /// Счётчик потерянного золота.
-        /// </summary>
-        /// <remarks>Имеет логику, связанную с <see cref="CurrentGold"/>.</remarks>
-        public static int LostGold
-        {
-            get => __lostGold;
-            set
-            {
-                CurrentGold += __lostGold - value;
-                __lostGold = value;
-            }
-        }
-        static int __lostGold;
-        public static int HiddenBottles { get; set; } = 0;
+        static ShipCell? SelectedShip { get; set; }
+
 
         /// <summary>
         /// Метод инициализирует игру.
@@ -180,7 +174,7 @@ namespace Jackal.Models
         /// <param name="autosave">Флаг того, что необходимо включить автосохранения.</param>
         public static void CreateMap(IEnumerable<Player> players, GameProperties properties, bool autosave = true)
         {
-            isStarted = true;
+            IsStarted = true;
 
             #region инициализация игроков с командами
             foreach (Player player in players)
@@ -197,11 +191,8 @@ namespace Jackal.Models
 
             foreach (List<Player> allies in _ListAllies)
             {
-                Team alliance = Team.None;
                 foreach (Player player in allies)
-                    alliance |= player.Team;
-                foreach (Player player in allies)
-                    player.SetAlliance(alliance, allies);
+                    player.SetAlliance(allies);
             }
             #endregion
 
@@ -392,7 +383,8 @@ namespace Jackal.Models
 
             //Map.SetCell(new EarthQuakeCell(2,2));
             //Map.SetCell(new CannabisCell(11, 6));
-            //Map[1, 5].AddPirate(new Missioner(Map[1, 5], Players[1], Players[1]));
+            //Map[0, 7].AddPirate(new Friday(Map[0, 7], Players[0], Players[0]));
+            //Map[1, 6].AddPirate(new Missioner(Map[1, 6], Players[1], Players[1]));
 
             foreach (Cell cell in Map)
                 cell.SetSelectableCoords(Map);
@@ -436,6 +428,7 @@ namespace Jackal.Models
                         PirateBirth(); break;
                 }
             }
+            AudioPlayer = new();
         }
 
 
@@ -447,7 +440,7 @@ namespace Jackal.Models
         /// <param name="checkOnly">Флаг того, что необходима только проверка на бочку рома.</param>
         static void NextPlayer()
         {
-            UpdateHiddenParams?.Invoke();
+            UpdateCollectablesParams?.Invoke();
             CheckRumBlock();
 
             if (CurrentPlayer.CannabisIndex > 0)
@@ -826,6 +819,7 @@ namespace Jackal.Models
             }
             if(!cell.CanBeSelectedBy(SelectedPirate))
             {
+                AudioPlayer?.Play(Sounds.Kill);
                 OnStartPirateAnimation(SelectedPirate, cell, pirateDelay);
                 SelectedPirate.Kill();
                 return MovementResult.End;
@@ -883,6 +877,7 @@ namespace Jackal.Models
         /// <param name="newCell">Клетка, на которую перемещается корабль.</param>
         static void MoveShip(Cell cell)
         {
+            AudioPlayer?.Play(Sounds.Sea);
             SaveOperator.MoveShip(cell);
             Client.SelectCell(NetMode.MoveShip, cell);
 
@@ -897,6 +892,7 @@ namespace Jackal.Models
                 }
                 else
                 {
+                    AudioPlayer?.Play(Sounds.Kill);
                     while(cell.Pirates.Count > 0)
                         cell.Pirates[0].Kill();
                 }
@@ -1051,6 +1047,7 @@ namespace Jackal.Models
         /// </summary>
         static void GetFridayDrunk()
         {
+            AudioPlayer?.Play(Sounds.Kill);
             CurrentPlayer.UseBottle();
             foreach (Pirate pirate in CurrentPlayer.Pirates)
                 pirate.CanGiveRumToFriday = false;
@@ -1131,15 +1128,12 @@ namespace Jackal.Models
                 cell.IsPreOpened = !cell.IsPreOpened;
                 cell.ChangeGrayStatus();
             }
-            //FileHandler.ReadAutosave();
         }
 
-        /// <summary>
-        /// Делегат для написания лога о ходе.
-        /// </summary>
-        public static Action<string>? WriteLog;
-
-
-
+        public static void Close()
+        {
+            SaveOperator.Close();
+            AudioPlayer?.Dispose();
+        }
     }
 }

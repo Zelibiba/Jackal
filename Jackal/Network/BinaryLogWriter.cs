@@ -101,11 +101,12 @@ namespace Jackal.Network
         /// Записывает <see cref="NetMode"/> в виде бита 10 и целого числа.
         /// </summary>
         /// <param name="mode"></param>
-        public void Write(NetMode mode)
+        /// <param name="end">Символ, идущий следом за записью в логе.</param>
+        public void Write(NetMode mode, char? end = ' ')
         {
             _writer?.Write("NetMode: ");
             base.Write((byte)10);
-            Write((int)mode);
+            Write((int)mode, end);
         }
         /// <summary>
         /// Записывает <see cref="GameProperties"/> в поток.
@@ -143,9 +144,9 @@ namespace Jackal.Network
             Write(player.Name);
             Write(player.Team);
             Write(player.AllianceIdentifier);
-            Write(player.IsReady);
             Write(player.Gold);
-            Write(player.Bottles,'\n');
+            Write(player.Bottles);
+            Write(player.IsReady, '\n');
         }
         /// <summary>
         /// Записывает <see cref="Coordinates"/> в поток в виде пары целых чисел.

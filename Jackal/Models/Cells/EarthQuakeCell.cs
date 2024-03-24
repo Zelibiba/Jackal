@@ -13,7 +13,17 @@ namespace Jackal.Models.Cells
 
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
-            MovementResult result = IsOpened ? MovementResult.End : MovementResult.EarthQuake;
+            MovementResult result;
+            if (IsOpened)
+            {
+                result = MovementResult.End;
+                enterSound = Sounds.Usual;
+            }
+            else
+            {
+                result = MovementResult.EarthQuake;
+                enterSound = Sounds.EarthQuake;
+            }
             base.AddPirate(pirate, delay);
             return result;
         }

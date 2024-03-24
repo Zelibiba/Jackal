@@ -20,7 +20,7 @@ namespace Jackal.Models
         static FileStream? _file;
         static StreamWriter? _writer;
 
-        static public List<int[]>? Operations { get; private set; }
+        public static List<int[]>? Operations { get; private set; }
 
         public static void StartAutosave(IEnumerable<Player> players, GameProperties properties)
         {

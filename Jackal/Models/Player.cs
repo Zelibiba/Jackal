@@ -49,12 +49,12 @@ namespace Jackal.Models
                    .Select(pirates => pirates.Count(pirate => pirate.IsFighter) >= 3)
                    .ToPropertyEx(this, p => p.IsEnoughtPirates);
 
-            Allies = new ObservableCollection<Player>();
-            Allies.ToObservableChangeSet()
-                  .AutoRefresh(player => player.Bottles)
-                  .ToCollection()
-                  .Select(players => players.Any(p => p.Bottles > 0))
-                  .ToPropertyEx(this, player => player.CanUseRum);
+            _allies = new ObservableCollection<Player>();
+            _allies.ToObservableChangeSet()
+                   .AutoRefresh(player => player.Bottles)
+                   .ToCollection()
+                   .Select(players => players.Any(p => p.Bottles > 0))
+                   .ToPropertyEx(this, player => player.CanUseRum);
         }
 
         /// <summary>
@@ -89,23 +89,29 @@ namespace Jackal.Models
         /// Список игроков в альянсе.
         /// </summary>
         /// <remarks>Необходим для совместного пользования ромом. Первый элемент - сам игрок.
-        public ObservableCollection<Player> Allies { get; private set; }
+        readonly ObservableCollection<Player> _allies;
         /// <summary>
         /// Метод задаёт альянс для игрока.
         /// </summary>
-        /// <param name="alliance">Задаваемый альянс.</param>
-        /// <param name="Allies">Список игроков в альянсе.</param>
-        public void SetAlliance(Team alliance, IEnumerable<Player> allies)
+        /// <param name="allies">Список игроков в альянсе.</param>
+        public void SetAlliance(IEnumerable<Player> allies)
         {
-            Alliance = alliance;
-            Player[] _Allies = new Player[allies.Count()];
-            _Allies[0] = this;
-            int i = 1;
-            foreach (Player player in allies.Except(_Allies))
-                _Allies[i++] = player;
+            Alliance = Team.None;
+            foreach (Player player in allies)
+                Alliance |= player.Team;
 
-            Allies.Clear();
-            Allies.AddRange(_Allies);
+            _allies.Clear();
+            _allies.Add(this);
+            _allies.AddRange(allies.Except(_allies));
+        }
+        /// <summary>
+        /// Метод возвращает команду для двойника в альянсе (Смещённая на 1 команда).
+        /// </summary>
+        /// <returns></returns>
+        public Team GetAllyTeam()
+        {
+            if ((int)Team * 2 > 32) return (Team)((int)Team / 32);
+            else return (Team)((int)Team * 2);
         }
 
         /// <summary>
@@ -115,13 +121,13 @@ namespace Jackal.Models
         /// <summary>
         /// Метод копирует основные параметры игрока.
         /// </summary>
-        /// <param name="player">игрок, с котого копируют.</param>
-        public void Copy(Player player)
+        /// <param name="player">Игрок, с котого копируют.</param>
+        /// <param name="alliedTeam">Копировать команду не напрямую, а через <see cref="GetAllyTeam"/></param>
+        public void Copy(Player player, bool alliedTeam = false)
         {
             Name = player.Name;
             AllianceIdentifier = player.AllianceIdentifier;
-            Alliance = player.Alliance;
-            Team = player.Team;
+            Team = alliedTeam ? player.GetAllyTeam() : player.Team;
             IsReady = player.IsReady;
         }
 
@@ -175,10 +181,7 @@ namespace Jackal.Models
         /// <summary>
         /// Метод уменьшает количество бутылок у альянса на одну.
         /// </summary>
-        public void UseBottle()
-        {
-            Allies.First(p => p.Bottles > 0).Bottles--;
-        }
+        public void UseBottle() => _allies.First(p => p.Bottles > 0).Bottles--;
 
         /// <summary>
         /// Число разов того, что с этого игрока начался ход конопли.

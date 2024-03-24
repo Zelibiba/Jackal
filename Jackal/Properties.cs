@@ -15,7 +15,7 @@ namespace Jackal
         /// <summary>
         /// Версия программы.
         /// </summary>
-        public static string Version => "1.0.7";
+        public static string Version => "1.1.0";
 
         static Properties()
         {
@@ -25,6 +25,7 @@ namespace Jackal
 #endif
             ImageFolder = Path.Combine(mainFolder, "Assets", "Images");
             MapPatternsFolder = Path.Combine(mainFolder, "Assets", "Map Patterns");
+            SoundsFolder = Path.Combine(mainFolder, "Assets", "Sounds");
             SavesFolder = Path.Combine(mainFolder, "Saves");
         }
         /// <summary>
@@ -39,5 +40,9 @@ namespace Jackal
         /// Путь до папки с сохранениями.
         /// </summary>
         public static string SavesFolder { get; }
+        /// <summary>
+        /// Путь до папки с аудиофайлами.
+        /// </summary>
+        public static string SoundsFolder { get; }
     }
 }

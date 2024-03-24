@@ -16,7 +16,10 @@ namespace Jackal.Models.Cells
         {
             base.AddPirate(pirate, delay);
             if (pirate is not Friday)
+            {
+                Game.AudioPlayer?.Play(Sounds.Kill);
                 pirate.Kill();
+            }
             return MovementResult.End;
         }
     }

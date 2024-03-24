@@ -13,7 +13,7 @@ namespace Jackal.Views
             InitializeComponent();
             DataContext = new MainMenuViewModel();
 
-            Closed += ServerStop;
+            Closing += ServerStop;
         }
 
         void ServerStop(object? sender, EventArgs e)
@@ -22,10 +22,8 @@ namespace Jackal.Views
                 Server.Stop();
             else
                 Client.Stop();
-            
-            SaveOperator.Close();
 
-            Closed -= ServerStop;
+            Game.Close();
         }
     }
 }

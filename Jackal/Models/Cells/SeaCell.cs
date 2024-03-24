@@ -12,6 +12,7 @@ namespace Jackal.Models.Cells
         public SeaCell(int row, int column) : base(row, column, "Sea")
         {
             Open();
+            enterSound = Sounds.Sea;
         }
 
         public override int Gold

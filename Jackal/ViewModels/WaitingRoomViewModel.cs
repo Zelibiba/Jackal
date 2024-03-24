@@ -67,6 +67,7 @@ namespace Jackal.ViewModels
                 .Skip(1)
                 .Subscribe(x => Client.ChangeGameProperties(GameProperties));
 
+            IsFixed = true;
             GameProperties = new();
             IP = ip ?? Server.IP;
         }

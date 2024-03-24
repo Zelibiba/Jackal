@@ -11,6 +11,7 @@ namespace Jackal.Models.Cells
         public GoldCell(int row, int column, GoldType goldType) : base(row, column, goldType.ToString())
         {
             _goldType = goldType;
+            enterSound = _goldType == GoldType.Galeon ? Sounds.Galeon : Sounds.Gold;
         }
 
         readonly GoldType _goldType;
@@ -18,6 +19,7 @@ namespace Jackal.Models.Cells
         public override void Open()
         {
             base.Open();
+            enterSound = Sounds.Usual;
             if (_goldType == GoldType.Galeon)
             {
                 Galeon = 1;

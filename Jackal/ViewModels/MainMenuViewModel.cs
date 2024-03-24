@@ -2,6 +2,7 @@
 using Jackal.Models;
 using Jackal.Network;
 using Jackal.Views;
+using LibVLCSharp.Shared;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
@@ -20,14 +21,13 @@ namespace Jackal.ViewModels
 
             //CreateServer(null);
 
-            //(Player[], GameProperties, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Properties.SavesFolder, "test.txt"));
+            //(Player[], GameProperties, List<int[]>) data = SaveOperator.ReadSave(Path.Combine(Properties.SavesFolder, "autosave3.txt"));
             //Content = new GameViewModel(data.Item1, data.Item2, data.Item3);
         }
 
         public string Version => "Версия:    " + Properties.Version;
 
         [Reactive] public ViewModelBase Content { get; private set; }
-        ViewModelBase GetContent() => Content;
         void SetContent(ViewModelBase viewModel) => Content = viewModel;
 
         public void CreateServer(object param)
