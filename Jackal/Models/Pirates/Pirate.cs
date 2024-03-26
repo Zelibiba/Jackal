@@ -331,6 +331,7 @@ namespace Jackal.Models.Pirates
         }
         public void LoopKill()
         {
+            Game.AudioPlayer?.Play(Sounds.Kill);
             Kill();
             if (Cell.Gold > 0)
             {

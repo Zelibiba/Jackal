@@ -1,6 +1,7 @@
 ﻿using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,17 +20,20 @@ namespace Jackal.Models
         Galeon,
         GetGold,
         Gun,
+        Pit,
         Ok,
         Hit,
         Kill,
         Bottles,
         Rum,
+        Maze,
         FridayMissioner,
         DrunkMissioner,
         Missioner,
         Ben,
         Friday,
         Airplane,
+        AirplaneEnter,
         Horse,
         Cannabis,
         EarthQuake,
@@ -46,18 +50,34 @@ namespace Jackal.Models
         /// <summary>
         /// Словарь аудиофайлов.
         /// </summary>
-        readonly Dictionary<Sounds, Media> _soundFiles;
+        readonly Dictionary<Sounds, Media[]> _soundFiles;
+        readonly Random _random;
 
-        // <summary>
+        /// <summary>
         /// Класс Аудиоплеера.
         /// </summary>
         public AudioPlayer()
         {
             _libVLS = new("--reset-plugins-cache");
-            _soundFiles = new Dictionary<Sounds, Media>();
+            DirectoryInfo dir = new(Properties.SoundsFolder);
+            string[] filenames = (from file in dir.GetFiles("*.mp3")
+                                  select file.Name.Split('.')[0]).ToArray();
+
+            _soundFiles = new Dictionary<Sounds, Media[]>();
             foreach (Sounds sound in Enum.GetValues(typeof(Sounds)))
-                _soundFiles[sound] = new Media(_libVLS, new Uri(Path.Combine(Properties.SoundsFolder, sound.ToString() + ".mp3")));
+            {
+                int count = filenames.Count(x => x.StartsWith($"{sound}_") || x == sound.ToString());
+                _soundFiles[sound] = new Media[count];
+                if (count == 1)
+                    _soundFiles[sound][0] = new(_libVLS, new Uri(Path.Combine(Properties.SoundsFolder, $"{sound}.mp3")));
+                else
+                {
+                    for (int i = 0; i < count; i++)
+                        _soundFiles[sound][i] = new(_libVLS, new Uri(Path.Combine(Properties.SoundsFolder, $"{sound}_{i + 1}.mp3")));
+                }
+            }
             _mediaPlayer = new(_libVLS);
+            _random = new();
         }
 
         /// <summary>
@@ -66,14 +86,19 @@ namespace Jackal.Models
         /// <param name="sound"></param>
         public void Play(Sounds sound)
         {
-            _mediaPlayer = new(_soundFiles[sound]);
+            Media[] medias = _soundFiles[sound];
+            int i = medias.Length == 1 ? 0 : _random.Next(0, medias.Length);
+            _mediaPlayer = new(medias[i]);
             _mediaPlayer.Play();
         }
 
         public void Dispose()
         {
-            foreach (Media media in _soundFiles.Values)
-                media.Dispose();
+            foreach (Media[] medias in _soundFiles.Values)
+            {
+                foreach (Media media in medias)
+                    media.Dispose();
+            }
             _mediaPlayer?.Dispose();
             _libVLS.Dispose();
         }

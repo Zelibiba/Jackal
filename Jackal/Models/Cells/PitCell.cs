@@ -27,6 +27,7 @@ namespace Jackal.Models.Cells
 
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
+            enterSound = Pirates.Count == 0 ? Sounds.Pit : Sounds.Usual;
             base.AddPirate(pirate, delay);
             if (Pirates.Count == 1 && pirate is not Friday)
                 pirate.IsBlocked = true;

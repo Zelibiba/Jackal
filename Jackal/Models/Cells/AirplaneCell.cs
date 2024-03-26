@@ -14,6 +14,7 @@ namespace Jackal.Models.Cells
         {
             IsActive = true;
             _altSelectableCoordinates = new();
+            enterSound = Sounds.AirplaneEnter;
         }
 
         /// <summary>
@@ -37,6 +38,7 @@ namespace Jackal.Models.Cells
         }
         public override MovementResult AddPirate(Pirate pirate, int delay =0)
         {
+            enterSound = Sounds.Usual;
             bool isOpened = IsOpened;
             base.AddPirate(pirate, delay);
             return isOpened ? MovementResult.End : MovementResult.Continue;

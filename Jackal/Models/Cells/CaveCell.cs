@@ -167,12 +167,12 @@ namespace Jackal.Models.Cells
         {
             base.RemovePirate(pirate, withGold);
 
-            // если выход открыт, проверить остальные пещеры на застрявших пиратов
-            //if (Pirates.Count == 0 && Exit.Pirates.Count == 0)
-            //{
-            //    CaveCell? closedCave = Caves.FirstOrDefault(cave => cave.IsClosed, null);
-            //    closedCave?.Enter.SendPiratesTo(Exit, 200);
-            //}
+            //если выход открыт, проверить остальные пещеры на застрявших пиратов
+            if (Pirates.Count == 0 && Exit.Pirates.Count == 0)
+            {
+                CaveCell? closedCave = Caves.FirstOrDefault(cave => cave.IsClosed, null);
+                closedCave?.Enter.SendPiratesTo(Exit);
+            }
         }
         public override MovementResult AddPirate(Pirate pirate, int delay = 0)
         {
